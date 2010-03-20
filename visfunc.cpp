@@ -1405,8 +1405,6 @@ make_rgb_image(uint8_t *yuyv, int width, int height)
 struct blob_position *
 vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 {
-#define put(a, b) *(work + ((b) * width) + (a))
-
 #define line_cache_sz 5
 #define red_min 0
 #define red_max 21 * line_cache_sz
@@ -1419,14 +1417,10 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 /* FIXME - adjust for 0-180 scale */
 
 	uint8_t back_buffer[line_cache_sz];
-	uint8_t *work;
 	void *tmp;
 	int x, y, i, j, cache;
 	int32_t _y, _u, _v, r, g, b, h, s, v;
-	uint8_t back_buffer_idx, old_hue;
-
-	work = (uint8_t*) malloc(width * height);
-	memset(work, 0, width * height);
+	uint8_t back_buffer_idx, old_hue, colour_value, old_colour_value;
 
 	memset(blobs, 0, sizeof(blobs));
 	num_blobs = 0;
@@ -1441,6 +1435,8 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 		memset(ospans, 0, sizeof(spans_a));
 		memset(back_buffer, 0, sizeof(back_buffer));
 		back_buffer_idx = 0;
+		colour_value = NOTHING;
+		old_colour_value = NOTHING;
 		/* swap */
 		tmp = ospans;
 		ospans = spans;
@@ -1465,6 +1461,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 		}
 
 		for (x = line_cache_sz - 1; x < width; x++) {
+			old_colour_value = colour_value;
 			get_yuv(x, y, _y, _u, _v);
 			yuv_2_rgb(_y, _u, _v, r, g, b);
 			rgb_2_hsv(r, g, b, h, s, v);
@@ -1475,25 +1472,23 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 
 			if (s >= span_min_sat) {
 				if (cache <= red_max && cache >= red_min)
-					put(x, y) = RED;
+					colour_value = RED;
 				else if (cache <= blue_max && cache >= blue_min)
-					put(x, y) = BLUE;
+					colour_value = BLUE;
 				else if (cache <= green_max &&
 					cache >= green_min)
-					put(x, y) = GREEN;
+					colour_value = GREEN;
 				else if (cache <= red2_max && cache >= red2_min)
-					put(x, y) = RED;
+					colour_value = RED;
 				else
-					put(x, y) = NOTHING;
+					colour_value = NOTHING;
 			} else {
-				put(x, y) = NOTHING;
+				colour_value = NOTHING;
 			}
 
 			cache -= old_hue;
 
-/* FIXME - comparison against previous value in scanline, not buffer safe */
-/* Ideally eliminate by not storing previous value in buffer */
-			if (put(x-1, y) != put(x, y)) { /* Start/end span */
+			if (old_colour_value != colour_value) {
 				/* First, end the current span. Insert here
 				 * some logic to make sure the first span slot
 				 * isn't discarded each time */
@@ -1514,7 +1509,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 				trumpets:
 				spans[span].x1 = x;
 				spans[span].y1 = y;
-				spans[span].colour = put(x, y);
+				spans[span].colour = colour_value;
 			}
 
 			if (span >= SPANS) {
@@ -1563,11 +1558,9 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 
 	}
 
-	free(work);
 	return blobs;
 #undef gethue
 #undef getsat
 #undef getval
 #undef getedge
-#undef put
 }
