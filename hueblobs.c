@@ -256,7 +256,16 @@ main(int argc, char **argv)
 			cvShowImage("val", val);
 		}
 
-		blobs = vis_find_blobs_through_scanlines(hue, sat, val);
+		blobs = 0;
+		raw_data = get_v4l_frame();
+
+		if (DEBUGDISPLAY) {
+			frame = make_rgb_image(raw_data, 320, 240);
+			squish_raw_data_into_hsv(raw_data, 320, 240,
+							hue, sat, val);
+		}
+
+		blobs = vis_find_blobs_through_scanlines(raw_data, 320, 240);
 
 		for (i = 0; ; i++) {
 			if (blobs[i].x1 == 0 && blobs[i].x2 == 0)
