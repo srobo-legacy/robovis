@@ -233,10 +233,12 @@ main(int argc, char **argv)
 
 	framesize = cvSize(320, 240);
 
-	srlog(DEBUG, "Allocating scratchpads");
-	hue = allo_frame(framesize, IPL_DEPTH_8U, 1);
-	sat = allo_frame(framesize, IPL_DEPTH_8U, 1);
-	val = allo_frame(framesize, IPL_DEPTH_8U, 1);
+	if (DEBUGDISPLAY) {
+		srlog(DEBUG, "Allocating scratchpads");
+		hue = allo_frame(framesize, IPL_DEPTH_8U, 1);
+		sat = allo_frame(framesize, IPL_DEPTH_8U, 1);
+		val = allo_frame(framesize, IPL_DEPTH_8U, 1);
+	}
 
 	srlog(DEBUG, "Beginning looping");
 	while (1){
@@ -250,13 +252,7 @@ main(int argc, char **argv)
 
 		if(DEBUGDISPLAY) {
 			cvShowImage("sat", sat);
-		}
-
-		if(DEBUGDISPLAY) {
 			cvShowImage("hue", hue);
-		}
-
-		if (DEBUGDISPLAY) {
 			cvShowImage("val", val);
 		}
 
