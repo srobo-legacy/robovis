@@ -205,13 +205,12 @@ main(int argc, char **argv)
 	char buffer[256];
 	int rawr = 0;
 #endif
-	IplImage *dsthsv, *dstrgb;
 	CvSize framesize;
+	uint8_t *raw_data;
 
 	struct blob_position *blobs;
 	char *req_tag = NULL;
 	int i, w, h;
-	CvCapture *capture = NULL;
 
 	open_webcam(CAMWIDTH, CAMHEIGHT);
 
@@ -227,58 +226,27 @@ main(int argc, char **argv)
 	}
 
 	//Get a frame to find the image size
-	if(USEFILE) {
-		frame = cvLoadImage(IN_FILENAME, CV_LOAD_IMAGE_COLOR);
-	} else {
-		capture = get_camera();
-		frame = get_frame(capture);
+	if (USEFILE) {
+		fprintf(stderr, "USEFILE is now no longer valid, seeing how "
+			"the existing code will only work on a yuyv array");
 	}
 
-	if (frame) {
-		framesize = cvGetSize(frame);
-		if(DEBUGOUTPUT) { //print the framesize if debug on
-			printf("Framesize %dx%d.\n", framesize.width,
-						framesize.height);
-		}
-
-
-	}
+	framesize = cvSize(320, 240);
 
 	srlog(DEBUG, "Allocating scratchpads");
-	hsv = allo_frame(framesize, IPL_DEPTH_8U, 3);
 	hue = allo_frame(framesize, IPL_DEPTH_8U, 1);
 	sat = allo_frame(framesize, IPL_DEPTH_8U, 1);
 	val = allo_frame(framesize, IPL_DEPTH_8U, 1);
-	dsthsv = allo_frame(framesize, IPL_DEPTH_8U, 3);
-	dstrgb = allo_frame(framesize, IPL_DEPTH_8U, 3);
 
 	srlog(DEBUG, "Beginning looping");
 	while (1){
 		srlog(DEBUG, "Press enter to grab a frame:");
 
-		if(!USEFILE && !DEBUGDISPLAY) {
+		if(!DEBUGDISPLAY) {
 			req_tag = wait_trigger();
 		}
 
 		srlog(DEBUG, "Grabbing frame");
-		if(USEFILE) {
-			frame = cvLoadImage(IN_FILENAME, CV_LOAD_IMAGE_COLOR);
-		} else {
-			frame = get_frame(capture);
-		}
-
-		if (!frame) {
-			srlog(DEBUG, "Couldn't grab frame");
-			goto noframe;
-			/* Well justified to reduce the complexity of the
-			 * intervening code */
-		}
-
-		srlog(DEBUG, "Converting to HSV");
-		cvCvtColor(frame, hsv, CV_BGR2HSV);
-
-		srlog(DEBUG, "Splitting into H, S and V");
-		cvSplit(hsv, hue, sat, val, NULL);
 
 		if(DEBUGDISPLAY) {
 			cvShowImage("sat", sat);
@@ -310,8 +278,6 @@ main(int argc, char **argv)
 		if(DEBUGDISPLAY) {
 			cvShowImage("testcam", frame);
 		}
-
-		noframe:
 
 		if (req_tag) {
 			fputs(req_tag, stdout);
