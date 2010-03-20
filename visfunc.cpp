@@ -1475,7 +1475,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 			drg = abs(r - g);
 			dgb = abs(g - b);
 
-			if (drb < 20 && drg < 20 && dgb < 20) {
+			if (drb < 40 && drg < 40 && dgb < 40) {
 				colour_value = NOTHING;
 			} else if (s < span_min_sat || v < 60) {
 				colour_value = NOTHING;
