@@ -32,6 +32,10 @@ int USEFILE = 0;
 int DEBUGOUTPUT = 0;
 int DEBUGDISPLAY = 0;
 
+extern "C" {
+#include "v4l.h"
+}
+
 //grab the command line options and set them where appropriate
 void
 get_command_line_opts(int argc, char **argv)
