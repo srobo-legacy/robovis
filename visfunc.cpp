@@ -13,6 +13,8 @@
 #include <string.h>
 #include <math.h>
 
+#include "hueblobs.h"
+
 #ifdef OPENCV
 #include <cv.h>
 #endif

@@ -7,6 +7,9 @@
 #include <time.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#include "hueblobs.h"
+
 #ifdef OPENCV
 #include <cv.h>
 #include <highgui.h>
