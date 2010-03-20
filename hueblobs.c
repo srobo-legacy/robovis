@@ -20,7 +20,7 @@
 #define ERROR 1
 
 #define IN_FILENAME "in.png"
-#define OUT_FILENAME "out.jpg"
+#define OUT_FILENAME "out.bmp"
 
 const unsigned int MINMASS = 200;
 const unsigned int MAXMASS = 2000;
@@ -266,9 +266,8 @@ main(int argc, char **argv)
 		rawr++;
 		cvSaveImage(buffer, frame);
 #endif
-#ifdef OPENCV
-		if (frame)
-			cvSaveImage(OUT_FILENAME, frame);
+
+		store_rgb_image(OUT_FILENAME, raw_data, CAMWIDTH, CAMHEIGHT);
 
 		if (USEFILE && frame) {
 			cvReleaseImage(&frame);
