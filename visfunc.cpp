@@ -1418,10 +1418,12 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 #define red2_max 185 * line_cache_sz
 /* FIXME - adjust for 0-180 scale */
 
+	uint8_t back_buffer[line_cache_sz];
 	uint8_t *work;
 	void *tmp;
 	int x, y, i, j, cache;
 	int32_t _y, _u, _v, r, g, b, h, s, v;
+	uint8_t back_buffer_idx, old_hue;
 
 	work = (uint8_t*) malloc(width * height);
 	memset(work, 0, width * height);
@@ -1437,6 +1439,8 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 	/* Spin through all scanlines, + 1 */
 	for (y = 0; y < height + 1; y++) {
 		memset(ospans, 0, sizeof(spans_a));
+		memset(back_buffer, 0, sizeof(back_buffer));
+		back_buffer_idx = 0;
 		/* swap */
 		tmp = ospans;
 		ospans = spans;
@@ -1456,6 +1460,8 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 			yuv_2_rgb(_y, _u, _v, r, g, b);
 			rgb_2_hsv(r, g, b, h, s, v);
 			cache += h;
+			back_buffer[back_buffer_idx++] = h;
+			back_buffer_idx %= line_cache_sz;
 		}
 
 		for (x = line_cache_sz - 1; x < width; x++) {
@@ -1463,6 +1469,9 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 			yuv_2_rgb(_y, _u, _v, r, g, b);
 			rgb_2_hsv(r, g, b, h, s, v);
 			cache += h;
+			old_hue = back_buffer[back_buffer_idx];
+			back_buffer[back_buffer_idx++] = h;
+			back_buffer_idx %= line_cache_sz;
 
 			if (s >= span_min_sat) {
 				if (cache <= red_max && cache >= red_min)
@@ -1480,13 +1489,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 				put(x, y) = NOTHING;
 			}
 
-			/* FIXME - turn this into some kind of buffering
-			 * code, rather than recalculating the yuyv values
-			 * each time */
-			get_yuv(x-line_cache_sz+1, y, _y, _u, _v);
-			yuv_2_rgb(_y, _u, _v, r, g, b);
-			rgb_2_hsv(r, g, b, h, s, v);
-			cache -= h;
+			cache -= old_hue;
 
 /* FIXME - comparison against previous value in scanline, not buffer safe */
 /* Ideally eliminate by not storing previous value in buffer */
