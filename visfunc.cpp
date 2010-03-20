@@ -1339,27 +1339,6 @@ vis_search_for_blobs(IplImage *img, IplImage *dir, int spacing)
 
 #ifdef OPENCV
 
-struct bmp_header {
-        uint16_t magic;
-        uint32_t file_size;
-        uint16_t reserved1;
-        uint16_t reserved2;
-        uint32_t data_offset;
-
-        uint32_t header_size;
-        uint32_t width;
-        uint32_t height;
-        uint16_t planes;
-        uint16_t bpp;
-        uint32_t compression;
-        uint32_t data_size;
-        uint32_t x_pix_per_m;
-        uint32_t y_pix_per_m;
-        uint32_t colours_used;
-        uint32_t important_colours;
-} __attribute__((packed));
-
-
 void
 squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue,
 				IplImage *sat, IplImage *val)
@@ -1417,6 +1396,26 @@ make_rgb_image(uint8_t *yuyv, int width, int height)
 }
 
 #endif
+
+struct bmp_header {
+        uint16_t magic;
+        uint32_t file_size;
+        uint16_t reserved1;
+        uint16_t reserved2;
+        uint32_t data_offset;
+
+        uint32_t header_size;
+        uint32_t width;
+        uint32_t height;
+        uint16_t planes;
+        uint16_t bpp;
+        uint32_t compression;
+        uint32_t data_size;
+        uint32_t x_pix_per_m;
+        uint32_t y_pix_per_m;
+        uint32_t colours_used;
+        uint32_t important_colours;
+} __attribute__((packed));
 
 void
 store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
