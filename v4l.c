@@ -15,6 +15,7 @@
 #endif
 #include <sys/mman.h>
 
+#include "hueblobs.h"
 #include "v4l.h"
 
 #define DEBUG

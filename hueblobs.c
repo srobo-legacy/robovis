@@ -7,6 +7,9 @@
 #include <time.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#include "hueblobs.h"
+
 #ifdef OPENCV
 #include <cv.h>
 #include <highgui.h>
@@ -189,9 +192,9 @@ main(int argc, char **argv)
 
 	if (DEBUGDISPLAY) {
 		srlog(DEBUG, "Allocating scratchpads");
-		hue = allo_frame(framesize, IPL_DEPTH_8U, 1);
-		sat = allo_frame(framesize, IPL_DEPTH_8U, 1);
-		val = allo_frame(framesize, IPL_DEPTH_8U, 1);
+		hue = cvCreateImage(framesize, IPL_DEPTH_8U, 1);
+		sat = cvCreateImage(framesize, IPL_DEPTH_8U, 1);
+		val = cvCreateImage(framesize, IPL_DEPTH_8U, 1);
 	}
 #endif
 
