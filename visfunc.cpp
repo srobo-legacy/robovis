@@ -1403,12 +1403,8 @@ make_rgb_image(uint8_t *yuyv, int width, int height)
 }
 
 struct blob_position *
-vis_find_blobs_through_scanlines(IplImage *hue, IplImage *sat, IplImage *val)
+vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 {
-#define gethue(a, b) *(h + ((b) * hue->widthStep) + (a))
-#define getsat(a, b) *(s + ((b) * sat->widthStep) + (a))
-#define getval(a, b) *(v + ((b) * val->widthStep) + (a))
-#define put(a, b) *(out->imageData + ((b) * out->widthStep) + (a))
 
 #define line_cache_sz 5
 #define red_min 0
@@ -1419,31 +1415,15 @@ vis_find_blobs_through_scanlines(IplImage *hue, IplImage *sat, IplImage *val)
 #define blue_max 149 * line_cache_sz
 #define red2_min 150 * line_cache_sz
 #define red2_max 185 * line_cache_sz
+/* FIXME - adjust for 0-180 scale */
 
-	CvSize sz;
-	IplImage *out;
-	unsigned char *h, *s, *v;
+	uint8_t *work;
 	void *tmp;
 	int x, y, i, j, cache;
+	int32_t _y, _u, _v, r, g, b, h, s, v;
 
-	h = (unsigned char *)hue->imageData;
-	s = (unsigned char *)sat->imageData;
-	v = (unsigned char *)val->imageData;
-
-	if (hue->width != sat->width || hue->height != sat->height) {
-		fprintf(stderr, "vis_find_blobs_through_scanlines, size "
-				"mismatch\n");
-		exit(1);
-	}
-
-        sz.width = hue->width;
-        sz.height = hue->height;
-        
-        out = cvCreateImage(sz, image_depth, 1);
-	if (!out) {
-		fprintf(stderr, "Couldn't allocate in find_blobs_through_sl\n");
-		exit(1);
-	}
+	work = (uint8_t*) malloc(width * height);
+	memset(work, 0, width * height);
 
 	memset(blobs, 0, sizeof(blobs));
 	num_blobs = 0;
@@ -1454,7 +1434,7 @@ vis_find_blobs_through_scanlines(IplImage *hue, IplImage *sat, IplImage *val)
 	span = 0;
 
 	/* Spin through all scanlines, + 1 */
-	for (y = 0; y < hue->height + 1; y++) {
+	for (y = 0; y < height + 1; y++) {
 		memset(ospans, 0, sizeof(spans_a));
 		/* swap */
 		tmp = ospans;
@@ -1467,16 +1447,23 @@ vis_find_blobs_through_scanlines(IplImage *hue, IplImage *sat, IplImage *val)
 		cache = 0;
 		span = 0;
 
-		if (y == hue->height)
+		if (y == height)
 			goto final_span_check;
 
-		for (x = 0; x < line_cache_sz - 1; x++)
-			cache += gethue(x, y);
+		for (x = 0; x < line_cache_sz - 1; x++) {
+			get_yuv(x, y, _y, _u, _v);
+			yuv_2_rgb(_y, _u, _v, r, g, b);
+			rgb_2_hsv(r, g, b, h, s, v);
+			cache += h;
+		}
 
-		for (x = line_cache_sz - 1; x < hue->width; x++) {
-			cache += gethue(x, y);
+		for (x = line_cache_sz - 1; x < width; x++) {
+			get_yuv(x, y, _y, _u, _v);
+			yuv_2_rgb(_y, _u, _v, r, g, b);
+			rgb_2_hsv(r, g, b, h, s, v);
+			cache += h;
 
-			if (getsat(x, y) >= span_min_sat) {
+			if (s >= span_min_sat) {
 				if (cache <= red_max && cache >= red_min)
 					put(x, y) = RED;
 				else if (cache <= blue_max && cache >= blue_min)
@@ -1566,7 +1553,7 @@ vis_find_blobs_through_scanlines(IplImage *hue, IplImage *sat, IplImage *val)
 
 	}
 
-	cvReleaseImage(&out);
+	free(work);
 	return blobs;
 #undef gethue
 #undef getsat
