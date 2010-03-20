@@ -33,7 +33,7 @@ void vis_follow_edge_backwards(IplImage *src, IplImage *direction, int x, int y,
 				int minx, int miny, int maxx, int maxy);
 struct blob_position *vis_search_for_blobs(IplImage *img, IplImage *dir,
 							int spacing);
-struct blob_position *vis_find_blobs_through_scanlines(IplImage *hue,
-					IplImage *sat, IplImage *val);
+struct blob_position *vis_find_blobs_through_scanlines(uint8_t *yuyv,
+						int width, int height);
 
 #endif /* _BOARDS_SLUG_VISION_ROBOVIS_VISFUNC_H_ */
