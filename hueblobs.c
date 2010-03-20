@@ -92,63 +92,6 @@ srlog(char level, const char *m)
 }
 
 void
-srshow(char *window, IplImage *frame)
-{
-	if(DEBUGOUTPUT) {
-		cvShowImage(window, frame);
-		cvWaitKey(0);
-	}
-}
-
-CvCapture
-*get_camera()
-{
-	srlog(DEBUG, "Opening camera");
-	CvCapture *capture = cvCaptureFromCAM(0);
-	if (capture == NULL){
-		srlog(ERROR, "Failed to open camera");
-		//TODO: Exit here?
-		return NULL;
-	}
-
-	//Setting to CAMWIDTH, CAMHEIGHT
-	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, CAMWIDTH);
-	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, CAMHEIGHT);
-	return capture;
-}
-
-IplImage
-*get_frame(CvCapture *capture)
-{
-	IplImage *frame = cvQueryFrame(capture);
-	/*MY EYES THE BURNING AND THE PAIN AND THE PAAAIIINNN
-	 * Highgui currently buffers 4 frames before handing them to us; this
-	 * means that any picture we take is increadibly delayed. If you use the
-	 * highgui binaries from srobo.org/~jmorse/highgui.tgz this is patched
-	 * to be only one frame. To overcome this last frame, retrieve two.
-	 */
-	frame = cvQueryFrame(capture);
-	if(frame == NULL){
-		srlog(ERROR, "Failed to grab initial frame.");
-		//TODO: Exit here?
-		return NULL;
-	}
-	return frame;
-}
-
-IplImage
-*allo_frame(CvSize framesize, unsigned char depth, unsigned char channels)
-{
-	IplImage *frame = cvCreateImage(framesize, depth, channels);
-	if(frame == NULL){
-		srlog(ERROR, "Failed to allocate scratchpad.");
-		//TODO: Exit here?
-		return NULL;
-	}
-	return frame;
-}
-
-void
 Hoo(int event, int x, int y, int flags, void *param)
 {
 	unsigned char *data;
