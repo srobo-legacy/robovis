@@ -15,6 +15,8 @@
 #endif
 #include <sys/mman.h>
 
+#include "v4l.h"
+
 #define DEBUG
 
 #ifdef DEBUG
