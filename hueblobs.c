@@ -272,10 +272,7 @@ main(int argc, char **argv)
 
 		store_rgb_image(OUT_FILENAME, raw_data, CAMWIDTH, CAMHEIGHT);
 
-		if (USEFILE && frame) {
-			cvReleaseImage(&frame);
-		}
-
+#ifdef OPENCV
 		if (DEBUGDISPLAY)
 			cvWaitKey(100);
 #endif
