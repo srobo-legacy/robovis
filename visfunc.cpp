@@ -1405,6 +1405,7 @@ make_rgb_image(uint8_t *yuyv, int width, int height)
 struct blob_position *
 vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 {
+#define put(a, b) *(work + ((b) * width) + (a))
 
 #define line_cache_sz 5
 #define red_min 0
