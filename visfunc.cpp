@@ -1568,4 +1568,3 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 #undef getedge
 #undef put
 }
-
