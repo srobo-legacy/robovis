@@ -7,8 +7,10 @@
 #include <time.h>
 #include <fcntl.h>
 #include <unistd.h>
+#ifdef OPENCV
 #include <cv.h>
 #include <highgui.h>
+#endif
 
 #include "visfunc.h"
 
@@ -26,7 +28,9 @@ const unsigned int MAXMASS = 2000;
 #define CAMWIDTH 320
 #define CAMHEIGHT 240
 
+#ifdef OPENCV
 IplImage *frame = NULL, *hsv, *hue, *sat, *val;
+#endif
 
 int USEFILE = 0;
 int DEBUGOUTPUT = 0;
@@ -91,6 +95,7 @@ srlog(char level, const char *m)
 	}
 }
 
+#ifdef OPENCV
 void
 Hoo(int event, int x, int y, int flags, void *param)
 {
@@ -138,6 +143,7 @@ Foo(int event, int x, int y, int flags, void* param)
 	c = data[y*step+x];
 	printf("Hue %d,%d - %d\n", x, y, c);
 }
+#endif
 
 int
 main(int argc, char **argv)
@@ -148,7 +154,9 @@ main(int argc, char **argv)
 	char buffer[256];
 	int rawr = 0;
 #endif
+#ifdef OPENCV
 	CvSize framesize;
+#endif
 	uint8_t *raw_data;
 
 	struct blob_position *blobs;
@@ -157,6 +165,7 @@ main(int argc, char **argv)
 
 	open_webcam(CAMWIDTH, CAMHEIGHT);
 
+#ifdef OPENCV
 	if(DEBUGDISPLAY) {
 		//No idea what this returns on fail.
 		cvNamedWindow("testcam", CV_WINDOW_AUTOSIZE);
@@ -167,6 +176,7 @@ main(int argc, char **argv)
 		cvNamedWindow("hue", CV_WINDOW_AUTOSIZE);
 		cvSetMouseCallback("hue", Foo, hue);
 	}
+#endif
 
 	//Get a frame to find the image size
 	if (USEFILE) {
@@ -174,6 +184,7 @@ main(int argc, char **argv)
 			"the existing code will only work on a yuyv array");
 	}
 
+#ifdef OPENCV
 	framesize = cvSize(320, 240);
 
 	if (DEBUGDISPLAY) {
@@ -182,6 +193,7 @@ main(int argc, char **argv)
 		sat = allo_frame(framesize, IPL_DEPTH_8U, 1);
 		val = allo_frame(framesize, IPL_DEPTH_8U, 1);
 	}
+#endif
 
 	srlog(DEBUG, "Beginning looping");
 	while (1){
@@ -193,20 +205,24 @@ main(int argc, char **argv)
 
 		srlog(DEBUG, "Grabbing frame");
 
+#ifdef OPENCV
 		if(DEBUGDISPLAY) {
 			cvShowImage("sat", sat);
 			cvShowImage("hue", hue);
 			cvShowImage("val", val);
 		}
+#endif
 
 		blobs = 0;
 		raw_data = get_v4l_frame();
 
+#ifdef OPENCV
 		if (DEBUGDISPLAY) {
 			frame = make_rgb_image(raw_data, 320, 240);
 			squish_raw_data_into_hsv(raw_data, 320, 240,
 							hue, sat, val);
 		}
+#endif
 
 		blobs = vis_find_blobs_through_scanlines(raw_data, 320, 240);
 
@@ -214,6 +230,7 @@ main(int argc, char **argv)
 			if (blobs[i].x1 == 0 && blobs[i].x2 == 0)
 				break;
 
+#ifdef OPENCV
 			cvRectangle(frame, cvPoint(blobs[i].x1, blobs[i].y1),
 					cvPoint(blobs[i].x2, blobs[i].y2),
 					(blobs[i].colour == RED) ?
@@ -221,16 +238,19 @@ main(int argc, char **argv)
 					(blobs[i].colour == BLUE) ?
 						cvScalar(255, 0, 0) :
 						cvScalar(255, 0, 0), 1);
-					
+#endif
+
 			w = blobs[i].x2 - blobs[i].x1;
 			h = blobs[i].y2 - blobs[i].y1;
 			printf("%d,%d,%d,%d,%d,%d\n", blobs[i].x1, blobs[i].y1,
 					w, h, w*h, blobs[i].colour);
 		}
 
+#ifdef OPENCV
 		if(DEBUGDISPLAY) {
 			cvShowImage("testcam", frame);
 		}
+#endif
 
 		if (req_tag) {
 			fputs(req_tag, stdout);
@@ -246,6 +266,7 @@ main(int argc, char **argv)
 		rawr++;
 		cvSaveImage(buffer, frame);
 #endif
+#ifdef OPENCV
 		if (frame)
 			cvSaveImage(OUT_FILENAME, frame);
 
@@ -255,6 +276,7 @@ main(int argc, char **argv)
 
 		if (DEBUGDISPLAY)
 			cvWaitKey(100);
+#endif
 
 	}	//end while loop
 
