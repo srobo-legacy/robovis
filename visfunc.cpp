@@ -7,7 +7,9 @@
  * In case of mis-use, consult your doctor
  */
 
+#include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 
 #include <cv.h>
