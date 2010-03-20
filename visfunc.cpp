@@ -1480,8 +1480,11 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 				put(x, y) = NOTHING;
 			}
 
-			cache -= gethue(x-line_cache_sz+1, y);
-
+/* FIXME: facebees */
+			get_yuv(x-line_cache_sz+1, y, _y, _u, _v);
+			yuv_2_rgb(_y, _u, _v, r, g, b);
+			rgb_2_hsv(r, g, b, h, s, v);
+			cache -= h;
 /* FIXME - comparison against previous value in scanline, not buffer safe */
 /* Ideally eliminate by not storing previous value in buffer */
 			if (put(x-1, y) != put(x, y)) { /* Start/end span */
