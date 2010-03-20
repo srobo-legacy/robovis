@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <cv.h>
 
-#define MAX_BLOBS 32
+#define MAX_BLOBS 1000
 
 struct blob_position {  
 	int x1;
