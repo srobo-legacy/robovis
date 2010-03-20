@@ -35,5 +35,7 @@ struct blob_position *vis_search_for_blobs(IplImage *img, IplImage *dir,
 							int spacing);
 struct blob_position *vis_find_blobs_through_scanlines(uint8_t *yuyv,
 						int width, int height);
+IplImage *make_rgb_image(uint8_t *raw_data, int width, int height);
+void squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue, IplImage *sat, IplImage *val);
 
 #endif /* _BOARDS_SLUG_VISION_ROBOVIS_VISFUNC_H_ */
