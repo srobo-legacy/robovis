@@ -1322,6 +1322,84 @@ static const int trans_table[] = {
 		s = clip(s);						\
 		v = clip(v);						\
 	} while (0);
+
+struct bmp_header {
+        uint16_t magic;
+        uint32_t file_size;
+        uint16_t reserved1;
+        uint16_t reserved2;
+        uint32_t data_offset;
+
+        uint32_t header_size;
+        uint32_t width;
+        uint32_t height;
+        uint16_t planes;
+        uint16_t bpp;
+        uint32_t compression;
+        uint32_t data_size;
+        uint32_t x_pix_per_m;
+        uint32_t y_pix_per_m;
+        uint32_t colours_used;
+        uint32_t important_colours;
+} __attribute__((packed));
+
+
+void
+squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue,
+				IplImage *sat, IplImage *val)
+{
+	uint8_t *rgb, *prgb, *hptr, *sptr, *vptr;
+	int i, j;
+	int32_t y, u, v, r, g, b, h, s;
+
+	rgb = (uint8_t *) malloc(width * height * 3);
+	prgb = rgb;
+	hptr = (uint8_t*) hue->imageData;
+	sptr = (uint8_t*) sat->imageData;
+	vptr = (uint8_t*) val->imageData;
+
+	for (j = 0; j < height; j++) {
+		for (i = 0; i < width; i++) {
+			get_yuv(i, j, y, u, v);
+			yuv_2_rgb(y, u, v, r, g, b);
+			*prgb++ = b;
+			*prgb++ = g;
+			*prgb++ = r;
+			rgb_2_hsv(r, g, b, h, s, v);
+			*hptr++ = h;
+			*sptr++ = s;
+			*vptr++ = v;
+		}
+	}
+
+	return;
+}
+
+IplImage *
+make_rgb_image(uint8_t *yuyv, int width, int height)
+{
+	IplImage *out;
+	CvSize frsize;
+	uint8_t *prgb;
+	int i, j, y, u, v, r, g, b;
+
+	frsize = cvSize(width, height);
+	out = cvCreateImage(frsize, IPL_DEPTH_8U, 3);
+	prgb = (uint8_t *)out->imageData;
+
+	for (j = 0; j < height; j++) {
+		for (i = 0; i < width; i++) {
+			get_yuv(i, j, y, u, v);
+			yuv_2_rgb(y, u, v, r, g, b);
+			*prgb++ = b;
+			*prgb++ = g;
+			*prgb++ = r;
+		}
+	}
+
+	return out;
+}
+
 struct blob_position *
 vis_find_blobs_through_scanlines(IplImage *hue, IplImage *sat, IplImage *val)
 {
