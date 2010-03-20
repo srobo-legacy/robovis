@@ -213,6 +213,8 @@ main(int argc, char **argv)
 	int i, w, h;
 	CvCapture *capture = NULL;
 
+	open_webcam(CAMWIDTH, CAMHEIGHT);
+
 	if(DEBUGDISPLAY) {
 		//No idea what this returns on fail.
 		cvNamedWindow("testcam", CV_WINDOW_AUTOSIZE);
@@ -336,6 +338,8 @@ main(int argc, char **argv)
 			cvWaitKey(100);
 
 	}	//end while loop
+
+	close_webcam();
 	return 0;
 }
 
