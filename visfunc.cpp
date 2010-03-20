@@ -1418,6 +1418,49 @@ make_rgb_image(uint8_t *yuyv, int width, int height)
 
 #endif
 
+void
+store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
+{
+	struct bmp_header head;
+	FILE *foo;
+	uint8_t *prgb;
+	int i, j, y, u, v, r, g, b;
+
+	prgb = (uint8_t*) malloc(width * height * 3);
+
+	for (j = 0; j < height; j++) {
+		for (i = 0; i < width; i++) {
+			get_yuv(i, j, y, u, v);
+			yuv_2_rgb(y, u, v, r, g, b);
+			*prgb++ = b;
+			*prgb++ = g;
+			*prgb++ = r;
+		}
+	}
+
+	head.magic = 0x4D42; /* Will explode on big endian */
+	head.file_size = sizeof(head) + (width * height * 3);
+	head.data_offset = sizeof(head);
+	head.header_size = sizeof(head);
+	head.width = width;
+	head.height = height;
+	head.planes = 1;
+	head.bpp = 24;
+	head.compression = 0;
+	head.data_size = width * height * 3;
+	head.x_pix_per_m = 96;
+	head.y_pix_per_m = 96;
+	head.colours_used = 0;
+	head.important_colours = 0;
+
+	foo = fopen(file, "w");
+	fwrite(&head, sizeof(head), 1, foo);
+	fwrite(prgb, width * height * 3, 1, foo);
+	fclose(foo);
+
+	return;
+}
+
 struct blob_position *
 vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 {
