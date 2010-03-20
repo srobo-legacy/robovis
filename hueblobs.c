@@ -273,7 +273,12 @@ main(int argc, char **argv)
 
 			cvRectangle(frame, cvPoint(blobs[i].x1, blobs[i].y1),
 					cvPoint(blobs[i].x2, blobs[i].y2),
-					cvScalar(255, 0, 0), 1);
+					(blobs[i].colour == RED) ?
+							cvScalar(0, 0, 255) :
+					(blobs[i].colour == BLUE) ?
+						cvScalar(255, 0, 0) :
+						cvScalar(255, 0, 0), 1);
+					
 			w = blobs[i].x2 - blobs[i].x1;
 			h = blobs[i].y2 - blobs[i].y1;
 			printf("%d,%d,%d,%d,%d,%d\n", blobs[i].x1, blobs[i].y1,
