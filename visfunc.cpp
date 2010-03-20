@@ -966,7 +966,7 @@ vis_follow_edge(IplImage *src, IplImage *direction, int x, int y)
 		bees:
 		pixel_check = vis_find_nearest_blob_distance(x, y);
 		if (pixel_check == -1) {
-			printf("ponies\n");
+			fprintf(stderr, "ponies\n");
 			breakpoint();
 			return;
 		}
@@ -1156,7 +1156,7 @@ vis_follow_edge_backwards(IplImage *src, IplImage *direction, int x, int y,
 		bees:
 		pixel_check = vis_find_nearest_blob_distance(x, y);
 		if (pixel_check == -1) {
-			printf("ponies\n");
+			fprintf(stderr, "ponies\n");
 			breakpoint();
 			return;
 		}
