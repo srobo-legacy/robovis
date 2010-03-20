@@ -1470,7 +1470,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 			back_buffer[back_buffer_idx++] = h;
 			back_buffer_idx %= line_cache_sz;
 
-			if (s >= span_min_sat) {
+			if (s >= span_min_sat && v >= 60) {
 				if (cache <= red_max && cache >= red_min)
 					colour_value = RED;
 				else if (cache <= blue_max && cache >= blue_min)
