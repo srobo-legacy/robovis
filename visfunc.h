@@ -1,6 +1,7 @@
 #ifndef _BOARDS_SLUG_VISION_ROBOVIS_VISFUNC_H_
 #define _BOARDS_SLUG_VISION_ROBOVIS_VISFUNC_H_
 
+#include <stdint.h>
 #include <cv.h>
 
 #define MAX_BLOBS 32
