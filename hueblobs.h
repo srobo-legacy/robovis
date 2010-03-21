@@ -4,4 +4,4 @@
 #define OPENCV
 #endif
 
-static const char rcsid[] = __FILE__ "$Id$";
+static const char rcsid[] = "$RCSfile: " __FILE__ "$ " "$Id$";
