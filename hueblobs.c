@@ -241,7 +241,7 @@ main(int argc, char **argv)
 							cvScalar(0, 0, 255) :
 					(blobs[i].colour == BLUE) ?
 						cvScalar(255, 0, 0) :
-						cvScalar(255, 0, 0), 1);
+						cvScalar(0, 255, 0), 1);
 #endif
 
 			w = blobs[i].x2 - blobs[i].x1;
