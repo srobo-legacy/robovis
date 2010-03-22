@@ -268,10 +268,11 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 {
 	struct bmp_header head;
 	FILE *foo;
-	uint8_t *prgb;
+	uint8_t *rgb, *prgb;
 	int i, j, y, u, v, r, g, b;
 
-	prgb = (uint8_t*) malloc(width * height * 3);
+	rgb = (uint8_t*) malloc(width * height * 3);
+	prgb = rgb;
 
 	for (j = 0; j < height; j++) {
 		for (i = 0; i < width; i++) {
@@ -302,6 +303,8 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 	fwrite(&head, sizeof(head), 1, foo);
 	fwrite(prgb, width * height * 3, 1, foo);
 	fclose(foo);
+
+	free(rgb);
 
 	return;
 }
