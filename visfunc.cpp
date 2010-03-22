@@ -194,12 +194,10 @@ void
 squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue,
 				IplImage *sat, IplImage *val)
 {
-	uint8_t *rgb, *prgb, *hptr, *sptr, *vptr;
+	uint8_t *hptr, *sptr, *vptr;
 	int i, j;
 	int32_t y, u, v, r, g, b, h, s;
 
-	rgb = (uint8_t *) malloc(width * height * 3);
-	prgb = rgb;
 	hptr = (uint8_t*) hue->imageData;
 	sptr = (uint8_t*) sat->imageData;
 	vptr = (uint8_t*) val->imageData;
@@ -208,9 +206,6 @@ squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue,
 		for (i = 0; i < width; i++) {
 			get_yuv(i, j, y, u, v);
 			yuv_2_rgb(y, u, v, r, g, b);
-			*prgb++ = b;
-			*prgb++ = g;
-			*prgb++ = r;
 			rgb_2_hsv(r, g, b, h, s, v);
 			*hptr++ = h;
 			*sptr++ = s;
