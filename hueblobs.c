@@ -32,7 +32,7 @@ const unsigned int MAXMASS = 2000;
 #define CAMHEIGHT 240
 
 #ifdef OPENCV
-IplImage *frame = NULL, *hsv, *hue, *sat, *val;
+IplImage *frame = NULL, *oldframe = NULL, *hsv, *hue, *sat, *val;
 #endif
 
 int USEFILE = 0;
@@ -221,6 +221,7 @@ main(int argc, char **argv)
 
 #ifdef OPENCV
 		if (DEBUGDISPLAY) {
+			oldframe = frame;
 			frame = make_rgb_image(raw_data, 320, 240);
 			squish_raw_data_into_hsv(raw_data, 320, 240,
 							hue, sat, val);
@@ -252,6 +253,8 @@ main(int argc, char **argv)
 #ifdef OPENCV
 		if(DEBUGDISPLAY) {
 			cvShowImage("testcam", frame);
+			cvReleaseImage(&oldframe);
+			oldframe = NULL;
 		}
 #endif
 
