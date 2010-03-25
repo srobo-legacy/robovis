@@ -218,6 +218,11 @@ main(int argc, char **argv)
 
 		blobs = 0;
 		raw_data = get_v4l_frame();
+		if (!raw_data) {
+			fprintf(stderr, "Couldn't grab v4l frame!\n");
+			sleep(1);
+			continue;
+		}
 
 #ifdef OPENCV
 		if (DEBUGDISPLAY) {
