@@ -1,4 +1,4 @@
-CFLAGS += -Wall -Wextra -Werror
+CFLAGS += -Wall -Wextra -Werror -O3 -funroll-loops -fomit-frame-pointer
 
 CBFLAGS = `pkg-config --cflags blobslib`
 LDBFLAGS = `pkg-config --libs blobslib`
@@ -12,13 +12,13 @@ CXX = $(CROSS_COMPILE)g++
 PY_CFLAGS += -I/usr/include/python2.4
 
 hueblobs: hueblobs.c visfunc.o v4l.o
-	$(CXX) -ggdb -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o v4l.o
+	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o v4l.o
 
 visfunc.o: visfunc.cpp
-	$(CXX) -ggdb $< $(OPENCV_CFLAGS) $(CFLAGS) -c -o $@ -fPIC
+	$(CXX) $< $(OPENCV_CFLAGS) $(CFLAGS) -c -o $@ -fPIC
 
 v4l.o: v4l.c
-	$(CC) -ggdb -o $@ $< $(CFLAGS) -c -fPIC
+	$(CC) -o $@ $< $(CFLAGS) -c -fPIC
 
 .PHONY: clean
 
