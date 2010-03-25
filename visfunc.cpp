@@ -306,7 +306,7 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 
 	foo = fopen(file, "w");
 	fwrite(&head, sizeof(head), 1, foo);
-	fwrite(prgb, width * height * 3, 1, foo);
+	fwrite(rgb, width * height * 3, 1, foo);
 	fclose(foo);
 
 	free(rgb);
