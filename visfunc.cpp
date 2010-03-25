@@ -274,6 +274,11 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 	rgb = (uint8_t*) malloc(width * height * 3);
 	prgb = rgb;
 
+	if (rgb == NULL) {
+		fprintf(stderr, "Couldn't allocate store_rgb_image buffer\n");
+		return;
+	}
+
 	for (j = 0; j < height; j++) {
 		for (i = 0; i < width; i++) {
 			get_yuv(i, j, y, u, v);
