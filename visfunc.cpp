@@ -291,8 +291,10 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 
 	head.magic = 0x4D42; /* Will explode on big endian */
 	head.file_size = sizeof(head) + (width * height * 3);
+	head.reserved1 = 0;
+	head.reserved2 = 0;
 	head.data_offset = sizeof(head);
-	head.header_size = sizeof(head);
+	head.header_size = 40;
 	head.width = width;
 	head.height = height;
 	head.planes = 1;
