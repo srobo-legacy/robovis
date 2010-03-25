@@ -86,8 +86,6 @@ open_webcam(unsigned int desired_width, unsigned int desired_height)
 		return 1;
 	}
 
-	printf("Set format worked\n");
-
 	memset(&cap, 0, sizeof(cap));
 	ioctl(fd, VIDIOC_QUERYCAP, &cap);
 	DFPRINTF((stderr,
