@@ -367,7 +367,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 		if (y == height)
 			goto final_span_check;
 
-		for (x = 0; x < line_cache_sz - 1; x++) {
+		for (x = 0; x < line_cache_sz; x++) {
 			get_yuv(x, y, _y, _u, _v);
 			yuv_2_rgb(_y, _u, _v, r, g, b);
 			rgb_2_hsv(r, g, b, h, s, v);
@@ -376,7 +376,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 			back_buffer_idx %= line_cache_sz;
 		}
 
-		for (x = line_cache_sz - 1; x < width; x++) {
+		for (x = line_cache_sz; x < width; x++) {
 			old_colour_value = colour_value;
 			get_yuv(x, y, _y, _u, _v);
 			yuv_2_rgb(_y, _u, _v, r, g, b);
