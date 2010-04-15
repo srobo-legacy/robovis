@@ -56,13 +56,13 @@
 #define line_hysteresis_high 5
 #define line_hysteresis_low 5
 
-#define BLOB_MIN_WIDTH 5
-#define BLOB_MIN_HEIGHT 5
-#define BLOB_MIN_MASS 10
+#define BLOB_MIN_WIDTH 3
+#define BLOB_MIN_HEIGHT 3
+#define BLOB_MIN_MASS 5
 
 #define span_min_sat 60
 #define span_min_val 60
-#define span_min_len 5
+#define span_min_len 3
 #define span_match_fuzz 30
 #define colour_strength_minimum 20
 #define colour_strength_minimum_blue 40
@@ -321,7 +321,7 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 struct blob_position *
 vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 {
-#define line_cache_sz 5
+#define line_cache_sz 3
 #define red_min 0
 #define red_max 10 * line_cache_sz
 #define green_min 60 * line_cache_sz
