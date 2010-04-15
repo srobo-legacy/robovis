@@ -335,7 +335,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 	void *tmp;
 	int x, y, i, j, cache;
 	int32_t _y, _u, _v, r, g, b, h, s, v;
-	uint8_t back_buffer_idx, old_hue, colour_value, old_colour_value;
+	uint8_t back_buffer_idx, colour_value, old_colour_value;
 	uint8_t drb, drg, dgb;
 
 	memset(blobs, 0, sizeof(blobs));
@@ -382,7 +382,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 			yuv_2_rgb(_y, _u, _v, r, g, b);
 			rgb_2_hsv(r, g, b, h, s, v);
 			cache += h;
-			old_hue = back_buffer[back_buffer_idx];
+			cache -= back_buffer[back_buffer_idx];
 			back_buffer[back_buffer_idx++] = h;
 			back_buffer_idx %= line_cache_sz;
 
@@ -409,8 +409,6 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 				else
 					colour_value = NOTHING;
 			}
-
-			cache -= old_hue;
 
 			if (old_colour_value != colour_value) {
 				/* First, end the current span. Insert here
