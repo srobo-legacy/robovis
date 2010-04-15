@@ -442,8 +442,14 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 			}
 		}
 
-		if (spans[span].colour != NOTHING)
+		if (spans[span].colour != NOTHING) {
+			spans[span].x2 = x;
+			spans[span].y2 = y;
+			spans[span].miny = spans[span].maxy = y;
+			spans[span].maxx = x;
+			spans[span].minx = spans[span].x1;
 			span++;
+		}
 
 		/* After processing one scan line, see whether there are
 		 * similar spans of colour on the higher scanline */
