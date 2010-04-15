@@ -64,6 +64,7 @@
 #define span_min_val 60
 #define span_min_len 5
 #define span_match_fuzz 30
+#define colour_strength_minimum 40
 
 static struct blob_position blobs[MAX_BLOBS+1];
 
@@ -389,9 +390,11 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 			drg = abs(r - g);
 			dgb = abs(g - b);
 
-			if (drb < 40 && drg < 40 && dgb < 40) {
+			if (drb < colour_strength_minimum &&
+				drg < colour_strength_minimum &&
+				dgb < colour_strength_minimum) {
 				colour_value = NOTHING;
-			} else if (s < span_min_sat || v < 60) {
+			} else if (s < span_min_sat || v < span_min_val) {
 				colour_value = NOTHING;
 			} else {
 				if (cache <= red_max && cache >= red_min)
