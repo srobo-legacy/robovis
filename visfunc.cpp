@@ -64,7 +64,8 @@
 #define span_min_val 60
 #define span_min_len 5
 #define span_match_fuzz 30
-#define colour_strength_minimum 40
+#define colour_strength_minimum 20
+#define colour_strength_minimum_blue 40
 
 static struct blob_position blobs[MAX_BLOBS+1];
 
@@ -392,7 +393,15 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 			drg = abs(r - g);
 			dgb = abs(g - b);
 
-			if (drb < colour_strength_minimum &&
+			if (cache >= blue_min &&
+				drb < colour_strength_minimum_blue &&
+				drg < colour_strength_minimum_blue &&
+				dgb < colour_strength_minimum_blue) {
+				sat_hyst_count = 0;
+				val_hyst_count = 0;
+				colour_value = NOTHING;
+			} else if (cache < blue_min &&
+				drb < colour_strength_minimum &&
 				drg < colour_strength_minimum &&
 				dgb < colour_strength_minimum) {
 				sat_hyst_count = 0;
