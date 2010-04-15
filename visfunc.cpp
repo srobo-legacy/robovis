@@ -426,9 +426,10 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 
 				spans[span].x2 = x;
 				spans[span].y2 = y;
-				spans[span].miny = spans[span].maxy = y;
 				spans[span].maxx = x;
+				spans[span].maxy = y;
 				spans[span].minx = spans[span].x1;
+				spans[span].miny = spans[span].y1;
 				span++;
 				trumpets:
 				spans[span].x1 = x;
@@ -445,9 +446,10 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 		if (spans[span].colour != NOTHING) {
 			spans[span].x2 = x;
 			spans[span].y2 = y;
-			spans[span].miny = spans[span].maxy = y;
 			spans[span].maxx = x;
+			spans[span].maxy = y;
 			spans[span].minx = spans[span].x1;
+			spans[span].miny = y;
 			span++;
 		}
 
