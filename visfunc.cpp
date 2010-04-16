@@ -63,9 +63,9 @@
 #define span_min_sat 60
 #define span_min_val 60
 #define span_min_len 3
-#define span_match_fuzz 30
+#define span_match_fuzz 8
 #define colour_strength_minimum 20
-#define colour_strength_minimum_blue 40
+#define colour_strength_minimum_blue 20
 
 static struct blob_position blobs[MAX_BLOBS+1];
 
@@ -327,7 +327,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 #define green_min 60 * line_cache_sz
 #define green_max 90 * line_cache_sz
 #define blue_min 100 * line_cache_sz
-#define blue_max 149 * line_cache_sz
+#define blue_max 115 * line_cache_sz
 #define red2_min 150 * line_cache_sz
 #define red2_max 185 * line_cache_sz
 /* FIXME - adjust for 0-180 scale */
