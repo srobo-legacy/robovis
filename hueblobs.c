@@ -100,6 +100,23 @@ srlog(char level, const char *m)
 
 #ifdef OPENCV
 void
+Boo(int event, int x, int y, int flags, void *param)
+{
+	unsigned char *data;
+	CvSize size;
+	int step, r, g, b;
+
+	UNUSED(event);
+	UNUSED(flags);
+	UNUSED(param);
+
+	cvGetRawData(frame, &data, &step, &size);
+	b = data[((y*step)+(x * 3))];
+	g = data[(((y*step)+(x * 3)))+1];
+	r = data[(((y*step)+(x * 3)))+1];
+	printf("RGB %d,%d - %d %d %d\n", x, y, r, g, b);
+}
+void
 Hoo(int event, int x, int y, int flags, void *param)
 {
 	unsigned char *data;
@@ -172,6 +189,7 @@ main(int argc, char **argv)
 	if(DEBUGDISPLAY) {
 		//No idea what this returns on fail.
 		cvNamedWindow("testcam", CV_WINDOW_AUTOSIZE);
+		cvSetMouseCallback("testcam", Boo, frame);
 		cvNamedWindow("val", CV_WINDOW_AUTOSIZE);
 		cvSetMouseCallback("val", Hoo, val);
 		cvNamedWindow("sat", CV_WINDOW_AUTOSIZE);
