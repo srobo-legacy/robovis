@@ -411,6 +411,10 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 				sat_hyst_count++;
 				if (sat_hyst_count > 1)
 					colour_value = NOTHING;
+			} else if (v < span_min_val) {
+				val_hyst_count++;
+				if (val_hyst_count > 1)
+					colour_value = NOTHING;
 			} else {
 				sat_hyst_count = 0;
 				val_hyst_count = 0;
