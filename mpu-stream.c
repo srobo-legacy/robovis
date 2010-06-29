@@ -14,6 +14,9 @@ DSP_HPROCESSOR dsp_handle = NULL;
 static DSP_HNODE node;
 static DSP_HSTREAM stream;
 
+const static struct DSP_UUID uuid = {0x3E7AEA34, 0xEC66, 0x4C5F, 0xBC, 0x11,
+					0x48, 0xDE, 0xE1, 0x21, 0x2C, 0x8F};
+
 int
 check_dsp_open()
 {
@@ -50,35 +53,23 @@ close_dsp()
 }
 
 int
-register_and_alloc_node(struct DSP_UUID *uuid)
+register_and_alloc_node()
 {
 	struct DSP_MSG msg;
 	DBAPI status, retval;
 
 	retval = 0xFACEBEE5;
 
-	/* Generate a uuid to feed bridge api */
-	uuid->ulData1 = 0x3E7AEA34;
-	uuid->usData2 = 0xEC66;
-	uuid->usData3 = 0x4C5F;
-	uuid->ucData4 = 0xBC;
-	uuid->ucData5 = 0x11;
-	uuid->ucData6[0] = 0x48;
-	uuid->ucData6[1] = 0xDE;
-	uuid->ucData6[2] = 0xE1;
-	uuid->ucData6[3] = 0x21;
-	uuid->ucData6[4] = 0x2C;
-	uuid->ucData6[5] = 0x8F;
-	DSPManager_UnregisterObject(uuid, DSP_DCDNODETYPE);
-	DSPManager_UnregisterObject(uuid, DSP_DCDLIBRARYTYPE);
+	DSPManager_UnregisterObject(&uuid, DSP_DCDNODETYPE);
+	DSPManager_UnregisterObject(&uuid, DSP_DCDLIBRARYTYPE);
 
-	status = DSPManager_RegisterObject(uuid, DSP_DCDNODETYPE, "dsp.doff");
+	status = DSPManager_RegisterObject(&uuid, DSP_DCDNODETYPE, "dsp.doff");
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't register dsp code with bridgedriver, "
 				"%X\n", status);
 		return NULL;
 	}
-	status = DSPManager_RegisterObject(uuid, DSP_DCDLIBRARYTYPE,"dsp.doff");
+	status = DSPManager_RegisterObject(&uuid, DSP_DCDLIBRARYTYPE,"dsp.doff");
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't register dsp code with bridgedriver, "
 				"%X\n", status);
@@ -86,7 +77,7 @@ register_and_alloc_node(struct DSP_UUID *uuid)
 	}
 
 	/* Right - it's registered. Now lets try and run it. */
-	status = DSPNode_Allocate(dsp_handle, uuid, NULL, NULL, &node);
+	status = DSPNode_Allocate(dsp_handle, &uuid, NULL, NULL, &node);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Failed to allocate dsp node (%X) from "
 				"bridgedriver\n", status);
@@ -116,17 +107,16 @@ terminate(DSP_HNODE node)
 }
 
 void
-dereg_node(struct DSP_UUID *uuid)
+dereg_node()
 {
 
-	DSPManager_UnregisterObject(uuid, DSP_DCDNODETYPE);
-	DSPManager_UnregisterObject(uuid, DSP_DCDLIBRARYTYPE);
+	DSPManager_UnregisterObject(&uuid, DSP_DCDNODETYPE);
+	DSPManager_UnregisterObject(&uuid, DSP_DCDLIBRARYTYPE);
 }
 
 int
 open_dsp_and_prepare_buffers(int buffer_sz)
 {
-	struct DSP_UUID uuid;
 	struct DSP_STRMATTR attrs;
 	uint8_t *reclaimed;
 	DSP_HNODE node;
@@ -146,7 +136,7 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	}
 
 	/* Register and create the dsp node, but don't create */
-	node = register_and_create(&uuid);
+	node = register_and_create();
 	if (node == NULL) {
 		fprintf(stderr, "Couldn't allocate dsp node\n");
 		return 1;
