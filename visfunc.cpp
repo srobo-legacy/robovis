@@ -93,10 +93,12 @@ add_blob(int minx, int miny, int maxx, int maxy, int colour)
 {
 	int w, h;
 
+#ifndef USE_DSP
 	if (!(num_blobs < MAX_BLOBS)) {
 		fprintf(stderr, "add_blob, ran out of blob records...\n");
 		return;
 	}
+#endif
 
 	w = maxx - minx;
 	h = maxy - miny;
@@ -165,6 +167,7 @@ add_blob(int minx, int miny, int maxx, int maxy, int colour)
 		v = clip(v);						\
 	} while (0);
 
+#ifndef USE_DSP
 #ifdef OPENCV
 
 void
@@ -292,6 +295,8 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 
 	return;
 }
+
+#endif /* ifndef USE_DSP */
 
 struct blob_position *
 vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
@@ -431,10 +436,12 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 				spans[span].colour = colour_value;
 			}
 
+#ifndef USE_DSP
 			if (span >= SPANS) {
 				fprintf(stderr, "Out of spans storage\n");
 				break;
 			}
+#endif
 		}
 
 		if (spans[span].colour != NOTHING) {
