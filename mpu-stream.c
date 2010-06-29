@@ -131,8 +131,11 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	DBAPI status;
 
 	stream = NULL;
-	buffer_sz += 3;
-	buffer_sz &= ~3;
+	if (buffer_sz & 3) {
+		fprintf(stderr, "Buffer size when creating dsp node must be "
+				"a multiple of 4\n");
+		return 1;
+	}
 
 	if (check_dsp_open()) {
 		fprintf(stderr, "Couldn't open DSP\n");
