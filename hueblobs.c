@@ -15,7 +15,10 @@
 #include <highgui.h>
 #endif
 
+extern "C" {
 #include "visfunc.h"
+#include "dsp_api.h"
+}
 
 #define UNUSED(x) ((x) = (x))
 
@@ -182,6 +185,14 @@ main(int argc, char **argv)
 
 	open_webcam(CAMWIDTH, CAMHEIGHT);
 
+#ifdef USE_DSP
+	if (check_dsp_open())
+		return 1;
+
+	if (open_dsp_and_prepare_buffers(CAMWIDTH * CAMHEIGHT * 2))
+		return 1;
+#endif
+
 #ifdef OPENCV
 	if(DEBUGDISPLAY) {
 		//No idea what this returns on fail.
@@ -248,8 +259,19 @@ main(int argc, char **argv)
 		}
 #endif
 
+#ifdef USE_DSP
+		/* Calculating buffer size is less than dynamic; anyway */
+		issue_buffer_to_dsp(raw_data, CAMWIDTH * CAMHEIGHT * 2);
+
+		blobs = recv_blob_info(1000); /* 1 second timeout */
+		if (blobs == NULL) {
+			fprintf(stderr, "Couldn't get blobs info: bad!\n");
+			exit(1);
+		}
+#else
 		blobs = vis_find_blobs_through_scanlines(raw_data, CAMWIDTH,
 								CAMHEIGHT);
+#endif
 
 		for (i = 0; ; i++) {
 			if (blobs[i].x1 == 0 && blobs[i].x2 == 0)
@@ -304,6 +326,9 @@ main(int argc, char **argv)
 	}	//end while loop
 
 	close_webcam();
+#ifdef USE_DSP
+	wind_up_dsp();
+#endif
 	return 0;
 }
 
