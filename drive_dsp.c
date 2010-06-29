@@ -14,8 +14,8 @@ DSP_HPROCESSOR dsp_handle = NULL;
 static DSP_HNODE node;
 static DSP_HSTREAM stream;
 
-const static struct DSP_UUID uuid = {0x3E7AEA34, 0xEC66, 0x4C5F, 0xBC, 0x11,
-					0x48, 0xDE, 0xE1, 0x21, 0x2C, 0x8F};
+static struct DSP_UUID uuid = {0x3E7AEA34, 0xEC66, 0x4C5F, 0xBC, 0x11,
+				{0x48, 0xDE, 0xE1, 0x21, 0x2C, 0x8F}};
 
 int
 check_dsp_open()
@@ -27,13 +27,13 @@ check_dsp_open()
 
 	status = DspManager_Open(0, NULL);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't open dsp manager, %X\n", status);
+		fprintf(stderr, "Couldn't open dsp manager, %X\n", (int)status);
 		return 1;
 	}
 
 	status = DSPProcessor_Attach(0, NULL, &dsp_handle);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't attach to dsp 0: %X\n", status);
+		fprintf(stderr, "Couldn't attach to dsp 0: %X\n", (int)status);
 		DspManager_Close(0, NULL);
 		return 1;
 	}
@@ -55,10 +55,7 @@ close_dsp()
 int
 register_and_alloc_node()
 {
-	struct DSP_MSG msg;
-	DBAPI status, retval;
-
-	retval = 0xFACEBEE5;
+	DBAPI status;
 
 	DSPManager_UnregisterObject(&uuid, DSP_DCDNODETYPE);
 	DSPManager_UnregisterObject(&uuid, DSP_DCDLIBRARYTYPE);
@@ -66,25 +63,26 @@ register_and_alloc_node()
 	status = DSPManager_RegisterObject(&uuid, DSP_DCDNODETYPE, "dsp.doff");
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't register dsp code with bridgedriver, "
-				"%X\n", status);
-		return NULL;
+				"%X\n", (int)status);
+		return 1;
 	}
-	status = DSPManager_RegisterObject(&uuid, DSP_DCDLIBRARYTYPE,"dsp.doff");
+
+	status = DSPManager_RegisterObject(&uuid,DSP_DCDLIBRARYTYPE,"dsp.doff");
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't register dsp code with bridgedriver, "
-				"%X\n", status);
-		return NULL;
+				"%X\n", (int)status);
+		return 1;
 	}
 
 	/* Right - it's registered. Now lets try and run it. */
 	status = DSPNode_Allocate(dsp_handle, &uuid, NULL, NULL, &node);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Failed to allocate dsp node (%X) from "
-				"bridgedriver\n", status);
-		return NULL;
+				"bridgedriver\n", (int)status);
+		return 1;
 	}
 
-	return node;
+	return 0;
 }
 
 int
@@ -94,14 +92,12 @@ terminate(DSP_HNODE node)
 	DSP_STATUS retval;
 
 	status = DSPNode_Delete(node);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Error deleting dsp node, %X\n");
-	}
+	if (DSP_FAILED(status))
+		fprintf(stderr, "Error deleting dsp node, %X\n", (int)status);
 
 	status = DSPNode_Terminate(node, &retval);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't terminate dsp node, %X\n", status);
-	}
+	if (DSP_FAILED(status))
+		fprintf(stderr, "Can't terminate dsp node, %X\n", (int)status);
 
 	return 0;
 }
@@ -118,9 +114,6 @@ int
 open_dsp_and_prepare_buffers(int buffer_sz)
 {
 	struct DSP_STRMATTR attrs;
-	uint8_t *reclaimed;
-	DSP_HNODE node;
-	unsigned long reclaimed_bytes, reclaimed_sz, reclaimed_baton;
 	DBAPI status;
 
 	stream = NULL;
@@ -135,9 +128,8 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 		return 1;
 	}
 
-	/* Register and create the dsp node, but don't create */
-	node = register_and_create();
-	if (node == NULL) {
+	/* Register and allocate the dsp node, but don't create */
+	if (register_and_alloc_node()) {
 		fprintf(stderr, "Couldn't allocate dsp node\n");
 		return 1;
 	}
@@ -153,27 +145,27 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	status = DSPNode_Connect((void*)DSP_HGPPNODE, 0, node, 0, &attrs);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't create dsp input stream, %X\n",
-				status);
+				(int)status);
 		return 1;
 	}
 
 	/* Hmkay, now it should be possible to create and execute node */
 	status = DSPNode_Create(node);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't create dsp node: %X\n", status);
+		fprintf(stderr, "Couldn't create dsp node: %X\n", (int)status);
 		goto fail;
 	}
 
 	status = DSPNode_Run(node);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't run dsp node: %X\n", status);
+		fprintf(stderr, "Couldn't run dsp node: %X\n", (int)status);
 		goto fail;
 	}
 
 	status = DSPStream_Open(node, DSP_TONODE, 0, NULL, &stream);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't open dsp input stream (%X)\n",
-				status);
+				(int)status);
 		goto streamout;
 	}
 
@@ -181,7 +173,10 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	return 0;
 
 	streamout:
-	DSPStream_Close(str_in);
+	DSPStream_Close(stream);
+
+	fail:
+	DSPNode_Delete(node);
 
 	return 1;
 }
@@ -194,14 +189,16 @@ issue_buffer_to_dsp(void *data, int sz)
 	/* Prepare buffer for being sent to dsp. AKA, wire it into memory */
 	status = DSPStream_PrepareBuffer(stream, sz, data);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't prepare buffer for dsp: %X\n",status);
+		fprintf(stderr, "Couldn't prepare buffer for dsp: %X\n",
+								(int)status);
 		return 1;
 	}
 
 	/* Put buffer into stream */
 	status = DSPStream_Issue(stream, data, sz, sz, 0);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't issue buffer to dsp: %X\n", status);
+		fprintf(stderr, "Couldn't issue buffer to dsp: %X\n",
+								(int)status);
 		DSPStream_UnprepareBuffer(stream, sz, data);
 		return 1;
 	}
@@ -216,9 +213,10 @@ int
 recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
 {
 	struct DSP_MSG msg;
-	void *data;
+	BYTE *data;
 	DBAPI status;
-	int num, data_sz, max_data_sz, tmp;
+	ULONG data_sz, max_data_sz, tmp;
+	int num;
 
 	status = DSPNode_GetMessage(node, &msg, timeout_ms);
 
@@ -250,7 +248,7 @@ recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
 			break;
 		default:
 			fprintf(stderr, "Invalid dsp message 0x%X arrived\n",
-								msg.dwCmd);
+								(int)msg.dwCmd);
 			memset(&blobs[num], 0, sizeof(blobs[num]));
 		}
 
@@ -263,7 +261,7 @@ recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
 		status = DSPNode_GetMessage(node, &msg, 10000);
 		if (DSP_FAILED(status)) {
 			fprintf(stderr, "Error %X getting dsp message, before "
-					"NO_MORE_BLOBS received\n");
+					"NO_MORE_BLOBS received\n",(int)status);
 			return -1;
 		}
 	}
@@ -272,7 +270,7 @@ recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
 	status = DSPStream_Reclaim(stream, &data, &data_sz, &max_data_sz, &tmp);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't retrieve buffer from input stream: "
-				"%X\n", status);
+				"%X\n", (int)status);
 		return -1;
 	}
 
@@ -286,12 +284,13 @@ recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
 void
 wind_up_dsp()
 {
+	DBAPI status;
 
 	/* We assume there's nothing in flight while we're shutting down */
 
 	status = DSPStream_Close(stream);
 	if (DSP_FAILED(status))
-		fprintf(stderr, "Couldn't close dsp stream (%X)\n", status);
+		fprintf(stderr, "Couldn't close dsp stream (%X)\n",(int)status);
 
 	terminate(node);
 	dereg_node(&uuid);
