@@ -47,7 +47,7 @@ close_dsp()
 }
 
 DSP_HNODE
-register_and_create(struct DSP_UUID *uuid)
+register_and_alloc_node(struct DSP_UUID *uuid)
 {
 	struct DSP_MSG msg;
 	DSP_HNODE node;
