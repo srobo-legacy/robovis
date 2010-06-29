@@ -8,8 +8,7 @@
 
 bool dsp_open = false;
 DSP_HPROCESSOR dsp_handle = NULL;
-static DSP_HSTREAM str_in, str;
-static void *in_bufs[2];
+static DSP_HSTREAM stream;
 
 int
 check_dsp_open()
@@ -131,7 +130,7 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	unsigned long reclaimed_bytes, reclaimed_sz, reclaimed_baton;
 	DBAPI status;
 
-	str_in = NULL;
+	stream = NULL;
 	buffer_sz += 3;
 	buffer_sz &= ~3;
 
@@ -175,37 +174,15 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 		goto fail;
 	}
 
-	status = DSPStream_Open(node, DSP_TONODE, 0, NULL, &str_in);
+	status = DSPStream_Open(node, DSP_TONODE, 0, NULL, &stream);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't open dsp input stream (%X)\n",
 				status);
 		goto streamout;
 	}
 
-	in_bufs[0] = malloc(buffer_sz);
-	in_bufs[1] = malloc(buffer_sz);
-
-	if (in_bufs[0] == NULL || in_bufs[1] == NULL)
-		fprintf(stderr, "Couldn't allocate dsp stream buffers\n");
-		goto bufout;
-	}
-
-	status = DSPStream_PrepareBuffer(str_in, buffer_sz, in_bufs[0]);
-	if (DSP_SUCCESS(status))
-		status = DSPStream_PrepareBuffer(str_in, buffer_sz, in_bufs[1]);
-
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't prepare dsp buffer: %X\n", status);
-		goto bufout;
-	}
-
 	/* Success */
 	return 0;
-
-	bufout:
-	/* Clean up buffers */
-	DSPStream_UnprepareBuffer(str_in, buffer_sz, in_bufs[0]);
-	DSPStream_UnprepareBuffer(str_in, buffer_sz, in_bufs[1]);
 
 	streamout:
 	DSPStream_Close(str_in);
