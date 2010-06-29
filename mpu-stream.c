@@ -8,6 +8,9 @@
 
 bool dsp_open = false;
 DSP_HPROCESSOR dsp_handle = NULL;
+static DSP_HSTREAM str_in, str_out;
+static void *in_bufs[2];
+static void *out_bufs[2];
 
 int
 check_dsp_open()
@@ -100,12 +103,12 @@ terminate(DSP_HNODE node)
 
 	status = DSPNode_Delete(node);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Error deleting node, %X\n");
+		fprintf(stderr, "Error deleting dsp node, %X\n");
 	}
 
 	status = DSPNode_Terminate(node, &retval);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't terminate node, %X\n", status);
+		fprintf(stderr, "Couldn't terminate dsp node, %X\n", status);
 	}
 
 	return 0;
@@ -120,24 +123,25 @@ dereg_node(struct DSP_UUID *uuid)
 }
 
 int
-main(int argc, char **argv)
+open_dsp_and_prepare_buffers(int buffer_sz)
 {
-	uint8_t output_buffer[1024];
-	uint8_t input_buffer[1024];
 	struct DSP_UUID uuid;
 	struct DSP_STRMATTR attrs;
 	uint8_t *reclaimed;
 	DSP_HNODE node;
-	DSP_HSTREAM str_in, str_out;
 	unsigned long reclaimed_bytes, reclaimed_sz, reclaimed_baton;
 	DBAPI status;
 
+	str_in = NULL;
+	str_out = NULL;
+	buffer_sz += 3;
+	buffer_sz &= ~3;
+
 	if (check_dsp_open()) {
-		fprintf(stderr, "Can't open DSP\n");
+		fprintf(stderr, "Couldn't open DSP\n");
 		return 1;
 	}
 
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
 	/* Register and create the dsp node, but don't create */
 	node = register_and_create(&uuid);
 	if (node == NULL) {
@@ -147,13 +151,12 @@ printf("deathcakes %s %d\n", __FILE__, __LINE__);
 
 	/* Create some streams to plug into dsp node */
 	attrs.uSegid = 0;
-	attrs.uBufsize = 256; /* Words not byte */
-	attrs.uNumBufs = 1;
+	attrs.uBufsize = buffer_sz / 4; /* Words not byte */
+	attrs.uNumBufs = 2;
 	attrs.uAlignment = 0;
 	attrs.uTimeout = 10000; /* No idea what scale this is */
 	attrs.lMode = STRMMODE_PROCCOPY;
 
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
 	status = DSPNode_Connect(node, 0, (void*)DSP_HGPPNODE, 0, &attrs);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't create dsp output stream, %X\n",
@@ -161,29 +164,25 @@ printf("deathcakes %s %d\n", __FILE__, __LINE__);
 		return 1;
 	}
 
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
 	status = DSPNode_Connect((void*)DSP_HGPPNODE, 0, node, 0, &attrs);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't create dsp intpu stream, %X\n",
+		fprintf(stderr, "Couldn't create dsp input stream, %X\n",
 				status);
 		return 1;
 	}
 
 	/* Hmkay, now it should be possible to create and execute node */
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
 	status = DSPNode_Create(node);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't create dsp node: %X\n", status);
-		goto out;
+		goto fail;
 	}
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
 
 	status = DSPNode_Run(node);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't run dsp node: %X\n", status);
-		goto out;
+		goto fail;
 	}
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
 
 	status = DSPStream_Open(node, DSP_TONODE, 0, NULL, &str_in);
 	if (DSP_FAILED(status)) {
@@ -198,26 +197,55 @@ printf("deathcakes %s %d\n", __FILE__, __LINE__);
 				status);
 		goto streamout;
 	}
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
 
-	status = DSPStream_PrepareBuffer(str_in, sizeof(input_buffer),
-							input_buffer);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't prepare dsp input buffer\n");
-		goto streamout;
+	in_bufs[0] = malloc(buffer_sz);
+	in_bufs[1] = malloc(buffer_sz);
+	out_bufs[0] = malloc(buffer_sz);
+	out_bufs[1] = malloc(buffer_sz);
+
+	if (in_bufs[0] == NULL || in_bufs[1] == NULL ||
+			out_bufs[0] == NULL || out_bufs[1] == NULL) {
+		fprintf(stderr, "Couldn't allocate dsp stream buffers\n");
+		goto bufout;
 	}
 
-	status = DSPStream_PrepareBuffer(str_out, sizeof(output_buffer),
-							output_buffer);
+	status = DSPStream_PrepareBuffer(str_in, buffer_sz, in_bufs[0]);
+	if (DSP_SUCCESS(status))
+		status = DSPStream_PrepareBuffer(str_in, buffer_sz, in_bufs[1]);
+	if (DSP_SUCCESS(status))
+		status = DSPStream_PrepareBuffer(str_out,buffer_sz,out_bufs[0]);
+	if (DSP_SUCCESS(status))
+		status = DSPStream_PrepareBuffer(str_out,buffer_sz,out_bufs[1]);
+
+
 	if (DSP_FAILED(status)) {
-		fprintf(stderr,  "Couldn't prepare dsp output buffer\n");
-		goto streamout;
+		fprintf(stderr, "Couldn't prepare dsp buffer: %X\n", status);
+		goto bufout;
 	}
+
+	/* Success */
+	return 0;
+
+	bufout:
+	/* Clean up buffers */
+	DSPStream_UnprepareBuffer(str_in, buffer_sz, in_bufs[0]);
+	DSPStream_UnprepareBuffer(str_in, buffer_sz, in_bufs[1]);
+	DSPStream_UnprepareBuffer(str_out, buffer_sz, out_bufs[0]);
+	DSPStream_UnprepareBuffer(str_out, buffer_sz, out_bufs[1]);
+
+	streamout:
+	DSPStream_Clse(str_in);
+	DSPStream_Clse(str_out);
+
+	return 1;
+}
+
+
+
 
 	/* Actually do some things */
 	memset(input_buffer, 0, sizeof(input_buffer));
 	memset(output_buffer, 0, sizeof(output_buffer));
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
 
 	/* Put buffer into streams - zeros should arrive at dsp */
 	status = DSPStream_Issue(str_in, input_buffer, 1024, 1024, 0);
