@@ -11,7 +11,7 @@ CXX = $(CROSS_COMPILE)g++
 # Python 2.4 doesn't support pkg-config; bodge this to your own include path
 PY_CFLAGS += -I/usr/include/python2.4
 
-hueblobs: hueblobs.c visfunc.o v4l.o
+hueblobs: hueblobs.c visfunc.o v4l.o drive_dsp.o
 	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o v4l.o
 
 visfunc.o: visfunc.cpp
@@ -19,6 +19,10 @@ visfunc.o: visfunc.cpp
 
 v4l.o: v4l.c
 	$(CC) -o $@ $< $(CFLAGS) -c -fPIC
+
+# FIXME: mpu include stuff is in a different repo. Eww.
+drive_dsp.o: drive_dsp.c
+	$(CC) -o $@ $< $(CFLAGS) -c -fPIC -I../dsp-code/mpu_include
 
 .PHONY: clean
 
