@@ -3,9 +3,10 @@
 
 #include "visfunc.h"
 
+int check_dsp_open();
 int open_dsp_and_prepare_buffers(int buffer_sz);
 int issue_buffer_to_dsp(void *data, int sz);
-int recv_blob_info(struct blob_positions *blobs, int max_num, int timeout_ms);
+struct blob_position *recv_blob_info(int timeout_ms);
 void wind_up_dsp();
 
 #endif /* _ROBOVIS_DSP_API_H_ */
