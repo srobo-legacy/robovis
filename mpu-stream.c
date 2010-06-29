@@ -6,8 +6,12 @@
 
 #include <dbapi.h>
 
+#include "visfunc.h"
+#include "dsp_comms.h"
+
 bool dsp_open = false;
 DSP_HPROCESSOR dsp_handle = NULL;
+static DSP_HNODE node;
 static DSP_HSTREAM stream;
 
 int
@@ -45,11 +49,10 @@ close_dsp()
 	return;
 }
 
-DSP_HNODE
+int
 register_and_alloc_node(struct DSP_UUID *uuid)
 {
 	struct DSP_MSG msg;
-	DSP_HNODE node;
 	DBAPI status, retval;
 
 	retval = 0xFACEBEE5;
@@ -219,16 +222,72 @@ issue_buffer_to_dsp(void *data, int sz)
 	return 0;
 }
 
+int
+recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
+{
+	struct DSP_MSG msg;
+	void *data;
+	DBAPI status;
+	int num, data_sz, max_data_sz, tmp;
 
+	status = DSPNode_GetMessage(node, &msg, timeout_ms);
 
-	status = DSPStream_Reclaim(str_in, &reclaimed, &reclaimed_bytes,
-					&reclaimed_sz, &reclaimed_baton);
+	/* If it timed out, return to caller */
+	if (DSP_FAILED(status))
+		return -1;
+
+	/* If we received a message, more will follow, as the dsp emits them
+	 * all in one burst, until a NO_MORE_BLOBS arrives */
+	num = 0;
+	while (msg.dwCmd != MSG_NO_MORE_BLOBS) {
+		blobs[num].minx = blobs[num].maxx = 0;
+		blobs[num].miny = blobs[num].maxy = 0;
+
+		blobs[num].x1 = msg.dwArg1 & 0xFFFF;
+		blobs[num].y1 = (msg.dwArg1 >> 16) & 0xFFFF;
+		blobs[num].x2 = msg.dwArg2 & 0xFFFF;
+		blobs[num].y2 = (msg.dwArg2 >> 16) & 0xFFFF;
+
+		switch (msg.dwCmd) {
+		case MSG_BLOB_RED:
+			blobs[num].colour = RED;
+			break;
+		case MSG_BLOB_BLUE:
+			blobs[num].colour = BLUE;
+			break;
+		case MSG_BLOB_GREEN:
+			blobs[num].colour = GREEN;
+			break;
+		default:
+			fprintf(stderr, "Invalid dsp message 0x%X arrived\n",
+								msg.dwCmd);
+			memset(&blobs[num], 0, sizeof(blobs[num]));
+		}
+
+		num++;
+
+		status = DSPNode_GetMessage(node, &msg, 10000);
+		if (DSP_FAILED(status)) {
+			fprintf(stderr, "Error %X getting dsp message, before "
+					"NO_MORE_BLOBS received\n");
+			return -1;
+		}
+	}
+
+	/* After NO_MORE_BLOBS, node will release the buffer */
+	status = DSPStream_Reclaim(stream, &data, &data_sz, &max_data_sz, &tmp);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't retrieve buffer from input stream: "
 				"%X\n", status);
-		goto streamout;
+		return -1;
 	}
 
+	/* Unwire buffer */
+	DSPStream_UnprepareBuffer(stream, max_data_sz, data);
+
+	/* kdone */
+	return num;
+}
 
 	streamout:
 printf("deathcakes %s %d\n", __FILE__, __LINE__);
