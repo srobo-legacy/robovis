@@ -1,10 +1,10 @@
-#define SR_NODE_GUID_STRING "7129518D_CB99_449C_8020_5BBE90CAD8A0"
+#define SR_NODE_GUID_STRING "3E7AEA34_EC66_4C5F_BC11_48DEE1212C8F"
 #define SR_NODE_CREATE_FUNC "create"
 #define SR_NODE_EXECUTE_FUNC "execute"
 #define SR_NODE_DELETE_FUNC "delete"
 #define SR_NODE_NAME "bees"
 #define SR_NODE_INPUT_STREAMS "1"
-#define SR_NODE_OUTPUT_STREAMS "1"
+#define SR_NODE_OUTPUT_STREAMS "0"
 
 #include <std.h>
 #include <stdlib.h>
@@ -20,10 +20,7 @@ void SYS_printf(const char *fmt, ...);
 struct state {
 	STRM_Handle in_handle;
 	unsigned int in_size;
-	STRM_Handle out_handle;
-	unsigned int out_size;
 	uint8_t *in_buf;
-	uint8_t *out_buf;
 };
 
 void
@@ -60,20 +57,9 @@ create(int arg_len, char *arg_str, int num_in_streams,
 					strm_def->bufsize, &attrs);
 	s->in_size = strm_def->bufsize;
 
-	strm_def = (RMS_StrmDef *)out_stream_handles[0];
-	attrs.nbufs = strm_def->nbufs;
-	attrs.segid = strm_def->segid;
-	attrs.timeout = strm_def->timeout;
-	attrs.align = strm_def->align;
-
-	s->out_handle = STRM_create(strm_def->name, STRM_OUTPUT,
-					strm_def->bufsize, &attrs);
-	s->out_size = strm_def->bufsize;
-
 	s->in_buf = (void *)STRM_allocateBuffer(s->in_handle, s->in_size);
-	s->out_buf = (void *)STRM_allocateBuffer(s->out_handle,s->out_size);
 
-	if (s->in_buf == NULL || s->out_buf == NULL)
+	if (s->in_buf == NULL)
 		return RMS_EOUTOFMEMORY;
 
 	return 0;
@@ -118,9 +104,7 @@ delete(NODE_EnvPtr node)
 
 	s = node->moreEnv;
 	STRM_freeBuffer(s->in_handle, s->in_buf, s->in_size);
-	STRM_freeBuffer(s->out_handle, s->out_buf, s->out_size);
 	STRM_delete(s->in_handle);
-	STRM_delete(s->out_handle);
 	MEM_free(0, s, sizeof(*s));
 
 	return 0;
