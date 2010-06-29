@@ -11,8 +11,12 @@
 #include <rmsdefs.h>
 #include <rms_sh.h>
 #include <node.h>
+#include <dbtype.h>
+#include <dbdefs.h>
 
 #include <sr_dcd.h>
+
+#include "dsp_comms.h"
 
 void *MEM_valloc(int seg_id, int size, int align);
 void SYS_printf(const char *fmt, ...);
