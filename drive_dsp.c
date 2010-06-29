@@ -9,8 +9,8 @@
 #include "visfunc.h"
 #include "dsp_comms.h"
 
-bool dsp_open = false;
-DSP_HPROCESSOR dsp_handle = NULL;
+static bool dsp_open = false;
+static DSP_HPROCESSOR dsp_handle = NULL;
 static DSP_HNODE node;
 static DSP_HSTREAM stream;
 
