@@ -31,18 +31,6 @@
 #define MIN(a,b)        (((a)<(b))?(a):(b))
 #define        MAX(a,b)        (((a)>(b))?(a):(b))
 
-#ifndef __GNUC__
-#define INLINE
-#define breakpoint() exit(1)
-#else
-#define INLINE inline
-#if !defined(__arm__)
-#define breakpoint() __asm__("int $3")
-#else
-#define breakpoint()
-#endif
-#endif
-
 #define BLOB_MIN_WIDTH 3
 #define BLOB_MIN_HEIGHT 3
 #define BLOB_MIN_MASS 5
