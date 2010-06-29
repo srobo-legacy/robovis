@@ -54,38 +54,38 @@ register_and_create(struct DSP_UUID *uuid)
 	retval = 0xFACEBEE5;
 
 	/* Generate a uuid to feed bridge api */
-	uuid->ulData1 = 0x7129518D;
-	uuid->usData2 = 0xCB99;
-	uuid->usData3 = 0x449C;
-	uuid->ucData4 = 0x80;
-	uuid->ucData5 = 0x20;
-	uuid->ucData6[0] = 0x5B;
-	uuid->ucData6[1] = 0xBE;
-	uuid->ucData6[2] = 0x90;
-	uuid->ucData6[3] = 0xCA;
-	uuid->ucData6[4] = 0xD8;
-	uuid->ucData6[5] = 0xA0;
+	uuid->ulData1 = 0x3E7AEA34;
+	uuid->usData2 = 0xEC66;
+	uuid->usData3 = 0x4C5F;
+	uuid->ucData4 = 0xBC;
+	uuid->ucData5 = 0x11;
+	uuid->ucData6[0] = 0x48;
+	uuid->ucData6[1] = 0xDE;
+	uuid->ucData6[2] = 0xE1;
+	uuid->ucData6[3] = 0x21;
+	uuid->ucData6[4] = 0x2C;
+	uuid->ucData6[5] = 0x8F;
 	DSPManager_UnregisterObject(uuid, DSP_DCDNODETYPE);
 	DSPManager_UnregisterObject(uuid, DSP_DCDLIBRARYTYPE);
 
-	status = DSPManager_RegisterObject(uuid, DSP_DCDNODETYPE,
-						"dsp-stream.doff");
+	status = DSPManager_RegisterObject(uuid, DSP_DCDNODETYPE, "dsp.doff");
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't register file, doff missing?\n");
+		fprintf(stderr, "Couldn't register dsp code with bridgedriver, "
+				"%X\n", status);
 		return NULL;
 	}
-	status = DSPManager_RegisterObject(uuid, DSP_DCDLIBRARYTYPE,
-						"dsp-stream.doff");
+	status = DSPManager_RegisterObject(uuid, DSP_DCDLIBRARYTYPE,"dsp.doff");
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't register file, doff missing?\n");
+		fprintf(stderr, "Couldn't register dsp code with bridgedriver, "
+				"%X\n", status);
 		return NULL;
 	}
 
 	/* Right - it's registered. Now lets try and run it. */
 	status = DSPNode_Allocate(dsp_handle, uuid, NULL, NULL, &node);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Failed to allocate node (%X): not a "
-				"code problem, something else?\n", status);
+		fprintf(stderr, "Failed to allocate dsp node (%X) from "
+				"bridgedriver\n", status);
 		return NULL;
 	}
 
