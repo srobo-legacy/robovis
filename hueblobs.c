@@ -15,8 +15,9 @@
 #include <highgui.h>
 #endif
 
-extern "C" {
 #include "visfunc.h"
+
+extern "C" {
 #include "dsp_api.h"
 }
 
