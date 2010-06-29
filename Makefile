@@ -1,7 +1,8 @@
-SRFLAGS= -DCAMWIDTH=320 -DCAMHEIGHT=240
+SRFLAGS= -DCAMWIDTH=320 -DCAMHEIGHT=240 -DUSE_DSP
 
 CFLAGS += -Wall -Wextra -Werror -O3 -funroll-loops -fomit-frame-pointer
 CFLAGS += $(SRFLAGS)
+CFLAGS += -L../dsp-code/mpu_lib -lbridge
 
 CBFLAGS = `pkg-config --cflags blobslib`
 LDBFLAGS = `pkg-config --libs blobslib`
@@ -15,7 +16,7 @@ CXX = $(CROSS_COMPILE)g++
 PY_CFLAGS += -I/usr/include/python2.4
 
 hueblobs: hueblobs.c visfunc.o v4l.o drive_dsp.o
-	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o v4l.o
+	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o v4l.o drive_dsp.o
 
 visfunc.o: visfunc.cpp
 	$(CXX) $< $(OPENCV_CFLAGS) $(CFLAGS) -c -o $@ -fPIC
