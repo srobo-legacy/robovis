@@ -68,6 +68,8 @@ create(int arg_len, char *arg_str, int num_in_streams,
 int
 execute(NODE_EnvPtr node)
 {
+	struct DSP_MSG msg;
+	struct blob_position *blobs;
 	struct state *s;
 	uint8_t *in_buf;
 	uint32_t context;
@@ -88,11 +90,18 @@ execute(NODE_EnvPtr node)
 	if (in_buf == NULL)
 		panic();
 
-	for (i = 0; i < 1024; i++) {
-		s->out_buf[i] = 1;
-	}
+	/* Hand off buffer to yuyv beating code */
+	blobs = vis_find_positions_through_scanlines(in_buf, WIDTH, HEIGHT);
 
-	STRM_issue(s->out_handle, s->out_buf, 1024, 1024, 0);
+	/* Put buffer back in queue */
+	STRM_issue(s->in_handle, in_buf, s->in_size, s->in_size, 0);
+
+	/* Pump out some blob information. For now, just pump out nothing
+	 * instead, worry about actual data later */
+	msg.dwCmd = MSG_NO_MORE_BLOBS;
+	msg.dwArg1 = 0;
+	msg.dwArg2 = 0;
+	NODE_putMsg(node, NODE_TOGPP, &msg, NODE_FOREVER);
 
 	return 0;
 }
