@@ -1,5 +1,5 @@
-#ifndef _BOARDS_SLUG_VISION_ROBOVIS_VISFUNC_H_
-#define _BOARDS_SLUG_VISION_ROBOVIS_VISFUNC_H_
+#ifndef _ROBOVIS_VISFUNC_H_
+#define _ROBOVIS_VISFUNC_H_
 
 #include <stdint.h>
 
@@ -32,4 +32,4 @@ struct blob_position *vis_find_blobs_through_scanlines(uint8_t *yuyv,
 						int width, int height);
 void store_rgb_image(const char *, uint8_t *raw_data, int width, int height);
 
-#endif /* _BOARDS_SLUG_VISION_ROBOVIS_VISFUNC_H_ */
+#endif /* _ROBOVIS_VISFUNC_H_ */
