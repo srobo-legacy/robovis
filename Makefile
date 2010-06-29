@@ -32,10 +32,13 @@ drive_dsp.o: drive_dsp.c
 dsp.o: dsp.c
 	env CROSS_COMPILE=tic64x- llvmc -Wllc,-march,tms320c64x -hosttools -I../dsp-code/dsp_include -I../dsp-code/mpu_include -c dsp.c -o dsp.o $(SRFLAGS)
 
-dsp.doff: dsp.o
-	tic64x-ld dsp.o -o dsp.doff --oformat=c64x -r
+dsp_visfunc.o: visfunc.cpp
+	env CROSS_COMPILE=tic64x- llvmc -Wllc,-march,tms320c64x -hosttools -I../dsp-code/dsp_include -I../dsp-code/mpu_include -c visfunc.cpp -o dsp_visfunc.o $(SRFLAGS)
+
+dsp.doff: dsp.o dsp_visfunc.o
+	tic64x-ld dsp.o dsp_visfunc.o -o dsp.doff --oformat=doff-c64x -r
 
 .PHONY: clean
 
 clean:
-	-rm -f hueblobs visfunc.o v4l.o drive_dsp.o dsp.o dsp.doff
+	-rm -f hueblobs visfunc.o v4l.o drive_dsp.o dsp.o dsp_visfunc.o dsp.doff
