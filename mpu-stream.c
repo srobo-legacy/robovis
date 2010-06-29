@@ -8,9 +8,8 @@
 
 bool dsp_open = false;
 DSP_HPROCESSOR dsp_handle = NULL;
-static DSP_HSTREAM str_in, str_out;
+static DSP_HSTREAM str_in, str;
 static void *in_bufs[2];
-static void *out_bufs[2];
 
 int
 check_dsp_open()
@@ -133,7 +132,6 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	DBAPI status;
 
 	str_in = NULL;
-	str_out = NULL;
 	buffer_sz += 3;
 	buffer_sz &= ~3;
 
@@ -156,13 +154,6 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	attrs.uAlignment = 0;
 	attrs.uTimeout = 10000; /* No idea what scale this is */
 	attrs.lMode = STRMMODE_PROCCOPY;
-
-	status = DSPNode_Connect(node, 0, (void*)DSP_HGPPNODE, 0, &attrs);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't create dsp output stream, %X\n",
-				status);
-		return 1;
-	}
 
 	status = DSPNode_Connect((void*)DSP_HGPPNODE, 0, node, 0, &attrs);
 	if (DSP_FAILED(status)) {
@@ -191,20 +182,10 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 		goto streamout;
 	}
 
-	status = DSPStream_Open(node, DSP_FROMNODE, 0, NULL, &str_out);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't open dsp output stream (%X)\n",
-				status);
-		goto streamout;
-	}
-
 	in_bufs[0] = malloc(buffer_sz);
 	in_bufs[1] = malloc(buffer_sz);
-	out_bufs[0] = malloc(buffer_sz);
-	out_bufs[1] = malloc(buffer_sz);
 
-	if (in_bufs[0] == NULL || in_bufs[1] == NULL ||
-			out_bufs[0] == NULL || out_bufs[1] == NULL) {
+	if (in_bufs[0] == NULL || in_bufs[1] == NULL)
 		fprintf(stderr, "Couldn't allocate dsp stream buffers\n");
 		goto bufout;
 	}
@@ -212,11 +193,6 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	status = DSPStream_PrepareBuffer(str_in, buffer_sz, in_bufs[0]);
 	if (DSP_SUCCESS(status))
 		status = DSPStream_PrepareBuffer(str_in, buffer_sz, in_bufs[1]);
-	if (DSP_SUCCESS(status))
-		status = DSPStream_PrepareBuffer(str_out,buffer_sz,out_bufs[0]);
-	if (DSP_SUCCESS(status))
-		status = DSPStream_PrepareBuffer(str_out,buffer_sz,out_bufs[1]);
-
 
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't prepare dsp buffer: %X\n", status);
@@ -230,12 +206,9 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	/* Clean up buffers */
 	DSPStream_UnprepareBuffer(str_in, buffer_sz, in_bufs[0]);
 	DSPStream_UnprepareBuffer(str_in, buffer_sz, in_bufs[1]);
-	DSPStream_UnprepareBuffer(str_out, buffer_sz, out_bufs[0]);
-	DSPStream_UnprepareBuffer(str_out, buffer_sz, out_bufs[1]);
 
 	streamout:
-	DSPStream_Clse(str_in);
-	DSPStream_Clse(str_out);
+	DSPStream_Close(str_in);
 
 	return 1;
 }
@@ -243,9 +216,6 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 
 
 
-	/* Actually do some things */
-	memset(input_buffer, 0, sizeof(input_buffer));
-	memset(output_buffer, 0, sizeof(output_buffer));
 
 	/* Put buffer into streams - zeros should arrive at dsp */
 	status = DSPStream_Issue(str_in, input_buffer, 1024, 1024, 0);
