@@ -266,6 +266,10 @@ recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
 
 		num++;
 
+		/* Don't overflow callers array */
+		if (num == max_num)
+			num--;
+
 		status = DSPNode_GetMessage(node, &msg, 10000);
 		if (DSP_FAILED(status)) {
 			fprintf(stderr, "Error %X getting dsp message, before "
