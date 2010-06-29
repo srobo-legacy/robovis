@@ -193,17 +193,33 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	return 1;
 }
 
+int
+issue_buffer_to_dsp(void *data, int sz)
+{
+	DBAPI status;
 
-
-
-
-	/* Put buffer into streams - zeros should arrive at dsp */
-	status = DSPStream_Issue(str_in, input_buffer, 1024, 1024, 0);
+	/* Prepare buffer for being sent to dsp. AKA, wire it into memory */
+	status = DSPStream_PrepareBuffer(stream, sz, data);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't issue buffer to input stream: %X\n",
-				status);
-		goto streamout;
+		fprintf(stderr, "Couldn't prepare buffer for dsp: %X\n",status);
+		return 1;
 	}
+
+	/* Put buffer into stream */
+	status = DSPStream_Issue(stream, data, sz, sz, 0);
+	if (DSP_FAILED(status)) {
+		fprintf(stderr, "Couldn't issue buffer to dsp: %X\n", status);
+		DSPStream_UnprepareBuffer(stream, sz, data);
+		return 1;
+	}
+
+	/* DSP node will now start beating image data. We return so that
+	 * the caller can do, well, stuff. Perhaps we wish to schedule grabbing
+	 * another image/frame, or do a little dance */
+	return 0;
+}
+
+
 
 	status = DSPStream_Reclaim(str_in, &reclaimed, &reclaimed_bytes,
 					&reclaimed_sz, &reclaimed_baton);
@@ -213,34 +229,6 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 		goto streamout;
 	}
 
-	/* Now issue buffer into output stream, retrieve output */
-	status = DSPStream_Issue(str_out, output_buffer, 1024, 1024, 0);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't put output buffer into stream: %X\n",	
-				status);
-		goto streamout;
-	}
-
-	status = DSPStream_Reclaim(str_out, &reclaimed, &reclaimed_bytes,
-					&reclaimed_sz, &reclaimed_baton);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't retrieve output buffer from stream: "
-				"%X\n", status);
-		goto streamout;
-	}
-
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
-	/* Let's actually see whether anything happened to it */
-	if (reclaimed_bytes != 1024) {
-		fprintf(stderr, "Reclaimed buffer is not of expected size\n");
-	} else {
-		memset(input_buffer, 1, sizeof(input_buffer));
-		if (!memcmp(reclaimed, input_buffer, reclaimed_bytes)) {
-			fprintf(stderr, "It matched! :O\n");
-		} else {
-			fprintf(stderr, "Data in output buffer didn't match\n");
-		}
-	}
 
 	streamout:
 printf("deathcakes %s %d\n", __FILE__, __LINE__);
