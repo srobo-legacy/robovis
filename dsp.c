@@ -91,7 +91,7 @@ execute(NODE_EnvPtr node)
 		panic();
 
 	/* Hand off buffer to yuyv beating code */
-	blobs = vis_find_positions_through_scanlines(in_buf, WIDTH, HEIGHT);
+	blobs = vis_find_positions_through_scanlines(in_buf,CAMWIDTH,CAMHEIGHT);
 
 	/* Put buffer back in queue */
 	STRM_issue(s->in_handle, in_buf, s->in_size, s->in_size, 0);

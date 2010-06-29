@@ -28,9 +28,6 @@
 const unsigned int MINMASS = 200;
 const unsigned int MAXMASS = 2000;
 
-#define CAMWIDTH 320
-#define CAMHEIGHT 240
-
 #ifdef OPENCV
 IplImage *frame = NULL, *oldframe = NULL, *hsv, *hue, *sat, *val;
 #endif
@@ -206,7 +203,7 @@ main(int argc, char **argv)
 	}
 
 #ifdef OPENCV
-	framesize = cvSize(320, 240);
+	framesize = cvSize(CAMWIDTH, CAMHEIGHT);
 
 	if (DEBUGDISPLAY) {
 		srlog(DEBUG, "Allocating scratchpads");
@@ -245,13 +242,14 @@ main(int argc, char **argv)
 #ifdef OPENCV
 		if (DEBUGDISPLAY) {
 			oldframe = frame;
-			frame = make_rgb_image(raw_data, 320, 240);
-			squish_raw_data_into_hsv(raw_data, 320, 240,
+			frame = make_rgb_image(raw_data, CAMWIDTH, CAMHEIGHT);
+			squish_raw_data_into_hsv(raw_data, CAMWIDTH, CAMHEIGHT,
 							hue, sat, val);
 		}
 #endif
 
-		blobs = vis_find_blobs_through_scanlines(raw_data, 320, 240);
+		blobs = vis_find_blobs_through_scanlines(raw_data, CAMWIDTH,
+								CAMHEIGHT);
 
 		for (i = 0; ; i++) {
 			if (blobs[i].x1 == 0 && blobs[i].x2 == 0)

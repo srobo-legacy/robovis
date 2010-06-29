@@ -1,5 +1,7 @@
 CFLAGS += -Wall -Wextra -Werror -O3 -funroll-loops -fomit-frame-pointer
 
+CFLAGS += -DCAMWIDTH=320 -DCAMHEIGHT=240
+
 CBFLAGS = `pkg-config --cflags blobslib`
 LDBFLAGS = `pkg-config --libs blobslib`
 OPENCV_CFLAGS += `pkg-config --cflags opencv` -Wall
