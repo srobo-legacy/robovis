@@ -31,31 +31,6 @@
 #define MIN(a,b)        (((a)<(b))?(a):(b))
 #define        MAX(a,b)        (((a)>(b))?(a):(b))
 
-#ifndef __GNUC__
-#define INLINE
-#define breakpoint() exit(1)
-#else
-#define INLINE inline
-#if !defined(__arm__)
-#define breakpoint() __asm__("int $3")
-#else
-#define breakpoint()
-#endif
-#endif
-
-#define template_size 5
-#define sobel_size 5
-#define image_depth IPL_DEPTH_8U
-
-/* Bounds for what edge pixel values are accepted into a line being followed -
- * a line will only _start_ when a 'high' pixel is found, and will continue 
- * until it drops below 'low'. This lets us eliminate a lot of noise without
- * thresholding out faint outlines. If both values are the same, equivalent
- * of thresholding */
-
-#define line_hysteresis_high 5
-#define line_hysteresis_low 5
-
 #define BLOB_MIN_WIDTH 3
 #define BLOB_MIN_HEIGHT 3
 #define BLOB_MIN_MASS 5

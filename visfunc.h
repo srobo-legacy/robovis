@@ -1,5 +1,5 @@
-#ifndef _BOARDS_SLUG_VISION_ROBOVIS_VISFUNC_H_
-#define _BOARDS_SLUG_VISION_ROBOVIS_VISFUNC_H_
+#ifndef _ROBOVIS_VISFUNC_H_
+#define _ROBOVIS_VISFUNC_H_
 
 #include <stdint.h>
 
@@ -24,19 +24,6 @@ struct blob_position {
 };
 
 #ifdef OPENCV
-IplImage *vis_do_smooth(IplImage *src);
-IplImage *vis_do_roberts_edge_detection(IplImage *src, IplImage **direction);
-IplImage *vis_do_sobel_edge_detection(IplImage *src, IplImage **direction);
-IplImage *vis_normalize_plane(IplImage *src);
-IplImage *vis_threshold(IplImage *src, unsigned char low, unsigned char high);
-IplImage *vis_clip(IplImage *src, IplImage *clip, unsigned char low,
-						unsigned char high);
-IplImage *vis_nonmaximal_supression(IplImage *src, IplImage *direction);
-void vis_follow_edge(IplImage *src, IplImage *direction, int x, int y);
-void vis_follow_edge_backwards(IplImage *src, IplImage *direction, int x, int y,
-				int minx, int miny, int maxx, int maxy);
-struct blob_position *vis_search_for_blobs(IplImage *img, IplImage *dir,
-							int spacing);
 IplImage *make_rgb_image(uint8_t *raw_data, int width, int height);
 void squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue, IplImage *sat, IplImage *val);
 #endif
@@ -45,4 +32,4 @@ struct blob_position *vis_find_blobs_through_scanlines(uint8_t *yuyv,
 						int width, int height);
 void store_rgb_image(const char *, uint8_t *raw_data, int width, int height);
 
-#endif /* _BOARDS_SLUG_VISION_ROBOVIS_VISFUNC_H_ */
+#endif /* _ROBOVIS_VISFUNC_H_ */
