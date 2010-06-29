@@ -13,6 +13,7 @@
 #include <node.h>
 #include <dbtype.h>
 #include <dbdefs.h>
+#include <rmstypes.h>
 
 #include <sr_dcd.h>
 
@@ -72,7 +73,7 @@ create(int arg_len, char *arg_str, int num_in_streams,
 int
 execute(NODE_EnvPtr node)
 {
-	struct DSP_MSG msg;
+	RMS_DSPMSG msg;
 	struct blob_position *blobs;
 	struct state *s;
 	uint8_t *in_buf;
@@ -102,9 +103,9 @@ execute(NODE_EnvPtr node)
 
 	/* Pump out some blob information. For now, just pump out nothing
 	 * instead, worry about actual data later */
-	msg.dwCmd = MSG_NO_MORE_BLOBS;
-	msg.dwArg1 = 0;
-	msg.dwArg2 = 0;
+	msg.cmd = MSG_NO_MORE_BLOBS;
+	msg.arg1 = 0;
+	msg.arg2 = 0;
 	NODE_putMsg(node, NODE_TOGPP, &msg, NODE_FOREVER);
 
 	return 0;
