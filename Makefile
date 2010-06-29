@@ -1,6 +1,7 @@
-CFLAGS += -Wall -Wextra -Werror -O3 -funroll-loops -fomit-frame-pointer
+SRFLAGS= -DCAMWIDTH=320 -DCAMHEIGHT=240
 
-CFLAGS += -DCAMWIDTH=320 -DCAMHEIGHT=240
+CFLAGS += -Wall -Wextra -Werror -O3 -funroll-loops -fomit-frame-pointer
+CFLAGS += $(SRFLAGS)
 
 CBFLAGS = `pkg-config --cflags blobslib`
 LDBFLAGS = `pkg-config --libs blobslib`
@@ -26,7 +27,15 @@ v4l.o: v4l.c
 drive_dsp.o: drive_dsp.c
 	$(CC) -o $@ $< $(CFLAGS) -c -fPIC -I../dsp-code/mpu_include
 
+
+# DSP side rules
+dsp.o: dsp.c
+	env CROSS_COMPILE=tic64x- llvmc -Wllc,-march,tms320c64x -hosttools -I../dsp-code/dsp_include -I../dsp-code/mpu_include -c dsp.c -o dsp.o $(SRFLAGS)
+
+dsp.doff: dsp.o
+	tic64x-ld dsp.o -o dsp.doff --oformat=c64x -r
+
 .PHONY: clean
 
 clean:
-	-rm -f hueblobs visfunc.o v4l.o
+	-rm -f hueblobs visfunc.o v4l.o drive_dsp.o dsp.o dsp.doff
