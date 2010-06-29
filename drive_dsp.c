@@ -17,6 +17,8 @@ static DSP_HSTREAM stream;
 static struct DSP_UUID uuid = {0x3E7AEA34, 0xEC66, 0x4C5F, 0xBC, 0x11,
 				{0x48, 0xDE, 0xE1, 0x21, 0x2C, 0x8F}};
 
+static struct blob_position blobs[MAX_BLOBS];
+
 int
 check_dsp_open()
 {
@@ -209,8 +211,8 @@ issue_buffer_to_dsp(void *data, int sz)
 	return 0;
 }
 
-int
-recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
+struct blob_position *
+recv_blob_info(int timeout_ms)
 {
 	struct DSP_MSG msg;
 	BYTE *data;
@@ -222,7 +224,7 @@ recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
 
 	/* If it timed out, return to caller */
 	if (DSP_FAILED(status))
-		return -1;
+		return NULL;
 
 	/* If we received a message, more will follow, as the dsp emits them
 	 * all in one burst, until a NO_MORE_BLOBS arrives */
@@ -254,15 +256,15 @@ recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
 
 		num++;
 
-		/* Don't overflow callers array */
-		if (num == max_num)
+		/* Don't overflow array */
+		if (num == MAX_BLOBS)
 			num--;
 
 		status = DSPNode_GetMessage(node, &msg, 10000);
 		if (DSP_FAILED(status)) {
 			fprintf(stderr, "Error %X getting dsp message, before "
 					"NO_MORE_BLOBS received\n",(int)status);
-			return -1;
+			return NULL;
 		}
 	}
 
@@ -271,14 +273,14 @@ recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Couldn't retrieve buffer from input stream: "
 				"%X\n", (int)status);
-		return -1;
+		return NULL;
 	}
 
 	/* Unwire buffer */
 	DSPStream_UnprepareBuffer(stream, max_data_sz, data);
 
 	/* kdone */
-	return num;
+	return &blobs[0];
 }
 
 void
