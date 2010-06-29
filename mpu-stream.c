@@ -283,28 +283,18 @@ recv_blob_info(struct blob_position *blobs, int max_num, int timeout_ms)
 	return num;
 }
 
-	streamout:
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
-	DSPStream_UnprepareBuffer(str_in, sizeof(input_buffer), input_buffer);
-	DSPStream_UnprepareBuffer(str_out, sizeof(output_buffer),output_buffer);
+void
+wind_up_dsp()
+{
 
-	status = DSPStream_Close(str_in);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't close dsp input stream (%X)\n",
-				status);
-	}
+	/* We assume there's nothing in flight while we're shutting down */
 
-	status = DSPStream_Close(str_out);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldnt close ddsp output stream (%X)\n",
-				status);
-	}
-printf("deathcakes %s %d\n", __FILE__, __LINE__);
+	status = DSPStream_Close(stream);
+	if (DSP_FAILED(status))
+		fprintf(stderr, "Couldn't close dsp stream (%X)\n", status);
 
-	out:
 	terminate(node);
 	dereg_node(&uuid);
 	close_dsp();
-
-	return 0;
+	return;
 }
