@@ -19,7 +19,9 @@
 #include <cv.h>
 #endif
 
+extern "C" {
 #include "visfunc.h"
+}
 
 /* Ensure that "MAX" and "MIN" are what we expect them to be */
 #if defined(MAX)
