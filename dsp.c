@@ -66,7 +66,10 @@ execute(NODE_EnvPtr node)
 		if (msgs == 0)
 			panic();
 
-		/* We expect only two messages from the dsp */
+		/* Actually fetch a message */
+		NODE_getMsg(node, &msg, NODE_FOREVER);
+
+		/* We expect only two kinds of messages from the dsp */
 		switch (msg.cmd) {
 		case MSG_START_PROCESSING:
 			/* Hand off buffer to yuyv beating code. This message
