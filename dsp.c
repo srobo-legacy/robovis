@@ -3,7 +3,7 @@
 #define SR_NODE_EXECUTE_FUNC "execute"
 #define SR_NODE_DELETE_FUNC "delete"
 #define SR_NODE_NAME "bees"
-#define SR_NODE_INPUT_STREAMS "1"
+#define SR_NODE_INPUT_STREAMS "0"
 #define SR_NODE_OUTPUT_STREAMS "0"
 
 #include <std.h>
