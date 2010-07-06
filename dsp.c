@@ -17,6 +17,7 @@
 
 #include <sr_dcd.h>
 
+#include "visfunc.h"
 #include "dsp_comms.h"
 
 void *MEM_valloc(int seg_id, int size, int align);
@@ -50,6 +51,43 @@ create(int arg_len, char *arg_str, int num_in_streams,
 	return RMS_EOK;
 }
 
+void
+pump_out_blobs(NODE_EnvPtr node, struct blob_position *blobs)
+{
+	RMS_DSPMSG msg;
+
+	/* For each blob, emit a message to the arm side. See dsp_comms.h for
+	 * documentation of the format that we're using */
+	while (blobs->colour != NOTHING) {
+		switch (blobs->colour) {
+		case RED:
+			msg.cmd = MSG_BLOB_RED;
+			break;
+		case BLUE:
+			msg.cmd = MSG_BLOB_BLUE;
+			break;
+		case GREEN:
+			msg.cmd = MSG_BLOB_GREEN;
+			break;
+		default:
+			SYS_printf("Colour %d is not valid: corruption?\n",
+							blobs->colour);
+			panic();
+		}
+
+		msg.arg1 = blobs->x1 & 0xFFFF;
+		msg.arg1 |= blobs->y1 << 16;
+		msg.arg2 = blobs->x2 & 0xFFFF;
+		msg.arg2 |= blobs->y2 << 16;
+
+		NODE_putMsg(node, NODE_TOGPP, &msg, NODE_FOREVER);
+
+		blobs++; /* Point at next blob in array */
+	}
+
+	return;
+}
+
 int
 execute(NODE_EnvPtr node)
 {
@@ -80,8 +118,9 @@ execute(NODE_EnvPtr node)
 					(void*)msg.arg1, CAMWIDTH,
 							CAMHEIGHT);
 
-			/* Pump out some blob information. For now, just pump
-			 * out nothing instead, worry about actual data later */
+			pump_out_blobs(node, blobs);
+
+			/* Send finish message */
 			msg.cmd = MSG_NO_MORE_BLOBS;
 			msg.arg1 = 0;
 			msg.arg2 = 0;
