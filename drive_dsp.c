@@ -186,7 +186,14 @@ issue_buffer_to_dsp(void *data, int sz)
 		return 1;
 	}
 
-	/* Flush ARM's cache of the framebuffer to memory */
+	/* Flush ARM's cache of the framebuffer to memory. NOTE: this always
+	 * fails - it appears dspbridge expects this data to always lie in
+	 * memory allocated to the process. In actuality the buffer is mmaped
+	 * from a v4l fd into the process. I don't know why these two things are
+	 * different, but they are.
+	 * Giving it some thought, it doesn't actually matter whether this
+	 * succeeds or fails: USB should be dmaing requests straight into the
+	 * buffer itself, so it never actually touches the ARM cache. */
 	status = DSPProcessor_FlushMemory(dsp_handle, data, sz, 0);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Warning: couldn't flush framebuffer from ARM "
