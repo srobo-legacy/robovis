@@ -12,7 +12,6 @@
 static bool dsp_open = false;
 static DSP_HPROCESSOR dsp_handle = NULL;
 static DSP_HNODE node;
-static DSP_HSTREAM stream;
 static void *reserved_dsp_vma;
 static void *dsp_mapped_vma;
 
@@ -119,8 +118,6 @@ open_dsp_and_prepare_buffers()
 {
 	DBAPI status;
 
-	stream = NULL;
-
 	if (check_dsp_open()) {
 		fprintf(stderr, "Couldn't open DSP\n");
 		return 1;
@@ -145,18 +142,8 @@ open_dsp_and_prepare_buffers()
 		goto fail;
 	}
 
-	status = DSPStream_Open(node, DSP_TONODE, 0, NULL, &stream);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't open dsp input stream (%X)\n",
-				(int)status);
-		goto streamout;
-	}
-
 	/* Success */
 	return 0;
-
-	streamout:
-	DSPStream_Close(stream);
 
 	fail:
 	DSPNode_Delete(node);
@@ -305,11 +292,6 @@ wind_up_dsp()
 	DBAPI status;
 
 	/* We assume there's nothing in flight while we're shutting down */
-
-	status = DSPStream_Close(stream);
-	if (DSP_FAILED(status))
-		fprintf(stderr, "Couldn't close dsp stream (%X)\n",(int)status);
-
 	terminate(node);
 	dereg_node(&uuid);
 	close_dsp();
