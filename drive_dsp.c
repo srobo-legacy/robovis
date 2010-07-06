@@ -199,6 +199,13 @@ issue_buffer_to_dsp(void *data, int sz)
 		return 1;
 	}
 
+	/* Flush ARM's cache of the framebuffer to memory */
+	status = DSPProcessor_FlushMemory(dsp_handle, data, sz, 0);
+	if (DSP_FAILED(status)) {
+		fprintf(stderr, "Warning: couldn't flush framebuffer from ARM "
+				"side cache: %X\n", (uint32_t)status);
+	}
+
 	/* Now send a message to dsp pointing at the chunk of memory to work
 	 * on. In theory we could use some message flags to translate between
 	 * mpu and dsp addresses in this, but there's no point as the map above
