@@ -317,7 +317,9 @@ main(int argc, char **argv)
 		cvSaveImage(buffer, frame);
 #endif
 
+#ifndef USE_DSP
 		store_rgb_image(OUT_FILENAME, raw_data, CAMWIDTH, CAMHEIGHT);
+#endif
 
 #ifdef OPENCV
 		if (DEBUGDISPLAY)
