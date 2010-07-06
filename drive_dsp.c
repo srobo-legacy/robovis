@@ -13,6 +13,8 @@ static bool dsp_open = false;
 static DSP_HPROCESSOR dsp_handle = NULL;
 static DSP_HNODE node;
 static DSP_HSTREAM stream;
+static void *reserved_dsp_vma;
+static void *dsp_mapped_vma;
 
 static struct DSP_UUID uuid = {0x3E7AEA34, 0xEC66, 0x4C5F, 0xBC, 0x11,
 				{0x48, 0xDE, 0xE1, 0x21, 0x2C, 0x8F}};
@@ -113,17 +115,11 @@ dereg_node()
 }
 
 int
-open_dsp_and_prepare_buffers(int buffer_sz)
+open_dsp_and_prepare_buffers()
 {
-	struct DSP_STRMATTR attrs;
 	DBAPI status;
 
 	stream = NULL;
-	if (buffer_sz & 3) {
-		fprintf(stderr, "Buffer size when creating dsp node must be "
-				"a multiple of 4\n");
-		return 1;
-	}
 
 	if (check_dsp_open()) {
 		fprintf(stderr, "Couldn't open DSP\n");
@@ -133,21 +129,6 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 	/* Register and allocate the dsp node, but don't create */
 	if (register_and_alloc_node()) {
 		fprintf(stderr, "Couldn't allocate dsp node\n");
-		return 1;
-	}
-
-	/* Create some streams to plug into dsp node */
-	attrs.uSegid = 0;
-	attrs.uBufsize = buffer_sz / 4; /* Words not byte */
-	attrs.uNumBufs = 2;
-	attrs.uAlignment = 0;
-	attrs.uTimeout = 10000; /* No idea what scale this is */
-	attrs.lMode = STRMMODE_PROCCOPY;
-
-	status = DSPNode_Connect((void*)DSP_HGPPNODE, 0, node, 0, &attrs);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't create dsp input stream, %X\n",
-				(int)status);
 		return 1;
 	}
 
@@ -186,22 +167,51 @@ open_dsp_and_prepare_buffers(int buffer_sz)
 int
 issue_buffer_to_dsp(void *data, int sz)
 {
+	struct DSP_MSG msg;
 	DBAPI status;
+	int aligned_size;
 
-	/* Prepare buffer for being sent to dsp. AKA, wire it into memory */
-	status = DSPStream_PrepareBuffer(stream, sz, data);
+	/* It appears that the DSP-side API croaks when handed a buffer ~150k in
+	 * size - I've no idea where the limitation comes in, but it's making it
+	 * impossible to perform the desired image processing over the stream
+	 * API.
+	 * So instead we reserve-and-map the callers buffer into DSP address
+	 * space, and send a message pointing the DSP at it */
+
+	/* Round up size of allocation, api wishes it to be 4k aligned */
+	aligned_size = (sz + 0xFFF) & ~0xFFF;
+	status = DSPProcessor_ReserveMemory(dsp_handle, aligned_size,
+						&reserved_dsp_vma);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't prepare buffer for dsp: %X\n",
-								(int)status);
+		fprintf(stderr, "Couldn't reserve dsp-side memory space: %X\n",
+							(uint32_t)status);
 		return 1;
 	}
 
-	/* Put buffer into stream */
-	status = DSPStream_Issue(stream, data, sz, sz, 0);
+	/* Now map the buffer we've been handled into the dsp memory space. I
+	 * presume that this also wires the buffer into memory */
+	status = DSPProcessor_Map(dsp_handle, data, aligned_size,
+				reserved_dsp_vma, &dsp_mapped_vma, 0);
 	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't issue buffer to dsp: %X\n",
-								(int)status);
-		DSPStream_UnprepareBuffer(stream, sz, data);
+		fprintf(stderr, "Couldn't map mpu memory to dsp space: %X\n",
+							(uint32_t)status);
+		DSPProcessor_UnReserveMemory(dsp_handle, reserved_dsp_vma);
+		return 1;
+	}
+
+	/* Now send a message to dsp pointing at the chunk of memory to work
+	 * on. In theory we could use some message flags to translate between
+	 * mpu and dsp addresses in this, but there's no point as the map above
+	 * has already given us the address */
+	msg.dwCmd = MSG_START_PROCESSING;
+	msg.dwArg1 = (uint32_t)dsp_mapped_vma;
+	msg.dwArg2 = 0;
+	status = DSPNode_PutMessage(node, &msg, DSP_FOREVER);
+	if (DSP_FAILED(status)) {
+		fprintf(stderr, "Unable to send start message to dsp node: %x\n"
+							, (uint32_t)status);
+		DSPProcessor_UnMap(dsp_handle, dsp_mapped_vma);
+		DSPProcessor_UnReserveMemory(dsp_handle, reserved_dsp_vma);
 		return 1;
 	}
 
