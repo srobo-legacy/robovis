@@ -232,9 +232,7 @@ struct blob_position *
 recv_blob_info(int timeout_ms)
 {
 	struct DSP_MSG msg;
-	BYTE *data;
 	DBAPI status;
-	ULONG data_sz, max_data_sz, tmp;
 	int num;
 
 	status = DSPNode_GetMessage(node, &msg, timeout_ms);
@@ -285,20 +283,21 @@ recv_blob_info(int timeout_ms)
 		}
 	}
 
-	/* After NO_MORE_BLOBS, node will release the buffer */
-	status = DSPStream_Reclaim(stream, &data, &data_sz, &max_data_sz, &tmp);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't retrieve buffer from input stream: "
-				"%X\n", (int)status);
-		return NULL;
-	}
-
-	/* Unwire buffer */
-	DSPStream_UnprepareBuffer(stream, max_data_sz, data);
-
 	/* kdone */
 	return &blobs[0];
 }
+
+void
+remove_buffer_from_dsp()
+{
+
+	/* No need to invalidate mapped memory at any point, dsp doesn't alter
+	 * it at all */
+	DSPProcessor_UnMap(dsp_handle, dsp_mapped_vma);
+	DSPProcessor_UnReserveMemory(dsp_handle, reserved_dsp_vma);
+	return;
+}
+
 
 void
 wind_up_dsp()

@@ -269,6 +269,8 @@ main(int argc, char **argv)
 			fprintf(stderr, "Couldn't get blobs info: bad!\n");
 			exit(1);
 		}
+
+		remove_buffer_from_dsp(); /* Unmap framebuffer */
 #else
 		blobs = vis_find_blobs_through_scanlines(raw_data, CAMWIDTH,
 								CAMHEIGHT);
