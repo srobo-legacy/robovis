@@ -289,7 +289,6 @@ remove_buffer_from_dsp()
 void
 wind_up_dsp()
 {
-	DBAPI status;
 
 	/* We assume there's nothing in flight while we're shutting down */
 	terminate(node);
