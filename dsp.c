@@ -55,40 +55,49 @@ execute(NODE_EnvPtr node)
 {
 	RMS_DSPMSG msg;
 	struct blob_position *blobs;
-	struct state *s;
 	uint8_t *in_buf;
 	uint32_t context;
 	Uns streams, msgs; /* Uns? Sounds like a war crime to me */
 	int i;
 
-	s = node->moreEnv;
-	/* "Prime" input stream with buffer (as said by strm example) */
-	STRM_issue(s->in_handle, s->in_buf, s->in_size, s->in_size, 0);
+	while (1) {
+		NODE_wait(node, NULL, 0, NODE_FOREVER, &msgs);
+		SYS_printf("after wait, %d msgs\n", msgs);
+		if (msgs == 0)
+			panic();
 
-	streams = NODE_wait(node, &s->in_handle, 1, 10000, &msgs);
-	SYS_printf("sys streams %d, msgs %d\n", streams, msgs);
-	if (streams == 0)
-		panic();
+		/* We expect only two messages from the dsp */
+		switch (msg.cmd) {
+		case MSG_START_PROCESSING:
+			/* Hand off buffer to yuyv beating code. This message
+			 * has only one argument, the dsp side address of the
+			 * buffer to beat */
+			SYS_printf("Starting to beat buffer at %x\n", msg.arg1);
+			blobs = vis_find_blobs_through_scanlines(
+					(void*)msg.arg1, CAMWIDTH,
+							CAMHEIGHT);
 
-	STRM_reclaim(s->in_handle, &in_buf, NULL, &context);
+			/* Pump out some blob information. For now, just pump
+			 * out nothing instead, worry about actual data later */
+			msg.cmd = MSG_NO_MORE_BLOBS;
+			msg.arg1 = 0;
+			msg.arg2 = 0;
+			NODE_putMsg(node, NODE_TOGPP, &msg, NODE_FOREVER);
+			break;
 
-	if (in_buf == NULL)
-		panic();
+		case RMS_EXIT:
 
-	/* Hand off buffer to yuyv beating code */
-	blobs = vis_find_blobs_through_scanlines(in_buf,CAMWIDTH,CAMHEIGHT);
+			/* In yet another delightful turn of events, when
+			 * instructed to exit there's nothing to free/disable */
+			return RMS_EOK;
 
-	/* Put buffer back in queue */
-	STRM_issue(s->in_handle, in_buf, s->in_size, s->in_size, 0);
+		default:
+			SYS_printf("Unrecognized node msg %x\n", msg.cmd);
+			panic();
+		}
+	}
 
-	/* Pump out some blob information. For now, just pump out nothing
-	 * instead, worry about actual data later */
-	msg.cmd = MSG_NO_MORE_BLOBS;
-	msg.arg1 = 0;
-	msg.arg2 = 0;
-	NODE_putMsg(node, NODE_TOGPP, &msg, NODE_FOREVER);
-
-	return 0;
+	return RMS_EOK;
 }
 
 int
