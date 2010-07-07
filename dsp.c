@@ -39,6 +39,20 @@ panic()
 	return;
 }
 
+void
+lol()
+{
+	uint32_t *beards;
+	int i;
+
+	beards = (void*)0x1100b000;
+
+	for (i = 0; i < 400; i++)
+		beards[i] = 'LOLO';
+
+	return;
+}
+
 int
 create(int arg_len, char *arg_str, int num_in_streams,
 		uint32_t in_stream_handles[], int num_out_streams,
