@@ -40,7 +40,7 @@ dsp.o: dsp.c
 dsp_visfunc.o: visfunc.cpp
 	$(DSP_CC) $(DSP_CFLAGS) -c visfunc.cpp -o dsp_visfunc.o $(SRFLAGS)
 
-dsp.doff: dsp.o dsp_visfunc.o srhacks.o
+dsp.doff: dsp.o dsp_visfunc.o
 	tic64x-ld $(DSP_LDFLAGS) dsp.o dsp_visfunc.o -lsr_hacks -o dsp.doff --oformat=doff-c64x -r
 
 .PHONY: clean
