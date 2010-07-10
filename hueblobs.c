@@ -169,8 +169,6 @@ Foo(int event, int x, int y, int flags, void* param)
 int
 main(int argc, char **argv)
 {
-	get_command_line_opts(argc, argv);
-
 #ifdef spam
 	char buffer[256];
 	int rawr = 0;
@@ -183,6 +181,8 @@ main(int argc, char **argv)
 	struct blob_position *blobs;
 	char *req_tag = NULL;
 	int i, w, h;
+
+	get_command_line_opts(argc, argv);
 
 	open_webcam(CAMWIDTH, CAMHEIGHT);
 
@@ -243,7 +243,6 @@ main(int argc, char **argv)
 		}
 #endif
 
-		blobs = 0;
 		raw_data = get_v4l_frame();
 		if (!raw_data) {
 			fprintf(stderr, "Couldn't grab v4l frame!\n");
