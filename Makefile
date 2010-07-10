@@ -11,6 +11,10 @@ OPENCV_LDFLAGS += `pkg-config --libs opencv`
 
 CC = $(CROSS_COMPILE)gcc
 CXX = $(CROSS_COMPILE)g++
+DSP_CC = clang -ccc-host-triple tms320c64x-unknown-unknown
+DSP_CXX = $(DSP_CC)
+DSP_CFLAGS = -I../dsp-code/dsp_include -I../dsp-code/mpu_include
+DSP_LDFLAGS = -L../dsp-code/dsp_lib
 
 # Python 2.4 doesn't support pkg-config; bodge this to your own include path
 PY_CFLAGS += -I/usr/include/python2.4
@@ -31,13 +35,13 @@ drive_dsp.o: drive_dsp.c
 
 # DSP side rules
 dsp.o: dsp.c
-	env CROSS_COMPILE=tic64x- llvmc -Wllc,-march,tms320c64x -hosttools -I../dsp-code/dsp_include -I../dsp-code/mpu_include -c dsp.c -o dsp.o $(SRFLAGS)
+	$(DSP_CC) $(DSP_CFLAGS) -c dsp.c -o dsp.o $(SRFLAGS)
 
 dsp_visfunc.o: visfunc.cpp
-	env CROSS_COMPILE=tic64x- llvmc -Wllc,-march,tms320c64x -hosttools -I../dsp-code/dsp_include -I../dsp-code/mpu_include -c visfunc.cpp -o dsp_visfunc.o $(SRFLAGS)
+	$(DSP_CC) $(DSP_CFLAGS) -c visfunc.cpp -o dsp_visfunc.o $(SRFLAGS)
 
-dsp.doff: dsp.o dsp_visfunc.o
-	tic64x-ld dsp.o dsp_visfunc.o -o dsp.doff --oformat=doff-c64x -r
+dsp.doff: dsp.o dsp_visfunc.o srhacks.o
+	tic64x-ld $(DSP_LDFLAGS) dsp.o dsp_visfunc.o -lsr_hacks -o dsp.doff --oformat=doff-c64x -r
 
 .PHONY: clean
 
