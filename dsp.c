@@ -1,11 +1,3 @@
-#define SR_NODE_GUID_STRING "3E7AEA34_EC66_4C5F_BC11_48DEE1212C8F"
-#define SR_NODE_CREATE_FUNC "create"
-#define SR_NODE_EXECUTE_FUNC "execute"
-#define SR_NODE_DELETE_FUNC "delete"
-#define SR_NODE_NAME "bees"
-#define SR_NODE_INPUT_STREAMS "0"
-#define SR_NODE_OUTPUT_STREAMS "0"
-
 #include <std.h>
 #include <stdlib.h>
 #include <rmsdefs.h>
@@ -15,10 +7,20 @@
 #include <dbdefs.h>
 #include <rmstypes.h>
 
-#include <sr_dcd.h>
-
 #include "visfunc.h"
 #include "dsp_comms.h"
+
+#define SR_NODE_GUID_STRING "3E7AEA34_EC66_4C5F_BC11_48DEE1212C8F"
+#define SR_NODE_CREATE_FUNC "create"
+#define SR_NODE_EXECUTE_FUNC "execute"
+#define SR_NODE_DELETE_FUNC "delete"
+#define SR_NODE_NAME "bees"
+#define SR_NODE_INPUT_STREAMS "0"
+#define SR_NODE_OUTPUT_STREAMS "0"
+#define SR_NODE_MESSAGE_DEPTH "50"
+
+#include <sr_dcd.h>
+#include <sr_hacks.h>
 
 void *MEM_valloc(int seg_id, int size, int align);
 void SYS_printf(const char *fmt, ...);
