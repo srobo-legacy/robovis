@@ -7,16 +7,24 @@
 #include <cv.h>
 #endif
 
-#define MAX_BLOBS 1000
+// When running on the dsp we have some extra constraints... in that the block
+// of blobs memory to be mapped must be page aligned. We could map more, but
+// that gives the possibility of the dsp trashing the mpu processes stack/heap
+// which isn't a plan, or we could map less which would lead to segfaults. So
+// make sure blob_position is 32 bytes large and MAX_BLOBS leads to a 4k page
+// aligned size.
+
+#define MAX_BLOBS 1024
 
 struct blob_position {  
-	int x1;
-	int y1;
-	int x2; 
-	int y2;
-	int minx, maxx;
-	int miny, maxy;
-	int colour;
+	uint16_t x1;
+	uint16_t y1;
+	uint16_t x2;
+	uint16_t y2;
+	uint16_t minx, maxx;
+	uint16_t miny, maxy;
+	uint16_t colour;
+	uint16_t padding[7];
 #define NOTHING 0
 #define RED 1
 #define BLUE 2
