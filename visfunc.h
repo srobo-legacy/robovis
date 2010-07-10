@@ -28,8 +28,8 @@ IplImage *make_rgb_image(uint8_t *raw_data, int width, int height);
 void squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue, IplImage *sat, IplImage *val);
 #endif
 
-struct blob_position *vis_find_blobs_through_scanlines(uint8_t *yuyv,
-						int width, int height);
+void vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
+					struct blob_position *blobs);
 void store_rgb_image(const char *, uint8_t *raw_data, int width, int height);
 
 #endif /* _ROBOVIS_VISFUNC_H_ */

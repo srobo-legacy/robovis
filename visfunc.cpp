@@ -44,8 +44,7 @@ extern "C" {
 #define colour_strength_minimum 20
 #define colour_strength_minimum_blue 20
 
-static struct blob_position blobs[MAX_BLOBS+1];
-
+static struct blob_position *blobs;
 static int num_blobs = 0;
 
 #define SPANS 32
@@ -315,8 +314,9 @@ abs(int a)
 }
 #endif
 
-struct blob_position *
-vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
+void
+vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
+				struct blob_position *blobs_out)
 {
 #define line_cache_sz 3
 #define red_min 0
@@ -336,7 +336,8 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 	uint8_t back_buffer_idx, colour_value, old_colour_value;
 	uint8_t drb, drg, dgb;
 
-	memset(blobs, 0, sizeof(blobs));
+	blobs = blobs_out;
+	memset(blobs, 0, MAX_BLOBS * sizeof(*blobs));
 	num_blobs = 0;
 	spans = spans_a;
 	ospans = spans_b;
@@ -508,7 +509,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 
 	}
 
-	return blobs;
+	return;
 #undef gethue
 #undef getsat
 #undef getval
