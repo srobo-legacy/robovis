@@ -59,6 +59,11 @@ create(int arg_len, char *arg_str, int num_in_streams,
 		uint32_t out_stream_handles[], NODE_EnvPtr node)
 {
 
+	/* First off, install SRs own exception handling fudge, TIs one is
+	 * currently broken */
+	srhacks_install_sr_excp_isr();
+	srhacks_install_sr_gpt8_isr();
+
 	/* Happily there's no setup or takedown required for this node, seeing
 	 * how data buffers are mapped from the ARM core and then sent to us
 	 * in a message */
