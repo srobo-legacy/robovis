@@ -7,6 +7,7 @@
 #include <dbapi.h>
 
 #include "visfunc.h"
+#include "dsp_api.h"
 #include "dsp_comms.h"
 
 static bool dsp_open = false;
