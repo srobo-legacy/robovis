@@ -14,11 +14,13 @@ static DSP_HPROCESSOR dsp_handle = NULL;
 static DSP_HNODE node;
 static void *reserved_dsp_vma;
 static void *dsp_mapped_vma;
+static void *blobs_dsp_vma;
+static void *blobs_dsp_mapped_vma;
+
+static struct blob_position blobs[MAX_BLOBS];
 
 static struct DSP_UUID uuid = {0x3E7AEA34, 0xEC66, 0x4C5F, 0xBC, 0x11,
 				{0x48, 0xDE, 0xE1, 0x21, 0x2C, 0x8F}};
-
-static struct blob_position blobs[MAX_BLOBS];
 
 int
 check_dsp_open()
@@ -114,9 +116,12 @@ dereg_node()
 }
 
 int
-open_dsp_and_prepare_buffers()
+open_dsp_and_prepare_buffers(int buffer_sz)
 {
 	DBAPI status;
+	int aligned_size, blobs_sz;
+
+	blobs_sz = MAX_BLOBS * sizeof(struct blob_position);
 
 	if (check_dsp_open()) {
 		fprintf(stderr, "Couldn't open DSP\n");
@@ -142,7 +147,43 @@ open_dsp_and_prepare_buffers()
 		goto fail;
 	}
 
-	/* Success */
+	/* It appears that the DSP-side API croaks when handed a buffer ~150k in
+	 * size - I've no idea where the limitation comes in, but it's making it
+	 * impossible to perform the desired image processing over the stream
+	 * API.
+	 * So instead we reserve-and-map the callers buffer into DSP address
+	 * space, and send a message pointing the DSP at it */
+	aligned_size = (buffer_sz + 0xFFF) & ~0xFFF;
+	status = DSPProcessor_ReserveMemory(dsp_handle, aligned_size,
+						&reserved_dsp_vma);
+	if (DSP_FAILED(status)) {
+		fprintf(stderr, "Couldn't reserve dsp-side memory space: %X\n",
+							(uint32_t)status);
+		goto fail;
+	}
+
+	/* Get some space and map in the blobs array */
+	status = DSPProcessor_ReserveMemory(dsp_handle, blobs_sz,
+						&blobs_dsp_vma);
+	if (DSP_FAILED(status)) {
+		fprintf(stderr, "Couldn't reserve dsp-side memory space for "
+				"blobs, %X\n", (uint32_t)status);
+		DSPProcessor_UnMap(dsp_handle, dsp_mapped_vma);
+		DSPProcessor_UnReserveMemory(dsp_handle, reserved_dsp_vma);
+		goto fail;
+	}
+
+	status = DSPProcessor_Map(dsp_handle, blobs, blobs_sz, blobs_dsp_vma,
+						&blobs_dsp_mapped_vma, 0);
+	if (DSP_FAILED(status)) {
+		fprintf(stderr, "Couldn't map mpu blobs memory to dsp space: "
+				"%X\n", (uint32_t)status);
+		DSPProcessor_UnReserveMemory(dsp_handle, blobs_dsp_vma);
+		DSPProcessor_UnMap(dsp_handle, dsp_mapped_vma);
+		DSPProcessor_UnReserveMemory(dsp_handle, reserved_dsp_vma);
+		goto fail;
+	}
+
 	return 0;
 
 	fail:
@@ -156,27 +197,13 @@ issue_buffer_to_dsp(void *data, int sz)
 {
 	struct DSP_MSG msg;
 	DBAPI status;
-	int aligned_size;
+	int aligned_size, blobs_sz;
 
-	/* It appears that the DSP-side API croaks when handed a buffer ~150k in
-	 * size - I've no idea where the limitation comes in, but it's making it
-	 * impossible to perform the desired image processing over the stream
-	 * API.
-	 * So instead we reserve-and-map the callers buffer into DSP address
-	 * space, and send a message pointing the DSP at it */
+	blobs_sz = MAX_BLOBS * sizeof(struct blob_position);
 
-	/* Round up size of allocation, api wishes it to be 4k aligned */
-	aligned_size = (sz + 0xFFF) & ~0xFFF;
-	status = DSPProcessor_ReserveMemory(dsp_handle, aligned_size,
-						&reserved_dsp_vma);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Couldn't reserve dsp-side memory space: %X\n",
-							(uint32_t)status);
-		return 1;
-	}
-
-	/* Now map the buffer we've been handled into the dsp memory space. I
+	/* Map the buffer we've been handled into the dsp memory space. I
 	 * presume that this also wires the buffer into memory */
+	aligned_size = (sz + 0xFFF) & ~0xFFF;
 	status = DSPProcessor_Map(dsp_handle, data, aligned_size,
 				reserved_dsp_vma, &dsp_mapped_vma, 0);
 	if (DSP_FAILED(status)) {
@@ -186,19 +213,21 @@ issue_buffer_to_dsp(void *data, int sz)
 		return 1;
 	}
 
-	/* Flush ARM's cache of the framebuffer to memory. NOTE: this always
-	 * fails - it appears dspbridge expects this data to always lie in
-	 * memory allocated to the process. In actuality the buffer is mmaped
-	 * from a v4l fd into the process. I don't know why these two things are
-	 * different, but they are.
+	/* Flush ARM's cache to memory. NOTE: this always fails for the
+	 * framebuffer, so we don't do it.- it appears dspbridge expects this
+	 * data to always lie in memory allocated to the process. In actuality
+	 * the buffer is mmaped from a v4l fd into the process. I don't know why
+	 * these two things are different, but they are.
 	 * Giving it some thought, it doesn't actually matter whether this
 	 * succeeds or fails: USB should be dmaing requests straight into the
-	 * buffer itself, so it never actually touches the ARM cache. */
-	status = DSPProcessor_FlushMemory(dsp_handle, data, sz, 0);
-	if (DSP_FAILED(status)) {
-		fprintf(stderr, "Warning: couldn't flush framebuffer from ARM "
-				"side cache: %X\n", (uint32_t)status);
-	}
+	 * buffer itself, so it never actually touches the ARM cache.
+	 * And we don't need to flush it for blobs, because we read them, not
+	 * write them to the dsp. So actually at this point, do nothing */
+
+	/* On second thoughts, we may as well invalidate the cache of blobs,
+	 * just in case some numptie wrote to it, a flush occurs and it writes
+	 * on top of what the dsp wrote */
+	DSPProcessor_InvalidateMemory(dsp_handle, blobs, blobs_sz);
 
 	/* Now send a message to dsp pointing at the chunk of memory to work
 	 * on. In theory we could use some message flags to translate between
@@ -206,7 +235,7 @@ issue_buffer_to_dsp(void *data, int sz)
 	 * has already given us the address */
 	msg.dwCmd = MSG_START_PROCESSING;
 	msg.dwArg1 = (uint32_t)dsp_mapped_vma;
-	msg.dwArg2 = 0;
+	msg.dwArg2 = (uint32_t)blobs_dsp_mapped_vma;
 	status = DSPNode_PutMessage(node, &msg, DSP_FOREVER);
 	if (DSP_FAILED(status)) {
 		fprintf(stderr, "Unable to send start message to dsp node: %x\n"
@@ -227,7 +256,6 @@ recv_blob_info(int timeout_ms)
 {
 	struct DSP_MSG msg;
 	DBAPI status;
-	int num;
 
 	status = DSPNode_GetMessage(node, &msg, timeout_ms);
 
@@ -235,58 +263,26 @@ recv_blob_info(int timeout_ms)
 	if (DSP_FAILED(status))
 		return NULL;
 
-	/* If we received a message, more will follow, as the dsp emits them
-	 * all in one burst, until a NO_MORE_BLOBS arrives */
-	num = 0;
-	while (msg.dwCmd != MSG_NO_MORE_BLOBS) {
-		blobs[num].minx = blobs[num].maxx = 0;
-		blobs[num].miny = blobs[num].maxy = 0;
-
-		blobs[num].x1 = msg.dwArg1 & 0xFFFF;
-		blobs[num].y1 = (msg.dwArg1 >> 16) & 0xFFFF;
-		blobs[num].x2 = msg.dwArg2 & 0xFFFF;
-		blobs[num].y2 = (msg.dwArg2 >> 16) & 0xFFFF;
-
-		switch (msg.dwCmd) {
-		case MSG_BLOB_RED:
-			blobs[num].colour = RED;
-			break;
-		case MSG_BLOB_BLUE:
-			blobs[num].colour = BLUE;
-			break;
-		case MSG_BLOB_GREEN:
-			blobs[num].colour = GREEN;
-			break;
-		default:
-			fprintf(stderr, "Invalid dsp message 0x%X arrived\n",
-								(int)msg.dwCmd);
-			memset(&blobs[num], 0, sizeof(blobs[num]));
-		}
-
-		num++;
-
-		/* Don't overflow array */
-		if (num == MAX_BLOBS)
-			num--;
-
-		status = DSPNode_GetMessage(node, &msg, 10000);
-		if (DSP_FAILED(status)) {
-			fprintf(stderr, "Error %X getting dsp message, before "
-					"NO_MORE_BLOBS received\n",(int)status);
-			return NULL;
-		}
+	/* Happily the return procedure is now just to wait until completion and
+	 * receive the done signal. We then invalidate the mpu side cache to
+	 * ensure that we don't get a stale view of data */
+	if (msg.dwCmd != MSG_DONE) {
+		fprintf(stderr, "Got unexpected msg 0x%X from dsp while waiting"
+				" for done signal\n", (uint32_t)msg.dwCmd);
+		return NULL;
 	}
 
+	DSPProcessor_InvalidateMemory(dsp_handle, blobs, MAX_BLOBS *
+					sizeof(struct blob_position));
+
 	/* kdone */
-	return &blobs[0];
+	return blobs;
 }
 
 void
 remove_buffer_from_dsp()
 {
 
-	/* No need to invalidate mapped memory at any point, dsp doesn't alter
-	 * it at all */
 	DSPProcessor_UnMap(dsp_handle, dsp_mapped_vma);
 	DSPProcessor_UnReserveMemory(dsp_handle, reserved_dsp_vma);
 	return;
