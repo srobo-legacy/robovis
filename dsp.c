@@ -63,8 +63,8 @@ create(int arg_len, char *arg_str, int num_in_streams,
 
 	/* First off, install SRs own exception handling fudge, TIs one is
 	 * currently broken */
-	srhacks_install_sr_excp_isr();
-	srhacks_install_sr_gpt8_isr();
+	sr_hacks_install_sr_excp_isr();
+	sr_hacks_install_sr_gpt8_isr();
 
 	/* Happily there's no setup or takedown required for this node, seeing
 	 * how data buffers are mapped from the ARM core and then sent to us
