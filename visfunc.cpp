@@ -303,15 +303,8 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 /* Implement abs here as a workaround for the fact we can't link against libc
  * while also linking against the bridgedriver base image... (also, gcc lowers
  * abs automagically */
-int
-abs(int a)
-{
-
-	if (a < 0)
-		return -a;
-	else
-		return a;
-}
+#define ABS(x) ((x) < 0) ? -(x) : (x)
+#define abs ABS
 #endif
 
 void
