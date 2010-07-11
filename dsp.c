@@ -1,5 +1,4 @@
 #include <std.h>
-#include <stdlib.h>
 #include <rmsdefs.h>
 #include <rms_sh.h>
 #include <node.h>
