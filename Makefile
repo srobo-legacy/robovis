@@ -13,7 +13,7 @@ CC = $(CROSS_COMPILE)gcc
 CXX = $(CROSS_COMPILE)g++
 DSP_CC = clang -ccc-host-triple tms320c64x-unknown-unknown
 DSP_CXX = $(DSP_CC)
-DSP_CFLAGS = -I../dsp-code/dsp_include -I../dsp-code/mpu_include
+DSP_CFLAGS = -I../dsp-code/dsp_include -I../dsp-code/mpu_include -O3
 DSP_LDFLAGS = -L../dsp-code/dsp_lib
 
 # Python 2.4 doesn't support pkg-config; bodge this to your own include path
