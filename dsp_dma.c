@@ -1,6 +1,8 @@
 #include <stdint.h>
 
 #define DMA_TPCC_ESRL		0x01C01010
+#define DMA_TPCC_IPRL		0x01C01068
+#define DMA_TPCC_ICRL		0x01C01070
 
 #define DMA_TPTC_INTEN		0x01C10108
 #define DMA_TPTC_RDRATE		0x01C10140
@@ -62,4 +64,15 @@ setup_simple_dma(void *src, void *dst, uint16_t cnt)
 	REG(DMA_TPCC_ESRL) = 1;
 
 	return;
+}
+
+void
+wait_for_dma_completion()
+{
+
+	while ((REG(DMA_TPCC_IPRL) & 1) == 0)
+		;
+
+	/* Clear intr 1 */
+	REG(DMA_TPCC_ICRL) = 1;
 }
