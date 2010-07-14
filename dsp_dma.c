@@ -24,6 +24,21 @@
 #define PUT_DMA_CONF(val, field, param) *((uint32_t*)(DMA_PARAM_BASE + ((param) * 0x20) + (field))) = (val);
 
 void
+configure_dma()
+{
+
+	/* No interrupts, ever */
+	PUT_TPTC_REG(0, DMA_TPTC_INTEN, 0);
+	/* Fastest read possible */
+	PUT_TPTC_REG(0, DMA_TPTC_RDRATE, 0);
+	/* Map param entry 0 to dma channel 0 */
+	PUT_DMA_CHAN_MAP(0, 0);
+
+	/* XXX - will bridgedriver firmware enable DMA accesses in DRAE? */
+	return;
+}
+
+void
 setup_simple_dma(void *src, void *dst, uint16_t cnt)
 {
 
