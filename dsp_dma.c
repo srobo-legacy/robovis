@@ -78,6 +78,10 @@ configure_dma()
 	PUT_DRAEH(0xFFFFFFFF, 5);
 	PUT_DRAEH(0xFFFFFFFF, 6);
 	PUT_DRAEH(0xFFFFFFFF, 7);
+
+	for (int i = 0; i < 508; i++)
+		DMA_TPCC_MPAA(i) = 0xFEFF;
+
 	return;
 }
 
