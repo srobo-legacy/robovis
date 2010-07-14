@@ -43,5 +43,8 @@ setup_simple_dma(void *src, void *dst, uint16_t cnt)
 	PUT_DMA_CONF(0, DMA_PARAM_CDSTRIDE, 0);
 	PUT_DMA_CONF(1, DMA_PARAM_CCNT, 0);
 
+	/* Trigger event 0, starting DMA channel 0 */
+	PUT_REG(DMA_TPCC_ESR0) = 1;
+
 	return;
 }
