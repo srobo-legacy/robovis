@@ -70,6 +70,9 @@ setup_simple_dma(void *src, void *dst, uint16_t cnt)
 	 * knobs that TIs DMA controller has, start a single, 1D transfer from
 	 * one point to another. */
 
+	/* Clear first channels intr bit, just in case */
+	REG(DMA_TPCC_ICRL) = 1;
+
 	/* Options bit - generate intr on completion. This never reaches the
 	 * processor because TPCC IER isn't enabled, but we can poll the intr
 	 * status register to detect completion */
