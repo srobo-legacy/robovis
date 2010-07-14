@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-#define DMA_TPCC_ESR0		0x01C01010
+#define DMA_TPCC_ESRL		0x01C01010
 
 #define DMA_TPTC_INTEN		0x01C10108
 #define DMA_TPTC_RDRATE		0x01C10140
@@ -59,7 +59,7 @@ setup_simple_dma(void *src, void *dst, uint16_t cnt)
 	PUT_DMA_CONF(1, DMA_PARAM_CCNT, 0);
 
 	/* Trigger event 0, starting DMA channel 0 */
-	REG(DMA_TPCC_ESR0) = 1;
+	REG(DMA_TPCC_ESRL) = 1;
 
 	return;
 }
