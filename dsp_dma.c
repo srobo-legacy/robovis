@@ -21,9 +21,10 @@ setup_simple_dma(void *src, void *dst, uint16_t cnt)
 	 * knobs that TIs DMA controller has, start a single, 1D transfer from
 	 * one point to another. */
 
-	/* All zeros config - no interrupts, chaining, weird completion, weird
-	 * fifo situations. Just a 1D transfer. */
-	PUT_DMA_CONF(0, DMA_PARAM_OPT, 0);
+	/* Options bit - generate intr on completion. This never reaches the
+	 * processor because TPCC IER isn't enabled, but we can poll the intr
+	 * status register to detect completion */
+	PUT_DMA_CONF(0x100000, DMA_PARAM_OPT, 0);
 	PUT_DMA_CONF((uint32_t)src, DMA_PARAM_SRCADDR, 0);
 	PUT_DMA_CONF(0x10000 | cnt, DMA_PARAM_ABCNT, 0);
 	PUT_DMA_CONF((uint32_t)dst, DMA_PARAM_DSTADDR, 0);
