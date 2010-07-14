@@ -380,10 +380,14 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 
 	uint8_t back_buffer[line_cache_sz];
 	void *tmp;
+	uint8_t *extmem;
 	int x, y, i, j, cache, val_hyst_count, sat_hyst_count;
 	int32_t _y, _u, _v, r, g, b, h, s, v;
 	uint8_t back_buffer_idx, colour_value, old_colour_value;
 	uint8_t drb, drg, dgb;
+
+	extmem = yuyv;
+	reset_dma_state(&extmem);
 
 	blobs = blobs_out;
 	memset(blobs, 0, MAX_BLOBS * sizeof(*blobs));
