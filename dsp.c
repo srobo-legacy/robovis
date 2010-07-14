@@ -23,6 +23,7 @@
 
 void *MEM_valloc(int seg_id, int size, int align);
 void SYS_printf(const char *fmt, ...);
+void configure_dma();
 
 struct state {
 	STRM_Handle in_handle;
@@ -64,6 +65,7 @@ create(int arg_len, char *arg_str, int num_in_streams,
 	 * currently broken */
 	sr_hacks_install_sr_excp_isr();
 	sr_hacks_install_sr_gpt8_isr();
+	configure_dma();
 
 	/* Happily there's no setup or takedown required for this node, seeing
 	 * how data buffers are mapped from the ARM core and then sent to us
