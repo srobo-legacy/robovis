@@ -5,10 +5,10 @@
 #define DMA_TPTC_INTEN		0x01C10108
 #define DMA_TPTC_RDRATE		0x01C10140
 
-#define PUT_REG(addr) *(uint32_t*)((addr))
-#define PUT_TPTC_REG(val, reg, tptc) PUT_REG(reg + (tptc*0x400)) = (val)
+#define REG(addr) *(uint32_t*)((addr))
+#define PUT_TPTC_REG(val, reg, tptc) REG(reg + (tptc*0x400)) = (val)
 
-#define PUT_DMA_CHAN_MAP(param, chan) PUT_REG(0x01C00100+(chan*4)) = ((param) << 5)
+#define PUT_DMA_CHAN_MAP(param, chan) REG(0x01C00100+(chan*4)) = ((param) << 5)
 
 #define DMA_PARAM_BASE		0x01C04000
 #define DMA_PARAM_OPT		0
@@ -59,7 +59,7 @@ setup_simple_dma(void *src, void *dst, uint16_t cnt)
 	PUT_DMA_CONF(1, DMA_PARAM_CCNT, 0);
 
 	/* Trigger event 0, starting DMA channel 0 */
-	PUT_REG(DMA_TPCC_ESR0) = 1;
+	REG(DMA_TPCC_ESR0) = 1;
 
 	return;
 }
