@@ -124,4 +124,6 @@ wait_for_dma_completion()
 
 	/* Clear intr 1 */
 	REG(DMA_TPCC_ICRL) = 1;
+
+	return;
 }
