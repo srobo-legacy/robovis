@@ -4,7 +4,10 @@
 #define DMA_TPCC_EEVAL		0x01C00320
 #define DMA_TPCC_DRAEL		0x01C00340
 #define DMA_TPCC_DRAEH		0x01C00344
+
+#define DMA_TPCC_ER		0x01C01000
 #define DMA_TPCC_ESRL		0x01C01010
+#define DMA_TPCC_ECRL		0x01C01018
 #define DMA_TPCC_IPRL		0x01C01068
 #define DMA_TPCC_ICRL		0x01C01070
 
@@ -86,6 +89,7 @@ setup_simple_dma(void *src, void *dst, uint16_t cnt)
 	PUT_DMA_CONF(1, DMA_PARAM_CCNT, 0);
 
 	/* Trigger event 0, starting DMA channel 0 */
+	REG(DMA_TPCC_ECRL) = 1;
 	REG(DMA_TPCC_ESRL) = 1;
 
 	return;
