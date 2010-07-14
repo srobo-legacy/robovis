@@ -23,6 +23,7 @@
 
 void *MEM_valloc(int seg_id, int size, int align);
 void SYS_printf(const char *fmt, ...);
+void BCACHE_wb(void *block, uint32_t sz, Bool wait);
 void configure_dma();
 
 struct state {
@@ -103,6 +104,10 @@ execute(NODE_EnvPtr node)
 			 vis_find_blobs_through_scanlines((void*)msg.arg1,
 							CAMWIDTH, CAMHEIGHT,
 							(void*)msg.arg2);
+
+			/* Write back our dirty blob data */
+			BCACHE_wb((void*)msg.arg2, MAX_BLOBS *
+				sizeof(struct blob_position), 1);
 
 			/* Send finish message */
 			msg.cmd = MSG_DONE;
