@@ -44,8 +44,8 @@ extern "C" {
 #define colour_strength_minimum 20
 #define colour_strength_minimum_blue 20
 
-void setup_simple_dma(void *src, void *dst, uint16_t cnt);
-void wait_for_dma_completion();
+extern "C" void setup_simple_dma(void *src, void *dst, uint16_t cnt);
+extern "C" void wait_for_dma_completion();
 
 static struct blob_position *blobs;
 static int num_blobs = 0;
