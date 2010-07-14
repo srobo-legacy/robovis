@@ -416,6 +416,12 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 		/* Swap sizes too */
 		ospan = span;
 
+		/* If we're done with one dma buffer, get the next */
+		if ((y % NUM_SCANLINES_TO_READ) == 0) {
+			wind_y = 0;
+			yuyv = get_next_buffer(&extmem, y);
+		}
+
 		cache = 0;
 		span = 0;
 
