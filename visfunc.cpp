@@ -381,7 +381,8 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 	uint8_t back_buffer[line_cache_sz];
 	void *tmp;
 	uint8_t *extmem;
-	int x, y, i, j, cache, val_hyst_count, sat_hyst_count;
+	int x, i, j, cache, val_hyst_count, sat_hyst_count;
+	unsigned int y, wind_y;
 	int32_t _y, _u, _v, r, g, b, h, s, v;
 	uint8_t back_buffer_idx, colour_value, old_colour_value;
 	uint8_t drb, drg, dgb;
@@ -399,7 +400,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 	span = 0;
 
 	/* Spin through all scanlines, + 1 */
-	for (y = 0; y < height + 1; y++) {
+	for (y = 0, wind_y = 0; y < height + 1; y++, wind_y++) {
 		memset(ospans, 0, sizeof(spans_a));
 		memset(back_buffer, 0, sizeof(back_buffer));
 		back_buffer_idx = 0;
@@ -422,7 +423,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 			goto final_span_check;
 
 		for (x = 0; x < line_cache_sz; x++) {
-			get_yuv(x, y, _y, _u, _v);
+			get_yuv(x, wind_y, _y, _u, _v);
 			yuv_2_rgb(_y, _u, _v, r, g, b);
 			rgb_2_hsv(r, g, b, h, s, v);
 			cache += h;
@@ -432,7 +433,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 
 		for (x = line_cache_sz; x < width; x++) {
 			old_colour_value = colour_value;
-			get_yuv(x, y, _y, _u, _v);
+			get_yuv(x, wind_y, _y, _u, _v);
 			yuv_2_rgb(_y, _u, _v, r, g, b);
 			rgb_2_hsv(r, g, b, h, s, v);
 			cache += h;
