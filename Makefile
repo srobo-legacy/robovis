@@ -37,11 +37,14 @@ drive_dsp.o: drive_dsp.c
 dsp.o: dsp.c
 	$(DSP_CC) $(DSP_CFLAGS) -c dsp.c -o dsp.o $(SRFLAGS)
 
+dsp_dma.o: dsp_dma.c
+	$(DSP_CC) $(DSP_CFLAGS) -c dsp_dma.c -o dsp_dma.o $(SRFLAGS)
+
 dsp_visfunc.o: visfunc.cpp
 	$(DSP_CC) $(DSP_CFLAGS) -c visfunc.cpp -o dsp_visfunc.o $(SRFLAGS)
 
-dsp.doff: dsp.o dsp_visfunc.o
-	tic64x-ld $(DSP_LDFLAGS) dsp.o dsp_visfunc.o -lsr_hacks -o dsp.doff --oformat=doff-c64x -r
+dsp.doff: dsp.o dsp_visfunc.o dsp_dma.o
+	tic64x-ld $(DSP_LDFLAGS) dsp.o dsp_dma.o dsp_visfunc.o -lsr_hacks -o dsp.doff --oformat=doff-c64x -r
 
 .PHONY: clean
 
