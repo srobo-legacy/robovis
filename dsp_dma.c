@@ -1,5 +1,10 @@
 #include <stdint.h>
 
+#define PUT_REG(addr) *(uint32_t*)((addr))
+#define PUT_TPTC_REG(val, reg, tptc) PUT_REG(reg + (tptc*0x400)) = (val)
+
+#define PUT_DMA_CHAN_MAP(param, chan) PUT_REG(0x01C00100+(chan*4)) = ((param) << 5)
+
 #define DMA_PARAM_BASE		0x01C04000
 #define DMA_PARAM_OPT		0
 #define DMA_PARAM_SRCADDR	4
