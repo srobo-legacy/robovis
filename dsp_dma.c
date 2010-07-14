@@ -1,5 +1,10 @@
 #include <stdint.h>
 
+#define DMA_TPCC_ESR0		0x01C01010
+
+#define DMA_TPTC_INTEN		0x01C10108
+#define DMA_TPTC_RDRATE		0x01C10140
+
 #define PUT_REG(addr) *(uint32_t*)((addr))
 #define PUT_TPTC_REG(val, reg, tptc) PUT_REG(reg + (tptc*0x400)) = (val)
 
