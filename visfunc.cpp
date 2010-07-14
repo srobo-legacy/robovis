@@ -44,6 +44,9 @@ extern "C" {
 #define colour_strength_minimum 20
 #define colour_strength_minimum_blue 20
 
+void setup_simple_dma(void *src, void *dst, uint16_t cnt);
+void wait_for_dma_completion();
+
 static struct blob_position *blobs;
 static int num_blobs = 0;
 
@@ -306,6 +309,59 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 #define ABS(x) ((x) < 0) ? -(x) : (x)
 #define abs ABS
 #endif
+
+#define CACHE_BLOCK_SZ		0x4000
+#define L1CACHE_BLOCK1		((uint8_t*)0x10F04000)
+#define L1CACHE_BLOCK2		(L1CACHE_BLOCK1 + CACHE_BLOCK_SZ)
+#define SIZEOF_SCANLINE		(CAMWIDTH * 2)
+#define NUM_SCANLINES_TO_READ	24
+#define DMA_READ_SZ		(NUM_SCANLINES_TO_READ * SIZEOF_SCANLINE)
+
+#if ((SIZEOF_SCANLINE * NUM_SCANLINES_TO_READ) > CACHE_BLOCK_SZ)
+#error num scanlines doesn't fit in cache block
+#endif
+
+static uint8_t * dma_buffer;
+static uint8_t * working_buffer;
+
+static void
+reset_dma_state(uint8_t **extmem_fb)
+{
+
+	/* Setup buffer pointers, and put the first dma xfer in motion */
+	dma_buffer = L1CACHE_BLOCK1;
+	working_buffer = L1CACHE_BLOCK2;
+	setup_simple_dma(*extmem_fb, dma_buffer, DMA_READ_SZ);
+	*extmem_fb += DMA_READ_SZ;
+	return;
+}
+
+static uint8_t *
+get_next_buffer(uint8_t **extmem_fb, int y)
+{
+	uint8_t *read_buffer;
+	int read_sz;
+
+	/* first, wait for the previous dma xfer to be ready */
+	wait_for_dma_completion();
+
+	/* Swap our buffers around */
+	read_buffer = dma_buffer;
+	dma_buffer = working_buffer;
+	working_buffer = read_buffer;
+
+	/* queue up the next dma_xfer - staying aware that the final one will
+	 * need to be slightly smaller */
+	if ((CAMWIDTH - y) < NUM_SCANLINES_TO_READ)
+		read_sz = (CAMWIDTH - y) * SIZEOF_SCANLINE;
+	else
+		read_sz = DMA_READ_SZ;
+
+	setup_simple_dma(*extmem_fb, dma_buffer, read_sz);
+	*extmem_fb += read_sz;
+
+	return read_buffer;
+}
 
 void
 vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
