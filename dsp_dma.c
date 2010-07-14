@@ -1,9 +1,24 @@
 #include <stdint.h>
 
+#define REG(addr) *(uint32_t*)((addr))
+
 #define DMA_TPCC_CCERR		0x01C00318
 #define DMA_TPCC_EEVAL		0x01C00320
 #define DMA_TPCC_DRAEL		0x01C00340
 #define DMA_TPCC_DRAEH		0x01C00344
+
+#define DMA_TPCC_QESTAT		0x01C00400
+#define DMA_TPCC_QSTAT0		0x01C00600
+#define DMA_TPCC_QSTAT1		0x01C00600
+#define GET_QESTAT(q, e) REG(DMA_TPCC_QESTAT + (q*0x40) + (e*4))
+#define DMA_TPCC_CCSTAT		0x01C00640
+
+#define DMA_TPCC_MPFAR		0x01C00800
+#define DMA_TPCC_MPFSR		0x01C00804
+#define DMA_TPCC_MPFCR		0x01C00808
+#define DMA_TPCC_MPPAG		0x01C0080C
+#define DMA_TPCC_MPPABASE	0x01C00810
+#define DMA_TPCC_MPAA(r) REG(DMA_TPCC_MPPABASE + (r * 4))
 
 #define DMA_TPCC_ER		0x01C01000
 #define DMA_TPCC_ESRL		0x01C01010
@@ -12,9 +27,10 @@
 #define DMA_TPCC_ICRL		0x01C01070
 
 #define DMA_TPTC_INTEN		0x01C10108
+#define DMA_TPTC_ERRSTAT	0x01C10120
+#define DMA_TPTC_ERRDET		0x01C1012C
 #define DMA_TPTC_RDRATE		0x01C10140
 
-#define REG(addr) *(uint32_t*)((addr))
 #define PUT_DRAEL(val, idx) REG(DMA_TPCC_DRAEL + ((idx) * 8)) = (val)
 #define PUT_DRAEH(val, idx) REG(DMA_TPCC_DRAEH + ((idx) * 8)) = (val)
 #define PUT_TPTC_REG(val, reg, tptc) REG(reg + (tptc*0x400)) = (val)
