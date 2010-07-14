@@ -1,5 +1,9 @@
 #include <stdint.h>
 
+#define DMA_TPCC_CCERR		0x01C00318
+#define DMA_TPCC_EEVAL		0x01C00320
+#define DMA_TPCC_DRAEL		0x01C00340
+#define DMA_TPCC_DRAEH		0x01C00344
 #define DMA_TPCC_ESRL		0x01C01010
 #define DMA_TPCC_IPRL		0x01C01068
 #define DMA_TPCC_ICRL		0x01C01070
@@ -8,6 +12,8 @@
 #define DMA_TPTC_RDRATE		0x01C10140
 
 #define REG(addr) *(uint32_t*)((addr))
+#define PUT_DRAEL(val, idx) REG(DMA_TPCC_DRAEL + ((idx) * 8)) = (val)
+#define PUT_DRAEH(val, idx) REG(DMA_TPCC_DRAEH + ((idx) * 8)) = (val)
 #define PUT_TPTC_REG(val, reg, tptc) REG(reg + (tptc*0x400)) = (val)
 
 #define PUT_DMA_CHAN_MAP(param, chan) REG(0x01C00100+(chan*4)) = ((param) << 5)
@@ -37,6 +43,22 @@ configure_dma()
 	PUT_DMA_CHAN_MAP(0, 0);
 
 	/* XXX - will bridgedriver firmware enable DMA accesses in DRAE? */
+	PUT_DRAEL(0xFFFFFFFF, 0);
+	PUT_DRAEL(0xFFFFFFFF, 1);
+	PUT_DRAEL(0xFFFFFFFF, 2);
+	PUT_DRAEL(0xFFFFFFFF, 3);
+	PUT_DRAEL(0xFFFFFFFF, 4);
+	PUT_DRAEL(0xFFFFFFFF, 5);
+	PUT_DRAEL(0xFFFFFFFF, 6);
+	PUT_DRAEL(0xFFFFFFFF, 7);
+	PUT_DRAEH(0xFFFFFFFF, 0);
+	PUT_DRAEH(0xFFFFFFFF, 1);
+	PUT_DRAEH(0xFFFFFFFF, 2);
+	PUT_DRAEH(0xFFFFFFFF, 3);
+	PUT_DRAEH(0xFFFFFFFF, 4);
+	PUT_DRAEH(0xFFFFFFFF, 5);
+	PUT_DRAEH(0xFFFFFFFF, 6);
+	PUT_DRAEH(0xFFFFFFFF, 7);
 	return;
 }
 
