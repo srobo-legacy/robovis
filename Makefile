@@ -19,11 +19,8 @@ DSP_LDFLAGS = -L../dsp-code/dsp_lib
 # Python 2.4 doesn't support pkg-config; bodge this to your own include path
 PY_CFLAGS += -I/usr/include/python2.4
 
-hueblobs: hueblobs.c visfunc.o v4l.o drive_dsp.o
-	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o v4l.o drive_dsp.o
-
-visfunc.o: visfunc.cpp
-	$(CXX) $< $(OPENCV_CFLAGS) $(CFLAGS) -c -o $@ -fPIC
+hueblobs: hueblobs.c v4l.o drive_dsp.o
+	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) v4l.o drive_dsp.o
 
 v4l.o: v4l.c
 	$(CC) -o $@ $< $(CFLAGS) -c -fPIC
