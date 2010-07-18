@@ -9,7 +9,6 @@
 
 #include <stddef.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
@@ -306,8 +305,12 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 /* Implement abs here as a workaround for the fact we can't link against libc
  * while also linking against the bridgedriver base image... (also, gcc lowers
  * abs automagically */
-#define ABS(x) ((x) < 0) ? -(x) : (x)
-#define abs ABS
+static inline int
+abs(int a)
+{
+
+	return (a < 0) ? -a : a;
+}
 #endif
 
 #define CACHE_BLOCK_SZ		0x4000
