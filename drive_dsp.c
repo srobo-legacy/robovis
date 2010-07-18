@@ -18,7 +18,7 @@ static void *dsp_mapped_vma;
 static void *blobs_dsp_vma;
 static void *blobs_dsp_mapped_vma;
 
-static struct blob_position blobs[MAX_BLOBS];
+static struct blob_position blobs[MAX_BLOBS] __attribute__((aligned(4096)));
 
 static struct DSP_UUID uuid = {0x3E7AEA34, 0xEC66, 0x4C5F, 0xBC, 0x11,
 				{0x48, 0xDE, 0xE1, 0x21, 0x2C, 0x8F}};
