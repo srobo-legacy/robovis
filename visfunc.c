@@ -13,14 +13,7 @@
 #include <math.h>
 
 #include "hueblobs.h"
-
-#ifdef OPENCV
-#include <cv.h>
-#endif
-
-extern "C" {
 #include "visfunc.h"
-}
 
 /* Ensure that "MAX" and "MIN" are what we expect them to be */
 #if defined(MAX)
@@ -43,16 +36,16 @@ extern "C" {
 #define colour_strength_minimum 20
 #define colour_strength_minimum_blue 20
 
-extern "C" void setup_simple_dma(void *src, void *dst, uint16_t cnt);
-extern "C" void wait_for_dma_completion();
+extern void setup_simple_dma(void *src, void *dst, uint16_t cnt);
+extern void wait_for_dma_completion();
 
 static struct blob_position *blobs;
 static int num_blobs = 0;
 
 #define SPANS 32
-static blob_position spans_a[SPANS+1];
-static blob_position spans_b[SPANS+1];
-static blob_position *spans, *ospans;
+static struct blob_position spans_a[SPANS+1];
+static struct blob_position spans_b[SPANS+1];
+static struct blob_position *spans, *ospans;
 static int span, ospan;
 
 /* 8 bit division conversion table - defined later in file */
@@ -96,12 +89,8 @@ add_blob(int minx, int miny, int maxx, int maxy, int colour)
 {
 	int w, h;
 
-#ifndef USE_DSP
-	if (!(num_blobs < MAX_BLOBS)) {
-		fprintf(stderr, "add_blob, ran out of blob records...\n");
+	if (num_blobs >= MAX_BLOBS)
 		return;
-	}
-#endif
 
 	w = maxx - minx;
 	h = maxy - miny;
@@ -169,137 +158,6 @@ add_blob(int minx, int miny, int maxx, int maxy, int colour)
 		s = clip(s);						\
 		v = clip(v);						\
 	} while (0);
-
-#ifndef USE_DSP
-#ifdef OPENCV
-
-void
-squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue,
-				IplImage *sat, IplImage *val)
-{
-	uint8_t *hptr, *sptr, *vptr;
-	int i, j;
-	int32_t y, u, v, r, g, b, h, s;
-
-	hptr = (uint8_t*) hue->imageData;
-	sptr = (uint8_t*) sat->imageData;
-	vptr = (uint8_t*) val->imageData;
-
-	for (j = 0; j < height; j++) {
-		for (i = 0; i < width; i++) {
-			get_yuv(i, j, y, u, v);
-			yuv_2_rgb(y, u, v, r, g, b);
-			rgb_2_hsv(r, g, b, h, s, v);
-			*hptr++ = h;
-			*sptr++ = s;
-			*vptr++ = v;
-		}
-	}
-
-	return;
-}
-
-IplImage *
-make_rgb_image(uint8_t *yuyv, int width, int height)
-{
-	IplImage *out;
-	CvSize frsize;
-	uint8_t *prgb;
-	int i, j, y, u, v, r, g, b;
-
-	frsize = cvSize(width, height);
-	out = cvCreateImage(frsize, IPL_DEPTH_8U, 3);
-	prgb = (uint8_t *)out->imageData;
-
-	for (j = 0; j < height; j++) {
-		for (i = 0; i < width; i++) {
-			get_yuv(i, j, y, u, v);
-			yuv_2_rgb(y, u, v, r, g, b);
-			*prgb++ = b;
-			*prgb++ = g;
-			*prgb++ = r;
-		}
-	}
-
-	return out;
-}
-
-#endif
-
-struct bmp_header {
-        uint16_t magic;
-        uint32_t file_size;
-        uint16_t reserved1;
-        uint16_t reserved2;
-        uint32_t data_offset;
-
-        uint32_t header_size;
-        uint32_t width;
-        uint32_t height;
-        uint16_t planes;
-        uint16_t bpp;
-        uint32_t compression;
-        uint32_t data_size;
-        uint32_t x_pix_per_m;
-        uint32_t y_pix_per_m;
-        uint32_t colours_used;
-        uint32_t important_colours;
-} __attribute__((packed));
-
-void
-store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
-{
-	struct bmp_header head;
-	FILE *foo;
-	uint8_t *rgb, *prgb;
-	int i, j, y, u, v, r, g, b;
-
-	rgb = (uint8_t*) malloc(width * height * 3);
-	prgb = rgb;
-
-	if (rgb == NULL) {
-		fprintf(stderr, "Couldn't allocate store_rgb_image buffer\n");
-		return;
-	}
-
-	for (j = 0; j < height; j++) {
-		for (i = 0; i < width; i++) {
-			get_yuv(i, j, y, u, v);
-			yuv_2_rgb(y, u, v, r, g, b);
-			*prgb++ = b;
-			*prgb++ = g;
-			*prgb++ = r;
-		}
-	}
-
-	head.magic = 0x4D42; /* Will explode on big endian */
-	head.file_size = sizeof(head) + (width * height * 3);
-	head.reserved1 = 0;
-	head.reserved2 = 0;
-	head.data_offset = sizeof(head);
-	head.header_size = 40;
-	head.width = width;
-	head.height = height;
-	head.planes = 1;
-	head.bpp = 24;
-	head.compression = 0;
-	head.data_size = width * height * 3;
-	head.x_pix_per_m = 96;
-	head.y_pix_per_m = 96;
-	head.colours_used = 0;
-	head.important_colours = 0;
-
-	foo = fopen(file, "w");
-	fwrite(&head, sizeof(head), 1, foo);
-	fwrite(rgb, width * height * 3, 1, foo);
-	fclose(foo);
-
-	free(rgb);
-
-	return;
-}
-
-#endif /* ifndef USE_DSP */
 
 #if defined(USE_DSP) && defined(__clang__)
 /* Implement abs here as a workaround for the fact we can't link against libc
@@ -414,7 +272,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 		/* swap */
 		tmp = ospans;
 		ospans = spans;
-		spans = (blob_position *)tmp;
+		spans = (struct blob_position *)tmp;
 
 		/* Swap sizes too */
 		ospan = span;
