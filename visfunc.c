@@ -7,10 +7,8 @@
  * In case of mis-use, consult your doctor
  */
 
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
+/* Can't include string.h, it squirts various inline functions at us */
+extern void *memset(void *, int c, unsigned int sz);
 
 #include "hueblobs.h"
 #include "visfunc.h"
