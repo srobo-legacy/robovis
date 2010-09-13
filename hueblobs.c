@@ -249,14 +249,6 @@ main(int argc, char **argv)
 
 		srlog(DEBUG, "Grabbing frame");
 
-#ifdef OPENCV
-		if(DEBUGDISPLAY) {
-			cvShowImage("sat", sat);
-			cvShowImage("hue", hue);
-			cvShowImage("val", val);
-		}
-#endif
-
 		blobs = 0;
 		raw_data = get_v4l_frame();
 		if (!raw_data) {
@@ -271,6 +263,10 @@ main(int argc, char **argv)
 			frame = make_rgb_image(raw_data, 320, 240);
 			squish_raw_data_into_hsv(raw_data, 320, 240,
 							hue, sat, val);
+
+			cvShowImage("sat", sat);
+			cvShowImage("hue", hue);
+			cvShowImage("val", val);
 		}
 #endif
 
