@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <unistd.h>
 
 #include "hueblobs.h"
@@ -38,6 +39,7 @@ IplImage *frame = NULL, *oldframe = NULL, *hsv, *hue, *sat, *val;
 int USEFILE = 0;
 int DEBUGOUTPUT = 0;
 int DEBUGDISPLAY = 0;
+int DEBUGSLOW = 0;
 
 extern "C" {
 #include "v4l.h"
@@ -53,6 +55,8 @@ get_command_line_opts(int argc, char **argv)
 			DEBUGOUTPUT = 1;
 		} else if (strcmp(argv[i], "-display") == 0) {
 			DEBUGDISPLAY = 1;
+		} else if (strcmp(argv[i], "-slow") == 0) {
+			DEBUGSLOW = 1;
 		}
 	}
 	return;
@@ -62,15 +66,34 @@ get_command_line_opts(int argc, char **argv)
 char
 *wait_trigger(void)
 {
+	struct pollfd fd;
 	char *req_tag;
 
 	req_tag = (char*)malloc(129);
 
-	req_tag = fgets(req_tag, 128, stdin);
-	if (req_tag == NULL)	/*EOF*/
-		exit(0);
+	if (DEBUGDISPLAY && DEBUGSLOW) {
+		do {
+			fd.fd = STDIN_FILENO;
+			fd.events = POLLIN;
+			fd.revents = 0;
 
-	return req_tag;
+			if (poll(&fd, 1, 0)) {
+				req_tag = fgets(req_tag, 128, stdin);
+				if (req_tag == NULL)	/*EOF*/
+					exit(0);
+
+				return req_tag;
+			}
+
+			cvWaitKey(100);
+		} while (1);
+	} else {
+		req_tag = fgets(req_tag, 128, stdin);
+		if (req_tag == NULL)	/*EOF*/
+			exit(0);
+
+		return req_tag;
+	}
 }
 
 void
@@ -220,7 +243,7 @@ main(int argc, char **argv)
 	while (1){
 		srlog(DEBUG, "Press enter to grab a frame:");
 
-		if(!DEBUGDISPLAY) {
+		if(!DEBUGDISPLAY || DEBUGSLOW) {
 			req_tag = wait_trigger();
 		}
 
