@@ -19,7 +19,7 @@ DSP_LDFLAGS = -L../dsp-code/dsp_lib
 # Python 2.4 doesn't support pkg-config; bodge this to your own include path
 PY_CFLAGS += -I/usr/include/python2.4
 
-hueblobs: hueblobs.c v4l.o drive_dsp.o
+hueblobs: hueblobs.c v4l.o drive_dsp.o trans_table.o bmp.o
 	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) v4l.o drive_dsp.o
 
 v4l.o: v4l.c
@@ -29,6 +29,11 @@ v4l.o: v4l.c
 drive_dsp.o: drive_dsp.c
 	$(CC) -o $@ $< $(CFLAGS) -c -fPIC -I../dsp-code/mpu_include
 
+trans_table.o: trans_table.c
+	$(CC) -o $@ $< $(CFLAGS) -c -fPIC
+
+bmp.o: bmp.c
+	$(CC) -o $@ $< $(CFLAGS) -c -fPIC
 
 # DSP side rules
 dsp.o: dsp.c
@@ -40,8 +45,11 @@ dsp_dma.o: dsp_dma.c
 visfunc.o: visfunc.c
 	$(DSP_CC) $(DSP_CFLAGS) -c visfunc.c -o visfunc.o $(SRFLAGS)
 
-dsp.doff: dsp.o visfunc.o dsp_dma.o
-	tic64x-ld $(DSP_LDFLAGS) dsp.o dsp_dma.o visfunc.o -lsr_hacks -o dsp.doff --oformat=doff-c64x -r
+dsp_trans_table.o: trans_table.c
+	$(DSP_CC) $(DSP_CFLAGS) -c trans_table.c -o dsp_trans_table.o $(SRFLAGS)
+
+dsp.doff: dsp.o visfunc.o dsp_dma.o dsp_trans_table.o
+	tic64x-ld $(DSP_LDFLAGS) dsp.o dsp_dma.o visfunc.o dsp_trans_table.o -lsr_hacks -o dsp.doff --oformat=doff-c64x -r
 
 .PHONY: clean
 
