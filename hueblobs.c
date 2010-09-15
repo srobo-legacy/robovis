@@ -180,7 +180,7 @@ main(int argc, char **argv)
 
 	struct blob_position *blobs;
 	char *req_tag = NULL;
-	int i, w, h;
+	int i, w, h, num_blobs;
 
 	get_command_line_opts(argc, argv);
 
@@ -295,6 +295,8 @@ main(int argc, char **argv)
 					w, h, w*h, blobs[i].colour);
 		}
 
+		num_blobs = i;
+
 #ifdef OPENCV
 		if(DEBUGDISPLAY) {
 			cvShowImage("testcam", frame);
@@ -318,7 +320,8 @@ main(int argc, char **argv)
 		cvSaveImage(buffer, frame);
 #endif
 
-		store_rgb_image(OUT_FILENAME, raw_data, CAMWIDTH, CAMHEIGHT);
+		store_rgb_image(OUT_FILENAME, raw_data, CAMWIDTH, CAMHEIGHT,
+				blobs, num_blobs);
 
 #ifdef OPENCV
 		if (DEBUGDISPLAY)
