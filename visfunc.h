@@ -36,9 +36,16 @@ IplImage *make_rgb_image(uint8_t *raw_data, int width, int height);
 void squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue, IplImage *sat, IplImage *val);
 #endif
 
+/* My eyes: */
+#ifdef __cplusplus
+extern "C" {
+#endif
 void vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 					struct blob_position *blobs);
 void store_rgb_image(const char *, uint8_t *raw_data, int width, int height);
+#ifdef __cplusplus
+};
+#endif
 
 /* And here are some delicious macros for converting between various colour
  * spaces and whatnot */
