@@ -43,6 +43,10 @@ void store_rgb_image(const char *, uint8_t *raw_data, int width, int height);
 /* And here are some delicious macros for converting between various colour
  * spaces and whatnot */
 
+extern const int trans_table[]; /* This is required for colour space operations
+				 * and to avoid divisions; actually lives in
+				 * trans_table.c */
+
 #define get_yuv(x, y, _y, _u, _v) do {					\
 				uint8_t *tmp;				\
 				tmp = &yuyv[((width * 2) * y) +		\
