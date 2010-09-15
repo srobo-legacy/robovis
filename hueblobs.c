@@ -180,10 +180,8 @@ main(int argc, char **argv)
 
 	struct blob_position *blobs;
 	char *req_tag = NULL;
-	int i, w, h, num_blobs, frame_no;
-	char buffer[256];
+	int i, w, h, num_blobs;
 
-	frame_no = 0;
 	get_command_line_opts(argc, argv);
 
 	open_webcam(CAMWIDTH, CAMHEIGHT);
@@ -322,22 +320,8 @@ main(int argc, char **argv)
 		cvSaveImage(buffer, frame);
 #endif
 
-#if 0
 		store_rgb_image(OUT_FILENAME, raw_data, CAMWIDTH, CAMHEIGHT,
 				blobs, num_blobs);
-#endif
-
-		snprintf(buffer, 255, "yuyv%d", frame_no);
-		FILE *foo = fopen(buffer, "w");
-		fwrite(raw_data, 2 * CAMWIDTH * CAMHEIGHT, 1, foo);
-		fclose(foo);
-
-		snprintf(buffer, 255, "blobs%d", frame_no);
-		foo = fopen(buffer, "w");
-		fwrite(blobs, num_blobs * sizeof(struct blob_position), 1, foo);
-		fclose(foo);
-
-		frame_no++;
 
 #ifdef OPENCV
 		if (DEBUGDISPLAY)
