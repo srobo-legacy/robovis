@@ -1,10 +1,4 @@
-#include <std.h>
-#include <rmsdefs.h>
-#include <rms_sh.h>
-#include <node.h>
-#include <dbtype.h>
-#include <dbdefs.h>
-#include <rmstypes.h>
+#include <dspapi.h>
 
 #include "visfunc.h"
 #include "dsp_comms.h"
@@ -21,7 +15,6 @@
 #include <sr_dcd.h>
 #include <sr_hacks.h>
 
-void *MEM_valloc(int seg_id, int size, int align);
 void SYS_printf(const char *fmt, ...);
 void BCACHE_wb(void *block, uint32_t sz, Bool wait);
 void configure_dma();
