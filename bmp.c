@@ -40,7 +40,7 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 		return;
 	}
 
-	for (j = 0; j < height; j++) {
+	for (j = height-1; j >= 0; j--) {
 		for (i = 0; i < width; i++) {
 			get_yuv(i, j, y, u, v);
 			yuv_2_rgb(y, u, v, r, g, b);
