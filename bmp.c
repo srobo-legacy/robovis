@@ -25,7 +25,67 @@ struct bmp_header {
 } __attribute__((packed));
 
 void
-store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
+plot_line_h(uint8_t *data, int stride, int x, int y, int len, uint32_t col)
+{
+	uint8_t *ptr;
+	int i;
+
+	ptr = &data[(stride * y) + (x * 3)];
+	for (i = 0; i < len; i++) {
+		ptr[0] = col & 0xFF;
+		ptr[1] = (col >> 8) & 0xFF;
+		ptr[2] = (col >> 16) & 0xFF;
+		ptr += 3;
+	}
+
+	return;
+}
+
+void
+plot_line_v(uint8_t *data, int stride, int x, int y, int len, uint32_t col)
+{
+	uint8_t *ptr;
+	int i;
+
+	ptr = &data[(stride * y) + (x * 3)];
+	for (i = 0; i < len; i++) {
+		ptr[0] = col & 0xFF;
+		ptr[1] = (col >> 8) & 0xFF;
+		ptr[2] = (col >> 16) & 0xFF;
+		ptr += stride;
+	}
+
+	return;
+}
+
+void
+carve_in_blob_rectangles(uint8_t *data, int width, struct blob_position *blobs,
+			int num_blobs)
+{
+	int i, stride;
+
+	stride = width * 3;
+	stride += 3;
+	stride &= ~3; /* align to 4 */
+
+	for (i = 0; i < num_blobs; i++) {
+		/* Draw two horizontal and two vertical lines */
+		plot_line_h(data, stride, blobs[i].x1, blobs[i].y1,
+				blobs[i].x2 - blobs[i].x1, 0xFF0000);
+		plot_line_h(data, stride, blobs[i].x1, blobs[i].y2,
+				blobs[i].x2 - blobs[i].x1, 0xFF0000);
+		plot_line_v(data, stride, blobs[i].x1, blobs[i].y1,
+				blobs[i].y2 - blobs[i].y1, 0xFF0000);
+		plot_line_v(data, stride, blobs[i].x2, blobs[i].y1,
+				blobs[i].y2 - blobs[i].y1, 0xFF0000);
+	}
+
+	return;
+}
+
+void
+store_rgb_image(const char *file, uint8_t *yuyv, int width, int height,
+		struct blob_position *blobs, int num_blobs)
 {
 	struct bmp_header head;
 	FILE *foo;
@@ -49,6 +109,8 @@ store_rgb_image(const char *file, uint8_t *yuyv, int width, int height)
 			*prgb++ = r;
 		}
 	}
+
+	carve_in_blob_rectangles(rgb, width, blobs, num_blobs);
 
 	head.magic = 0x4D42; /* Will explode on big endian */
 	head.file_size = sizeof(head) + (width * height * 3);

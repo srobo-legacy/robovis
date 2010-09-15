@@ -42,7 +42,8 @@ extern "C" {
 #endif
 void vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 					struct blob_position *blobs);
-void store_rgb_image(const char *, uint8_t *raw_data, int width, int height);
+void store_rgb_image(const char *, uint8_t *raw_data, int width, int height,
+			struct blob_position *blobs, int num_blobs);
 #ifdef __cplusplus
 };
 #endif
