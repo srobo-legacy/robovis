@@ -13,16 +13,6 @@ extern void *memset(void *, int c, unsigned int sz);
 #include "hueblobs.h"
 #include "visfunc.h"
 
-/* Ensure that "MAX" and "MIN" are what we expect them to be */
-#if defined(MAX)
-#undef MAX
-#endif
-#if defined(MIN)
-#undef MIN
-#endif
-#define MIN(a,b)        (((a)<(b))?(a):(b))
-#define        MAX(a,b)        (((a)>(b))?(a):(b))
-
 #define BLOB_MIN_WIDTH 3
 #define BLOB_MIN_HEIGHT 3
 #define BLOB_MIN_MASS 5
