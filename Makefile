@@ -20,7 +20,7 @@ DSP_LDFLAGS = -L../dsp-code/dsp_lib
 PY_CFLAGS += -I/usr/include/python2.4
 
 hueblobs: hueblobs.c v4l.o drive_dsp.o trans_table.o bmp.o
-	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) v4l.o drive_dsp.o
+	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) v4l.o drive_dsp.o trans_table.o bmp.o
 
 v4l.o: v4l.c
 	$(CC) -o $@ $< $(CFLAGS) -c -fPIC
@@ -54,4 +54,4 @@ dsp.doff: dsp.o visfunc.o dsp_dma.o dsp_trans_table.o
 .PHONY: clean
 
 clean:
-	-rm -f hueblobs visfunc.o v4l.o drive_dsp.o dsp.o dsp_visfunc.o dsp.doff
+	-rm -f hueblobs *.o dsp.doff
