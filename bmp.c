@@ -69,15 +69,20 @@ carve_in_blob_rectangles(uint8_t *data, int width, struct blob_position *blobs,
 	stride &= ~3; /* align to 4 */
 
 	for (i = 0; i < num_blobs; i++) {
+		if (blobs[i].colour == RED) col = 0xFF0000;
+		else if (blobs[i].colour == GREEN) col = 0x00FF00;
+		else if (blobs[i].colour == BLUE) col = 0x0000FF;
+		else continue; /* Erk, shouldn't happen */
+
 		/* Draw two horizontal and two vertical lines */
-		plot_line_h(data, stride, blobs[i].x1, blobs[i].y1,
-				blobs[i].x2 - blobs[i].x1, 0xFF0000);
-		plot_line_h(data, stride, blobs[i].x1, blobs[i].y2,
-				blobs[i].x2 - blobs[i].x1, 0xFF0000);
-		plot_line_v(data, stride, blobs[i].x1, blobs[i].y1,
-				blobs[i].y2 - blobs[i].y1, 0xFF0000);
-		plot_line_v(data, stride, blobs[i].x2, blobs[i].y1,
-				blobs[i].y2 - blobs[i].y1, 0xFF0000);
+		plot_line_h(data, stride, height, blobs[i].x1, blobs[i].y1,
+				blobs[i].x2 - blobs[i].x1, col);
+		plot_line_h(data, stride, height, blobs[i].x1, blobs[i].y2,
+				blobs[i].x2 - blobs[i].x1, col);
+		plot_line_v(data, stride, height, blobs[i].x1, blobs[i].y1,
+				blobs[i].y2 - blobs[i].y1, col);
+		plot_line_v(data, stride, height, blobs[i].x2, blobs[i].y1,
+				blobs[i].y2 - blobs[i].y1, col);
 	}
 
 	return;
