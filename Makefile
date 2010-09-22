@@ -14,6 +14,9 @@ PY_CFLAGS += -I/usr/include/python2.4
 hueblobs: hueblobs.c visfunc.o v4l.o
 	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o v4l.o
 
+showyuyv: showyuyv.c visfunc.o
+	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o
+
 visfunc.o: visfunc.cpp
 	$(CXX) $< $(OPENCV_CFLAGS) $(CFLAGS) -c -o $@ -fPIC
 
