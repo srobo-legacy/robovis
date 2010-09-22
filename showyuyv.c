@@ -159,6 +159,12 @@ main(int argc, char **argv)
 				(blobs[i].colour == BLUE) ?
 					cvScalar(255, 0, 0) :
 					cvScalar(0, 255, 0), 1);
+
+		int w = blobs[i].x2 - blobs[i].x1;
+		int h = blobs[i].y2 - blobs[i].y1;
+		printf("%d,%d,%d,%d,%d,%d\n", blobs[i].x1, blobs[i].y1,
+					w, h, w*h, blobs[i].colour);
+
 	}
 
 	cvShowImage("testcam", frame);
