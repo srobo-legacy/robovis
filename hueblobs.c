@@ -174,7 +174,7 @@ main(int argc, char **argv)
 	char buffer[256];
 	uint8_t *raw_data;
 
-	struct blob_position *blobs, *loaded_blobs;
+	struct blob_position *blobs, *canonical_blobs;
 	int i, num_blobs, frame_no;
 
 	get_command_line_opts(argc, argv);
@@ -224,21 +224,6 @@ main(int argc, char **argv)
 		fread(raw_data, 2 * CAMWIDTH * CAMHEIGHT, 1, foo);
 		fclose(foo);
 
-		loaded_blobs = (struct blob_position *)malloc(
-				sizeof(struct blob_position) * 1024);
-		memset(loaded_blobs, 0, sizeof(struct blob_position) * 1024);
-		snprintf(buffer, 255, "blobs%d", frame_no);
-		foo = fopen(buffer, "r");
-		if (foo == NULL) {
-			fprintf(stderr, "Can't find file %s\n", buffer);
-			exit(1);
-		}
-		struct stat filestat;
-		stat(buffer, &filestat);
-		fread(loaded_blobs, filestat.st_size, 1, foo);
-		fclose(foo);
-
-#ifdef USE_DSP
 		/* Calculating buffer size is less than dynamic; anyway */
 		issue_buffer_to_dsp(raw_data, CAMWIDTH * CAMHEIGHT * 2);
 
@@ -249,10 +234,12 @@ main(int argc, char **argv)
 		}
 
 		remove_buffer_from_dsp(); /* Unmap framebuffer */
-#else
-		blobs = vis_find_blobs_through_scanlines(raw_data, CAMWIDTH,
-								CAMHEIGHT);
-#endif
+
+		/* Pick up the /correct/ set of blobs via arm-side calcs */
+		canonical_blobs = (struct blob_position *) malloc(
+				sizeof(struct blob_position *) * MAX_BLOBS);
+		vis_find_blobs_through_scanlines(raw_data, CAMWIDTH, CAMHEIGHT,
+							canonical_blobs);
 
 		for (i = 0; ; i++) {
 			if (blobs[i].x1 == 0 && blobs[i].x2 == 0)
@@ -268,7 +255,7 @@ main(int argc, char **argv)
 
 		num_blobs = i;
 
-		if (memcmp(blobs, loaded_blobs, num_blobs *
+		if (memcmp(blobs, canonical_blobs, num_blobs *
 				sizeof(struct blob_position))) {
 			fprintf(stderr, "Mismatch in blobs for img %d\n",
 								frame_no);
@@ -282,17 +269,16 @@ main(int argc, char **argv)
 		}
 		printf("vs\n");
 		for (i = 0; ; i++) {
-			if (loaded_blobs[i].x1 == 0 && loaded_blobs[i].x2 == 0)
+			if (canonical_blobs[i].x1 == 0 && canonical_blobs[i].x2 == 0)
 				break;
-			w = loaded_blobs[i].x2 - loaded_blobs[i].x1;
-			h = loaded_blobs[i].y2 - loaded_blobs[i].y1;
-			printf("%d,%d,%d,%d,%d,%d\n", loaded_blobs[i].x1, loaded_blobs[i].y1, w, h, w*h, loaded_blobs[i].colour);
+			w = canonical_blobs[i].x2 - canonical_blobs[i].x1;
+			h = canonical_blobs[i].y2 - canonical_blobs[i].y1;
+			printf("%d,%d,%d,%d,%d,%d\n", canonical_blobs[i].x1, canonical_blobs[i].y1, w, h, w*h, canonical_blobs[i].colour);
 		}
 		}
 
 		frame_no++;
-
-		free(loaded_blobs);
+		free(canonical_blobs);
 
 #if 0
 		store_rgb_image(OUT_FILENAME, raw_data, CAMWIDTH, CAMHEIGHT,
