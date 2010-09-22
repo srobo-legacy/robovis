@@ -1,6 +1,11 @@
 	.file	"visfunc.c"
 
 
+#define		ST_RETADDR	4
+#define		ST_SAVED_A10	8
+#define		ST_SAVED_A11	12
+#define		ST_SAVED_A12	16
+#define		ST_SAVED_A13	20
 	.text
 	.globl	vis_find_blobs_through_scanlines
 	.align	5
@@ -9,14 +14,14 @@ vis_find_blobs_through_scanlines:
 		mvk		136,	A0
 	||	mv		B15,	A1
 		stw		A15,	*B15
-	||	stw		B3,	*-A1(4)
+	||	stw		B3,	*-A1(ST_RETADDR)
 	||	mv		B15,	A15
 	||	sub		B15,	A0	,B15
 
-		stw		A10,	*-A15(8)
-		stw		A11,	*-A15(12)
-		stw		A12,	*-A15(16)
-		stw		A13,	*-A15(20)
+		stw		A10,	*-A15(ST_SAVED_A10)
+		stw		A11,	*-A15(ST_SAVED_A11)
+		stw		A12,	*-A15(ST_SAVED_A12)
+		stw		A13,	*-A15(ST_SAVED_A13)
 		mv		B6,	A10
 		mv		A6,	A11
 		mv		B4,	A3
@@ -2096,15 +2101,11 @@ vis_find_blobs_through_scanlines:
 		nop	.S1	4
 .BB1_122:
 
-		ldw		*-A15(20),	A13
-		nop	.S1	4
-		ldw		*-A15(16),	A12
-		nop	.S1	4
-		ldw		*-A15(12),	A11
-		nop	.S1	4
-		ldw		*-A15(8),	A10
-		nop	.S1	4
-		ldw		*-A15(4),	B3
+		ldw		*-A15(ST_SAVED_A13),	A13
+		ldw		*-A15(ST_SAVED_A12),	A12
+		ldw		*-A15(ST_SAVED_A11),	A11
+		ldw		*-A15(ST_SAVED_A10),	A10
+		ldw		*-A15(ST_RETADDR),	B3
 		mv		A15,	B15
 	||	ldw		*A15,	A15
 		nop		4
