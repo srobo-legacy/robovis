@@ -30,12 +30,6 @@ extern void wait_for_dma_completion();
 static struct blob_position *blobs;
 static int num_blobs = 0;
 
-#define SPANS 32
-static struct blob_position spans_a[SPANS+1];
-static struct blob_position spans_b[SPANS+1];
-static struct blob_position *spans, *ospans;
-static int span, ospan;
-
 static void
 add_blob(int minx, int miny, int maxx, int maxy, int colour)
 {
@@ -139,7 +133,12 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 #define red2_max 185 * line_cache_sz
 /* FIXME - adjust for 0-180 scale */
 
+	#define SPANS 32
+	struct blob_position spans_a[SPANS+1];
+	struct blob_position spans_b[SPANS+1];
 	uint8_t back_buffer[line_cache_sz];
+	struct blob_position *spans, *ospans;
+	int span, ospan;
 	void *tmp;
 	uint8_t *extmem;
 	int x, i, j, cache, val_hyst_count, sat_hyst_count;
