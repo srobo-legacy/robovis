@@ -34,22 +34,19 @@ vis_find_blobs_through_scanlines:
 
 ; Next up an inlined copy of reset_dma_state
 		mvkl	.S1	dma_buffer,	A3
-		mvkl	.S1	284180480,	A5
-		mvkl	.S1	working_buffer,	A6
+	||	mvkl	.S2	working_buffer,	B0
 		mvkl	.S1	284196864,	A7
+	||	mvkl	.S2	284180480,	B4
 		mvkh	.S1	dma_buffer,	A3
-		mvkh	.S1	284180480,	A5
-		mvkh	.S1	working_buffer,	A6
+	||	mvkh	.S2	working_buffer,	B0
 		mvkh	.S1	284196864,	A7
-		stw		A5,	*A3
-		stw		A7,	*A6
-		sub	.D2	B15,	0,	B15
+	||	mvkh	.S2	284180480,	B4
+; 1 stall for using xpath on register just written
+		stw	.D2T1	A7,	*B0
+	||	stw	.D1T2	B4,	*A3
 		mvk	.S1	15360,	A6
-		mvk	.S1	0,	A12
 		mvkl	.S1	blobs,	A13
-		mv		A5,	B4
 		callp	.S2	setup_simple_dma
-		add	.D2X	B15,	A12,	B15
 		mvkh	.S1	blobs,	A13
 		stw		A10,	*A13
 		mvkl	.S1	32768,	A6
