@@ -215,7 +215,7 @@ main(int argc, char **argv)
 #endif
 
 		raw_data = &big_aligned_fbuffer[0];
-		snprintf(buffer, 255, "yuyv%d", frame_no);
+		snprintf(buffer, 255, "data/yuyv%d", frame_no);
 		FILE *foo = fopen(buffer, "r");
 		if (foo == NULL) {
 			fprintf(stderr, "Can't find file %s\n", buffer);
