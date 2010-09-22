@@ -40,6 +40,8 @@ int USEFILE = 0;
 int DEBUGOUTPUT = 0;
 int DEBUGDISPLAY = 0;
 
+uint8_t big_aligned_fbuffer[CAMHEIGHT * CAMWIDTH * 2] __attribute__((aligned(4096)));
+
 extern "C" {
 #include "v4l.h"
 }
@@ -169,22 +171,19 @@ Foo(int event, int x, int y, int flags, void* param)
 int
 main(int argc, char **argv)
 {
-#ifdef spam
 	char buffer[256];
-	int rawr = 0;
-#endif
-#ifdef OPENCV
-	CvSize framesize;
-#endif
 	uint8_t *raw_data;
 
-	struct blob_position *blobs;
-	char *req_tag = NULL;
-	int i, w, h, num_blobs;
+	struct blob_position *blobs, *loaded_blobs;
+	int i, num_blobs, frame_no;
 
 	get_command_line_opts(argc, argv);
+	int w, h;
+	frame_no = 2;
 
+#if 0
 	open_webcam(CAMWIDTH, CAMHEIGHT);
+#endif
 
 #ifdef USE_DSP
 	if (check_dsp_open())
@@ -194,70 +193,50 @@ main(int argc, char **argv)
 		return 1;
 #endif
 
-#ifdef OPENCV
-	if(DEBUGDISPLAY) {
-		//No idea what this returns on fail.
-		cvNamedWindow("testcam", CV_WINDOW_AUTOSIZE);
-		cvSetMouseCallback("testcam", Boo, frame);
-		cvNamedWindow("val", CV_WINDOW_AUTOSIZE);
-		cvSetMouseCallback("val", Hoo, val);
-		cvNamedWindow("sat", CV_WINDOW_AUTOSIZE);
-		cvSetMouseCallback("sat", Goo, sat);
-		cvNamedWindow("hue", CV_WINDOW_AUTOSIZE);
-		cvSetMouseCallback("hue", Foo, hue);
-	}
-#endif
-
 	//Get a frame to find the image size
 	if (USEFILE) {
 		fprintf(stderr, "USEFILE is now no longer valid, seeing how "
 			"the existing code will only work on a yuyv array");
 	}
 
-#ifdef OPENCV
-	framesize = cvSize(CAMWIDTH, CAMHEIGHT);
-
-	if (DEBUGDISPLAY) {
-		srlog(DEBUG, "Allocating scratchpads");
-		hue = cvCreateImage(framesize, IPL_DEPTH_8U, 1);
-		sat = cvCreateImage(framesize, IPL_DEPTH_8U, 1);
-		val = cvCreateImage(framesize, IPL_DEPTH_8U, 1);
-	}
-#endif
-
 	srlog(DEBUG, "Beginning looping");
 	while (1){
 		srlog(DEBUG, "Press enter to grab a frame:");
 
-		if(!DEBUGDISPLAY) {
-			req_tag = wait_trigger();
-		}
-
 		srlog(DEBUG, "Grabbing frame");
 
-#ifdef OPENCV
-		if(DEBUGDISPLAY) {
-			cvShowImage("sat", sat);
-			cvShowImage("hue", hue);
-			cvShowImage("val", val);
-		}
-#endif
-
+#if 0
 		raw_data = get_v4l_frame();
 		if (!raw_data) {
 			fprintf(stderr, "Couldn't grab v4l frame!\n");
 			sleep(1);
 			continue;
 		}
-
-#ifdef OPENCV
-		if (DEBUGDISPLAY) {
-			oldframe = frame;
-			frame = make_rgb_image(raw_data, CAMWIDTH, CAMHEIGHT);
-			squish_raw_data_into_hsv(raw_data, CAMWIDTH, CAMHEIGHT,
-							hue, sat, val);
-		}
 #endif
+
+		raw_data = &big_aligned_fbuffer[0];
+		snprintf(buffer, 255, "yuyv%d", frame_no);
+		FILE *foo = fopen(buffer, "r");
+		if (foo == NULL) {
+			fprintf(stderr, "Can't find file %s\n", buffer);
+			exit(1);
+		}
+		fread(raw_data, 2 * CAMWIDTH * CAMHEIGHT, 1, foo);
+		fclose(foo);
+
+		loaded_blobs = (struct blob_position *)malloc(
+				sizeof(struct blob_position) * 1024);
+		memset(loaded_blobs, 0, sizeof(struct blob_position) * 1024);
+		snprintf(buffer, 255, "blobs%d", frame_no);
+		foo = fopen(buffer, "r");
+		if (foo == NULL) {
+			fprintf(stderr, "Can't find file %s\n", buffer);
+			exit(1);
+		}
+		struct stat filestat;
+		stat(buffer, &filestat);
+		fread(loaded_blobs, filestat.st_size, 1, foo);
+		fclose(foo);
 
 #ifdef USE_DSP
 		/* Calculating buffer size is less than dynamic; anyway */
@@ -278,54 +257,46 @@ main(int argc, char **argv)
 		for (i = 0; ; i++) {
 			if (blobs[i].x1 == 0 && blobs[i].x2 == 0)
 				break;
-
-#ifdef OPENCV
-			cvRectangle(frame, cvPoint(blobs[i].x1, blobs[i].y1),
-					cvPoint(blobs[i].x2, blobs[i].y2),
-					(blobs[i].colour == RED) ?
-							cvScalar(0, 0, 255) :
-					(blobs[i].colour == BLUE) ?
-						cvScalar(255, 0, 0) :
-						cvScalar(0, 255, 0), 1);
-#endif
+#if 0
 
 			w = blobs[i].x2 - blobs[i].x1;
 			h = blobs[i].y2 - blobs[i].y1;
 			printf("%d,%d,%d,%d,%d,%d\n", blobs[i].x1, blobs[i].y1,
 					w, h, w*h, blobs[i].colour);
+#endif
 		}
 
 		num_blobs = i;
 
-#ifdef OPENCV
-		if(DEBUGDISPLAY) {
-			cvShowImage("testcam", frame);
-			cvReleaseImage(&oldframe);
-			oldframe = NULL;
+		if (memcmp(blobs, loaded_blobs, num_blobs *
+				sizeof(struct blob_position))) {
+			fprintf(stderr, "Mismatch in blobs for img %d\n",
+								frame_no);
+		for (i = 0; ; i++) {
+			if (blobs[i].x1 == 0 && blobs[i].x2 == 0)
+				break;
+			w = blobs[i].x2 - blobs[i].x1;
+			h = blobs[i].y2 - blobs[i].y1;
+			printf("%d,%d,%d,%d,%d,%d\n", blobs[i].x1, blobs[i].y1,
+					w, h, w*h, blobs[i].colour);
 		}
-#endif
-
-		if (req_tag) {
-			fputs(req_tag, stdout);
-			free(req_tag);
+		printf("vs\n");
+		for (i = 0; ; i++) {
+			if (loaded_blobs[i].x1 == 0 && loaded_blobs[i].x2 == 0)
+				break;
+			w = loaded_blobs[i].x2 - loaded_blobs[i].x1;
+			h = loaded_blobs[i].y2 - loaded_blobs[i].y1;
+			printf("%d,%d,%d,%d,%d,%d\n", loaded_blobs[i].x1, loaded_blobs[i].y1, w, h, w*h, loaded_blobs[i].colour);
+		}
 		}
 
-		fputs("BLOBS\n", stdout);
-		fflush(stdout);
+		frame_no++;
 
-		srlog(DEBUG, "Saving frame to out.jpg");
-#ifdef spam
-		sprintf(buffer, "out%4d.jpg", rawr);
-		rawr++;
-		cvSaveImage(buffer, frame);
-#endif
+		free(loaded_blobs);
 
+#if 0
 		store_rgb_image(OUT_FILENAME, raw_data, CAMWIDTH, CAMHEIGHT,
 				blobs, num_blobs);
-
-#ifdef OPENCV
-		if (DEBUGDISPLAY)
-			cvWaitKey(100);
 #endif
 
 	}	//end while loop
