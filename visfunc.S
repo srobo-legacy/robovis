@@ -6,6 +6,8 @@
 #define		ST_SAVED_A11	12
 #define		ST_SAVED_A12	16
 #define		ST_SAVED_A13	20
+#define		ST_WIDTH	28
+#define		ST_RAW_DATA	48
 	.text
 	.globl	vis_find_blobs_through_scanlines
 	.align	5
@@ -25,9 +27,9 @@ vis_find_blobs_through_scanlines:
 		mv		B6,	A10
 		mv		A6,	A11
 		mv		B4,	A3
-		stw		A3,	*-A15(28)
+		stw		A3,	*-A15(ST_WIDTH)
 		mv		A4,	A0
-		stw		A0,	*-A15(48)
+		stw		A0,	*-A15(ST_RAW_DATA)
 		mvkl	.S1	dma_buffer,	A3
 		mvkl	.S1	284180480,	A5
 		mvkl	.S1	working_buffer,	A6
