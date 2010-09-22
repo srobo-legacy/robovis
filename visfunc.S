@@ -20,6 +20,7 @@ vis_find_blobs_through_scanlines:
 	||	mv		B15,	A15
 	||	sub		B15,	A0	,B15
 
+; So, Begin by saving volatile registers and arguments...
 		stw		A10,	*-A15(ST_SAVED_A10)
 		stw		A11,	*-A15(ST_SAVED_A11)
 		stw		A12,	*-A15(ST_SAVED_A12)
@@ -30,6 +31,8 @@ vis_find_blobs_through_scanlines:
 		stw		A3,	*-A15(ST_WIDTH)
 		mv		A4,	A0
 		stw		A0,	*-A15(ST_RAW_DATA)
+
+; Next up an inlined copy of reset_dma_state
 		mvkl	.S1	dma_buffer,	A3
 		mvkl	.S1	284180480,	A5
 		mvkl	.S1	working_buffer,	A6
