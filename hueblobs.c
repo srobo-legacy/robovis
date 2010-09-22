@@ -236,7 +236,7 @@ main(int argc, char **argv)
 		remove_buffer_from_dsp(); /* Unmap framebuffer */
 
 		/* Pick up the /correct/ set of blobs via arm-side calcs */
-		canonical_blobs = (struct blob_position *) malloc(
+		canonical_blobs = (struct blob_position *) calloc(1,
 				sizeof(struct blob_position *) * MAX_BLOBS);
 		vis_find_blobs_through_scanlines(raw_data, CAMWIDTH, CAMHEIGHT,
 							canonical_blobs);
