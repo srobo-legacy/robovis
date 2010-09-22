@@ -11,6 +11,7 @@ CFLAGS += -L../dsp-code/mpu_lib -lbridge
 
 CC = $(CROSS_COMPILE)gcc
 CXX = $(CROSS_COMPILE)g++
+DSP_AS = tic64x-as
 DSP_CC = clang -ccc-host-triple tms320c64x-unknown-unknown
 DSP_CXX = $(DSP_CC)
 DSP_CFLAGS = -I../dsp-code/dsp_include -I../dsp-code/mpu_include -O3
@@ -45,8 +46,13 @@ dsp.o: dsp.c
 dsp_dma.o: dsp_dma.c
 	$(DSP_CC) $(DSP_CFLAGS) -c dsp_dma.c -o dsp_dma.o $(SRFLAGS)
 
-visfunc.o: visfunc.c
-	$(DSP_CC) $(DSP_CFLAGS) -c visfunc.c -o visfunc.o $(SRFLAGS)
+visfunc.o: visfunc.S
+	cpp visfunc.S -o visfunc.s $(SRFLAGS)
+	$(DSP_AS) visfunc.s -o visfunc.o
+	rm visfunc.s
+
+#visfunc.o: visfunc.c
+#	$(DSP_CC) $(DSP_CFLAGS) -c visfunc.c -o visfunc.o $(SRFLAGS)
 
 dsp_trans_table.o: trans_table.c
 	$(DSP_CC) $(DSP_CFLAGS) -c trans_table.c -o dsp_trans_table.o $(SRFLAGS)
