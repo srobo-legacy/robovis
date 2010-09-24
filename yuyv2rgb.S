@@ -139,14 +139,6 @@ mv A18, A3	; Restore previous calculation
 		mv		A5,	A0
 .BB1_9:
 
-		ldw		*-A15(8),	A1
-		nop	.S1	4
-		mv		A1,	A3
-		shru	.S1	A3,	8,	A3
-		mv		A1,	A4
-		shru	.S1	A4,	16,	A4
-		mv		A1,	A5
-		shru	.S1	A5,	24,	A5
 		ldw		*-A15(12),	A1
 		nop	.S1	4
 		mv		A1,	A6
@@ -155,14 +147,12 @@ mv A18, A3	; Restore previous calculation
 		shru	.S1	A7,	16,	A7
 		mv		A1,	A8
 		shru	.S1	A8,	24,	A8
+
 		ldw		*-A15(32),	A1
-		nop	.S1	4
 		ldw		*-A15(8),	A2
-		nop	.S1	4
-		stb		A2,	*A1
-		stb		A3,	*+A1(1)
-		stb		A4,	*+A1(2)
-		stb		A5,	*+A1(3)
+		nop		4
+		stw		A2,	*A1
+
 		shru	.S1	A0,	8,	A3
 		shru	.S1	A0,	16,	A4
 		shru	.S1	A0,	24,	A5
