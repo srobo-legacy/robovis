@@ -40,6 +40,11 @@ yuyv2rgb:
 		nop	.S1	3
 		sub	.L1	A17,	A0,	A17
 
+		mvk	.S1	516,	A0
+		mpy32	.M1	A7,	A0,	A0
+		nop	.S1	3
+		add	.L1	A4,	A0,	A18
+
 		mv		A5,	A0
 		stw		A0,	*-A15(32)
 		mv		A8,	A0
@@ -108,14 +113,7 @@ mv A17, A3	; reload forwarded calc
 		stw		A0,	*-A15(12)
 .BB1_6:
 
-		mvk	.S1	516,	A3
-		ldw		*-A15(16),	A0
-		nop	.S1	4
-		mpy32	.M1	A0,	A3,	A3
-		nop	.S1	3
-		ldw		*-A15(20),	A0
-		nop	.S1	4
-		add	.L1	A0,	A3,	A3
+mv A18, A3	; Restore previous calculation
 		mvk	.S1	-1,	A4
 		cmpgt	.L1	A3,	A4,	A4
 		mv		A4,	A0
