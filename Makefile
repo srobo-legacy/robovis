@@ -46,16 +46,11 @@ dsp.o: dsp.c
 dsp_dma.o: dsp_dma.c
 	$(DSP_CC) $(DSP_CFLAGS) -c dsp_dma.c -o dsp_dma.o $(SRFLAGS)
 
-visfunc.o: visfunc.S
-	cpp visfunc.S -o visfunc.s $(SRFLAGS)
-	$(DSP_AS) visfunc.s -o visfunc.o
-	rm visfunc.s
-
 yuyv2rgb.o: yuyv2rgb.c
 	$(DSP_CC) $(DSP_CFLAGS) -c $< -o $@ $(SRFLAGS)
 
-#visfunc.o: visfunc.c
-#	$(DSP_CC) $(DSP_CFLAGS) -c visfunc.c -o visfunc.o $(SRFLAGS)
+visfunc.o: visfunc.c
+	$(DSP_CC) $(DSP_CFLAGS) -c visfunc.c -o visfunc.o $(SRFLAGS)
 
 dsp_trans_table.o: trans_table.c
 	$(DSP_CC) $(DSP_CFLAGS) -c trans_table.c -o dsp_trans_table.o $(SRFLAGS)
