@@ -29,6 +29,10 @@ yuyv2rgb:
 		mvk	.S1	-1,	A16
 		addk	.S1	-128,	A7
 		cmpgt	.L1	A9,	A16,	A16
+
+		mvk	.S1	100,	A0
+		mpy32	.M1	A7,	A0,	A17
+
 		mv		A5,	A0
 		stw		A0,	*-A15(32)
 		mv		A8,	A0
@@ -67,11 +71,7 @@ yuyv2rgb:
 		stw		A0,	*-A15(8)
 .BB1_3:
 
-		mvk	.S1	100,	A3
-		ldw		*-A15(16),	A0
-		nop	.S1	4
-		mpy32	.M1	A0,	A3,	A3
-		nop	.S1	3
+mv A17, A3	; reload forwarded calc
 		mvk	.S1	208,	A4
 		ldw		*-A15(20),	A0
 		nop	.S1	4
