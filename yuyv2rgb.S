@@ -57,22 +57,21 @@ yuyv2rgb:
 		stw		A0,	*-A15(12)
 		mv		A4,	A0
 		stw		A0,	*-A15(20)
+
+		; A16 -> is this > 0?
 		mv		A16,	A0
-	[ A0]	b	.S1	.BB1_2			;if nz, r <= 0
-		nop	.S1	4
-
-		mvk	.S1	0,	A9
-		mv		A9,	A0
-		stw		A0,	*-A15(8)
-		b	.S1	.BB1_3
-		nop	.S1	4
-.BB1_2:
-
-		shr	.S1	A9,	8,	A4	; calc'd value
+		shr	.S1	A9,	8,	A4	; calc final value
 		mvk	.S1	255,	A5
-		cmpgt	.L1	A4,	A5,	A6	; if calc'd > 255,
-		mv		A6,	A0
-	[!A0]	mv	.S1	A4,	A5		; if not; use calc'd
+		cmplt	.L1	A4,	A5,	A2	; if calc'd > 255,
+		mvk	.S1	0,	A1
+
+		; select from 255 or calcval
+	[ A2]	mv		A4,	A5		; It's < 255, select
+	[!A2]	mv		A5,	A5		; >= 255, clip
+
+		; And if it was < 0, clip to 0
+	[!A0]	mv		A1,	A5
+		; save
 		stw		A5,	*-A15(8)
 .BB1_3:
 
