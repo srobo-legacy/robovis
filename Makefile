@@ -51,14 +51,17 @@ visfunc.o: visfunc.S
 	$(DSP_AS) visfunc.s -o visfunc.o
 	rm visfunc.s
 
+yuyv2rgb.o: yuyv2rgb.c
+	$(DSP_CC) $(DSP_CFLAGS) -c $< -o $@ $(SRFLAGS)
+
 #visfunc.o: visfunc.c
 #	$(DSP_CC) $(DSP_CFLAGS) -c visfunc.c -o visfunc.o $(SRFLAGS)
 
 dsp_trans_table.o: trans_table.c
 	$(DSP_CC) $(DSP_CFLAGS) -c trans_table.c -o dsp_trans_table.o $(SRFLAGS)
 
-dsp.doff: dsp.o visfunc.o dsp_dma.o dsp_trans_table.o
-	tic64x-ld $(DSP_LDFLAGS) dsp.o dsp_dma.o visfunc.o dsp_trans_table.o -lsr_hacks -o dsp.doff --oformat=doff-c64x -r
+dsp.doff: dsp.o visfunc.o dsp_dma.o dsp_trans_table.o yuyv2rgb.o
+	tic64x-ld $(DSP_LDFLAGS) dsp.o dsp_dma.o visfunc.o dsp_trans_table.o yuyv2rgb.o -lsr_hacks -o dsp.doff --oformat=doff-c64x -r
 
 .PHONY: clean
 
