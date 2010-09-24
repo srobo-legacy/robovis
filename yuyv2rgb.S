@@ -58,7 +58,7 @@ yuyv2rgb:
 		mv		A4,	A0
 		stw		A0,	*-A15(20)
 		mv		A16,	A0
-	[ A0]	b	.S1	.BB1_2
+	[ A0]	b	.S1	.BB1_2			;if nz, r <= 0
 		nop	.S1	4
 
 		mvk	.S1	0,	A9
@@ -68,19 +68,12 @@ yuyv2rgb:
 		nop	.S1	4
 .BB1_2:
 
-		mv		A9,	A0
-		mvk	.S1	0,	A3
-		shr	.S1	A0,	8,	A4
+		shr	.S1	A9,	8,	A4	; calc'd value
 		mvk	.S1	255,	A5
-		cmpgt	.L1	A4,	A5,	A6
-		cmplt	.L1	A0,	A3,	A7
+		cmpgt	.L1	A4,	A5,	A6	; if calc'd > 255,
 		mv		A6,	A0
-	[!A0]	mv	.S1	A3,	A5
-		or	.D1	A6,	A7,	A3
-		mv		A3,	A0
-	[!A0]	mv	.S1	A4,	A5
-		mv		A5,	A0
-		stw		A0,	*-A15(8)
+	[!A0]	mv	.S1	A4,	A5		; if not; use calc'd
+		stw		A5,	*-A15(8)
 .BB1_3:
 
 mv A17, A3	; reload forwarded calc
