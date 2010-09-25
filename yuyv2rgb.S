@@ -54,6 +54,7 @@ yuyv2rgb:
 	||	mv		A3,	B2
 
 
+		; Clip r value
 		shr	.S1	A9,	8,	A5	; calc final value
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
 
@@ -62,33 +63,29 @@ yuyv2rgb:
 	||[!A1]	mv		A3,	A19		; >= 255, clip
 	||	mv		A16,	A0
 
-		; And if it was < 0, clip to 0. A16 contained previous comarison
-	[!A0]	mv		A4,	A19
-.BB1_3:
+	[!A0]	mv		A4,	A19		; If it was < 0, clip
 
 
+		; Clip g value
 		shr	.S1	A17,	8,	A5	; calc final value
 	||	cmpgt	.L1	A17,	A6,	A0	; are we > -1?
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
 
-		; select from 255 or calcval
 	[ A1]	mv		A5,	A20		; It's < 255, select
 	||[!A1]	mv		A3,	A20		; >= 255, clip
 
-		; And if it was < 0, clip to 0
-	[!A0]	mv		A4,	A20
+	[!A0]	mv		A4,	A20		; If it was < 0, clip
 
 
+		; Clip b value
 		shr	.S1	A18,	8,	A5	; calc final value
 	||	cmpgt	.L1	A18,	A6,	A0	; are we > -1?
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
 
-		; select from 255 or calcval
 	[ A1]	mv		A5,	A21		; It's < 255, select
 	||[!A1]	mv		A3,	A21		; >= 255, clip
 
-		; And if it was < 0, clip to 0
-	[!A0]	mv		A4,	A21
+	[!A0]	mv		A4,	A21		; If it was < 0, clip
 
 ; epilog
 		ldw		*-A15(4),	B3
