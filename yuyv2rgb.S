@@ -40,28 +40,28 @@ yuyv2rgb:
 	||	mvk		0,	B4
 		sub	.L1	A17,	A1,	A17	; Depends on prev insn
 	||	add		A4,	A2,	A18
+		; Clip r value on A side, g on B side, b on A
+	||	shr	.S1	A9,	8,	A5	; calc final value
 
-		; Clip r value on A side, g on B side
-		shr	.S1	A9,	8,	A5	; calc final value
-	||	shr	.S2X	A17,	8,	B17
+		shr	.S2X	A17,	8,	B17
+	||	shr	.S1	A18,	8,	A4
+	||	max2		A6,	A5,	A19
 
-		max2		A6,	A5,	A19
-	||	max2		B4,	B17,	B9
-
-		min2		A19,	A3,	A19
-	||	min2		B9,	B2,	B9
-
-		; Clip b value
-		shr	.S1	A18,	8,	A5	; calc final value
-	||	mvkh		0,		B9
-
-		max2		A6,	A5,	A21
-		min2		A3,	A21,	A21
-
-		b	.S2	B3			; EPILOG: return
-	||	mvkh		0,		A21
+		max2		B4,	B17,	B9
+	||	max2		A6,	A4,	A21
+	||	min2		A19,	A3,	A19
+	||	b	.S2	B3			; EPILOG: return
 		; Have to have precisely 5 insns following the return branch,
 		; or otherwise insert some nops
+
+		min2		B9,	B2,	B9
+	||	min2		A3,	A21,	A21
+	||	mvkh		0		A19
+
+		mvkh		0,		A21
+	||	mvkh		0,		B9
+
+
 
 
 		; Store rgb values back to output. If they're not word
@@ -70,4 +70,3 @@ yuyv2rgb:
 		stw	.D2T2	B9,		*B7
 		stw	.D2T1	A21,		*B8
 
-		nop	5
