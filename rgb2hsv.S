@@ -27,14 +27,9 @@ rgb2hsv:
 		mv		A1,		A9
 
 		cmpeq	.L1	0,	A17,	A16
-		mv		A5,	A0
-		stw		A0,	*-A15(24)
-		mv		A8,	A0
-		stw		A0,	*-A15(20)
-		mv		A3,	A0
-		stw		A0,	*-A15(16)
-		mv		A17,	A0
-		stw		A0,	*-A15(8)
+		mv		A5,	B2
+		mv		A8,	B1
+		mv		A3,	B0
 		mv		A16,	A0
 
 		; If v == 0, jmp - this is a valid branch to keep
@@ -122,15 +117,9 @@ rgb2hsv:
 
 		ldw		*-A15(12),	A1
 		nop	.S1	4
-		ldw		*-A15(24),	A2
-		nop	.S1	4
-		stw		A1,	*A2
-		ldw		*-A15(20),	A2
-		nop	.S1	4
-		stw		A0,	*A2
-		ldw		*-A15(16),	A0
-		nop	.S1	4
-		stw		A3,	*A0
+		stw		A1,	*B2
+		stw		A0,	*B1
+		stw		A3,	*B0
 
 
 		ldw		*-A15(4),	B3
