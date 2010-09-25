@@ -6,6 +6,9 @@
 ; Now at 6f2a93013b2815b08e18c8dae7fa2d145f34d767, 13 cycles, and the critical
 ; path is ability to load constants; then multiply latency; then clip()ing
 
+; Due to the use of max2/min2 and other hacks, in reality this function only
+; deals with hwords/shorts internally
+
 	.text
 	.globl	yuyv2rgb
 	.align	5
