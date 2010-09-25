@@ -32,14 +32,11 @@ yuyv2rgb:
 
 		mpy32	.M1X	A2,	B4,	A2
 
-		add	.L1	A4,	A0,	A4
-		add	.L1	A4,	A9,	A9
-
-		sub	.L1X	A4,	B5,	A17
-
-		sub	.L1	A17,	A1,	A17
-
-		add	.L1	A4,	A2,	A18
+		add	.L1	A4,	A0,	A4	; Depends on A4 mpy32...
+		add	.L1	A4,	A9,	A9	; Depends on prev insn
+		sub	.L1X	A4,	B5,	A17	; Depends on B5 mpy
+		sub	.L1	A17,	A1,	A17	; Depends on prev insn
+	||	add		A4,	A2,	A18
 
 		; save output pointers, load constants for comparisons
 		mvk		-1,	A6
