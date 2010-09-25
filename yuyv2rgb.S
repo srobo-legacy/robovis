@@ -29,14 +29,11 @@ yuyv2rgb:
 		mpy32	.M2	B4,	B0,	B5
 	||	mpy32	.M1X	A6,	B1,	A1
 	||	mvk	.S1	516,	A2
-	||	nop		2
 
 		mpy32	.M1X	A2,	B4,	A2
 
 		add	.L1	A4,	A0,	A4
 		add	.L1	A4,	A9,	A9
-		mvk	.S1	-1,	A16
-		cmpgt	.L1	A9,	A16,	A16
 
 		sub	.L1X	A4,	B5,	A17
 
@@ -52,12 +49,12 @@ yuyv2rgb:
 
 		; Clip r value
 		shr	.S1	A9,	8,	A5	; calc final value
+	||	cmpgt	.L1	A9,	A6,	A0	; are we > -1?
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
 
 		; select from 255 or calcval
 	[ A1]	mv		A5,	A19		; It's < 255, select
 	||[!A1]	mv		A3,	A19		; >= 255, clip
-	||	mv		A16,	A0
 
 	[!A0]	mv		A4,	A19		; If it was < 0, clip
 
