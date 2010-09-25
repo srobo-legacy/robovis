@@ -30,6 +30,7 @@ rgb2hsv:
 	||	mv		A0,	A24
 		mv		B9,	A9
 	||	cmpeq	.L1	0,	A17,	A1
+	||	ldw		*A25(A17),	A5	; trans_table load
 
 		; If v == 0, we write out all zeros
 	[ A1]	b	.S1	.writeout
@@ -39,9 +40,7 @@ rgb2hsv:
 
 		sub	.L1	A17,	A9,	A20	; diff = max - min
 		mv		A9,	A1
-		ldw		*A25(A17),	A3
-		nop	.S1	4
-		mpy32	.M1	A3,	A20,	A0
+		mpy32	.M1	A5,	A20,	A0
 		nop	.S1	3
 		shru	.S1	A0,	12,	A23
 		cmpeq	.L1	A17,	A1,	A3	; if (diff != 0)?
