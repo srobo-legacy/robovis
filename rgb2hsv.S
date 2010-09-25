@@ -23,11 +23,10 @@ rgb2hsv:
 	||	mvkl		trans_table,	A25
 		max2		A6,	A17,	A17
 	||	min2		B9,	A6,	B9
-	||	mv		A26,	A27
+	||	mv		A26,	A24
 	||	mvkh		trans_table,	A25
 		mvkh		0,		A17
 	||	mvkh		0,		B9
-	||	mv		A26,	A24
 		cmpeq		0,	A17,	A1
 	||	ldw		*A25(A17),	A5	; trans_table load
 	||	sub		A17,	B9,	A20	; diff = max - min
@@ -36,7 +35,7 @@ rgb2hsv:
 		; We don't require any nops here - if the branch isn't taken
 		; no-one cares, and if it /is/ taken, it still doesn't matter
 		; so long as nothing in the following five cycles alters
-		; A24, A26, or A27 where the zeros being written out lie
+		; A24, A26, or A17 where the zeros being written out lie
 
 .calcsat:
 
@@ -90,16 +89,16 @@ rgb2hsv:
 		min2		A3,	A26,	A26
 		mvkh		0,	A26
 
-		max2		A4,	A17,	A5
-		min2		A3,	A5,	A27
-		mvkh		0,	A27
+		max2		A4,	A17,	A17
+		min2		A3,	A17,	A17
+		mvkh		0,	A17
 
 .writeout:
 
 
 		stw		A24,	*B6
 		stw		A26,	*B7
-		stw		A27,	*B8
+		stw		A17,	*B8
 
 
 		ldw		*-A15(4),	B3
