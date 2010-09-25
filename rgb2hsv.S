@@ -48,14 +48,13 @@ rgb2hsv:
 		nop	.S1	5
 .BB1_2:
 
-		sub	.L1	A17,	A9,	A0	; diff = max - min
+		sub	.L1	A17,	A9,	A20	; diff = max - min
 		mv		A9,	A1
-		stw		A0,	*-A15(32)
 		mvkl	.S1	trans_table,	A3
 		mvkh	.S1	trans_table,	A3
 		ldw		*A3(A17),	A3
 		nop	.S1	4
-		mpy32	.M1	A3,	A0,	A0
+		mpy32	.M1	A3,	A20,	A0
 		nop	.S1	3
 		shru	.S1	A0,	12,	A0
 		cmpeq	.L1	A17,	A1,	A3	; if (diff != 0)?
@@ -90,9 +89,7 @@ rgb2hsv:
 		mv		A17,	A5
 		cmpeq	.L1	A5,	A0,	A5
 		mvkl	.S1	trans_table,	A6
-		ldw		*-A15(32),	A2
-		nop	.S1	4
-		shl	.S1	A2,	2,	A7
+		shl	.S1	A20,	2,	A7
 		mv		A5,	A2
 	[!A2]	mv	.S1	A3,	A4
 		ldw		*-A15(12),	A2
