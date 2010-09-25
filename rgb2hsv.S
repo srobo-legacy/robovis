@@ -56,9 +56,8 @@ rgb2hsv:
 		nop	.S1	4
 		mpy32	.M1	A3,	A20,	A0
 		nop	.S1	3
-		shru	.S1	A0,	12,	A0
+		shru	.S1	A0,	12,	A23
 		cmpeq	.L1	A17,	A1,	A3	; if (diff != 0)?
-		stw		A0,	*-A15(28)
 		mv		A3,	A1
 	[ A1]	mvk		0,	A0
 	[ A1]	b	.S1	.clipping
@@ -110,10 +109,7 @@ rgb2hsv:
 .BB1_8:
 
 		mvk	.S1	255,	A0
-		ldw		*-A15(28),	A1
-		nop	.S1	4
-		mv		A1,	A3
-		cmpgtu	.L1	A3,	A0,	A3
+		cmpgtu	.L1	A23,	A0,	A3
 		mvk	.S1	256,	A4
 		mv		A3,	A2
 	[!A2]	mv	.S1	A1,	A0
