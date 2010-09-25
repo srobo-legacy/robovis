@@ -35,7 +35,7 @@ rgb2hsv:
 		; If v == 0, we write out all zeros
 		mvk		0,	A0
 	[ A1]	mv		A0,	A3
-	[ A1]	stw		A0,	*-A15(12)
+	[ A1]	mv		A0,	A24
 	[ A1]	b	.S1	.writeout
 		nop	.S1	5
 
@@ -94,10 +94,8 @@ rgb2hsv:
 		mvk		0,	A4
 
 		max2		A4,	A0,	A0
-		min2		A3,	A0,	A0
-		mvkh		0,	A0
-
-		stw		A0,	*-A15(12)
+		min2		A3,	A0,	A24
+		mvkh		0,	A24
 
 		max2		A4,	A23,	A0
 		min2		A3,	A0,	A0
@@ -110,9 +108,7 @@ rgb2hsv:
 .writeout:
 
 
-		ldw		*-A15(12),	A1
-		nop	.S1	4
-		stw		A1,	*B2
+		stw		A24,	*B2
 		stw		A0,	*B1
 		stw		A3,	*B0
 
