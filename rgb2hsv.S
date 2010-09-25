@@ -89,16 +89,14 @@ rgb2hsv:
 		shl	.S1	A20,	2,	A7
 		mv		A5,	A2
 	[!A2]	mv	.S1	A3,	A4
-		mv		A21,	A3
-		sub	.L1	A3,	A0,	A3
+		sub	.L1	A21,	A0,	A3
 		mv		A17,	A5
 		cmpeq	.L1	A5,	A1,	A5
 		mv		A5,	A2
 	[!A2]	mv	.S1	A4,	A3
 		sub	.L1	A0,	A1,	A0
 		mv		A17,	A4
-		mv		A21,	A8
-		cmpeq	.L1	A4,	A8,	A4
+		cmpeq	.L1	A4,	A21,	A4
 		shr	.S1	A7,	2,	A7
 		mv		A4,	A1
 	[!A1]	mv	.S1	A3,	A0
