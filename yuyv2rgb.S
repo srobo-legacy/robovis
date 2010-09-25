@@ -1,5 +1,8 @@
 	.file	"yuyv2rgb.c"
 
+; NB, my count of cycles in rev c0a539175c3eb4575d55320edaa41ef535dec0b7 is
+; 183 plus 3 paths that lead to 5 extra cycles. My count for rev
+; a85b8ad1c87697f7b1ee56a91e75848d418d99c4 says this is now 21 cycles ever time.
 
 	.text
 	.globl	yuyv2rgb
