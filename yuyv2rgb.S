@@ -3,6 +3,8 @@
 ; NB, my count of cycles in rev c0a539175c3eb4575d55320edaa41ef535dec0b7 is
 ; 183 plus 3 paths that lead to 5 extra cycles. My count for rev
 ; a85b8ad1c87697f7b1ee56a91e75848d418d99c4 says this is now 21 cycles ever time.
+; Now at 6f2a93013b2815b08e18c8dae7fa2d145f34d767, 13 cycles, and the critical
+; path is ability to load constants; then multiply latency; then clip()ing
 
 	.text
 	.globl	yuyv2rgb
