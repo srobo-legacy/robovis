@@ -6,13 +6,6 @@
 	.align	5
 	.type	rgb2hsv,@function
 rgb2hsv:
-		mvk		40,	A0
-	||	mv		B15,	A1
-		stw		A15,	*B15
-	||	stw		B3,	*-A1(4)
-	||	mv		B15,	A15
-	||	sub		B15,	A0	,B15
-
 		mv		A8,	B7
 	||	mvk		0,	A26
 
@@ -82,14 +75,14 @@ rgb2hsv:
 
 .clipping:
 		mvk		255,	A3
-	||	mvk		255,	B3
+	||	mvk		255,	B2
 		mvk		0,	A4
 	||	mvk		0,	B4
 
 		max2		A4,	A24,	A24
 	||	max2		B4,	A23,	B5
 		min2		A3,	A24,	A24
-	||	min2		B3,	B5,	B5
+	||	min2		B2,	B5,	B5
 		mvkh		0,	A24
 	||	mvkh		0,	B5
 	||	max2		A4,	A17,	A17
@@ -105,12 +98,6 @@ rgb2hsv:
 		stw		A24,	*B6
 		stw		A26,	*B7
 		stw		A17,	*B8
-
-
-		ldw		*-A15(4),	B3
-		mv		A15,	B15
-	||	ldw		*A15,	A15
-		nop		4
 
 		bnop	.S2	B3,	5
 
