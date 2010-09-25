@@ -30,18 +30,14 @@ rgb2hsv:
 		mv		A5,	B2
 		mv		A8,	B1
 		mv		A3,	B0
-		mv		A16,	A0
+		mv		A16,	A1
 
-		; If v == 0, jmp - this is a valid branch to keep
-	[!A0]	b	.S1	.BB1_2
+		mvk		0,	A0
+	[ A1]	mv		A0,	A3
+	[ A1]	stw		A0,	*-A15(12)
+	[ A1]	b	.S1	.BB1_11
 		nop	.S1	5
 
-		mvk	.S1	0,	A7
-		mv		A7,	A0		; s and h = 0?
-		mv		A7,	A3
-		stw		A0,	*-A15(12)
-		b	.S1	.BB1_11
-		nop	.S1	5
 .BB1_2:
 
 		sub	.L1	A17,	A9,	A20	; diff = max - min
