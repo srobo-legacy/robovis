@@ -43,7 +43,8 @@ rgb2hsv:
 	||	cmpeq	.L1X	A17,	B9,	A1	; if (diff != 0)?
 		nop	.S1	3			; unavoidable
 		shru	.S1	A0,	12,	A23
-	||	mvk		0,	A24
+		; Can't make this any shorter, branch to writeout executes
+		; up to this point
 	[ A1]	b	.S1	.clipping
 
 .calch:
