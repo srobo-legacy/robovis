@@ -14,23 +14,24 @@ rgb2hsv:
 	||	sub		B15,	A0	,B15
 
 		mv		A8,	B7
-		mv		B4,	A7
+	||	mvk		0,	A0
 
+		; Calculate min/max of [r,g,b], load [h,s,v] = 0 in case we
+		; end up with v = 0 and writing out early
 		max2		A4,	B4,	A17
 	||	min2		B4,	A4,	B9
+	||	mvkl		trans_table,	A25
 		max2		A6,	A17,	A17
 	||	min2		B9,	A6,	B9
+	||	mv		A0,	A3
+	||	mvkh		trans_table,	A25
 		mvkh		0,		A17
 	||	mvkh		0,		B9
+	||	mv		A0,	A24
 		mv		B9,	A9
-
-		cmpeq	.L1	0,	A17,	A16
-		mv		A16,	A1
+	||	cmpeq	.L1	0,	A17,	A1
 
 		; If v == 0, we write out all zeros
-		mvk		0,	A0
-	[ A1]	mv		A0,	A3
-	[ A1]	mv		A0,	A24
 	[ A1]	b	.S1	.writeout
 		nop	.S1	5
 
@@ -38,9 +39,7 @@ rgb2hsv:
 
 		sub	.L1	A17,	A9,	A20	; diff = max - min
 		mv		A9,	A1
-		mvkl	.S1	trans_table,	A3
-		mvkh	.S1	trans_table,	A3
-		ldw		*A3(A17),	A3
+		ldw		*A25(A17),	A3
 		nop	.S1	4
 		mpy32	.M1	A3,	A20,	A0
 		nop	.S1	3
@@ -54,11 +53,11 @@ rgb2hsv:
 .calch:
 		; for this block, 'v' is A17
 		mv		A6,	A21			; keep 'b' value
-		sub	.L1	A7,	A21,	A9
+		sub	.L1X	B4,	A21,	A9
 		sub	.L1	A21,	A4,	A3
-		sub	.L1	A4,	A7,	A8
+		sub	.L1X	A4,	B4,	A8
 		cmpeq	.L1	A17,	A4,	A2
-		cmpeq	.L1	A17,	A7,	A1
+		cmpeq	.L1X	A17,	B4,	A1
 		cmpeq	.L1	A17,	A21,	A0
 	[!A2]	mvk	.S1	0,	A9
 	[!A1]	mv	.S1	A9,	A3
@@ -67,9 +66,7 @@ rgb2hsv:
 	[ A1]	addk		60,	A22
 	[ A0]	addk		120,	A22
 
-		mvkl	.S1	trans_table,	A6
-		mvkh	.S1	trans_table,	A6
-		ldw		*A6(A20),	A3
+		ldw		*A25(A20),	A3
 		nop	.S1	4
 		mvkl	.S1	262144,	A6
 		mvkh	.S1	262144,	A6
