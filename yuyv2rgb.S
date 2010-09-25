@@ -13,8 +13,7 @@ yuyv2rgb:
 	||	mv		B15,	A15
 	||	sub		B15,	A0	,B15
 
-		mv		B8,	A3
-		mv		B6,	A5
+		mv		A8,	B7
 		mv		B4,	A7
 		mvk	.S1	298,	A9
 		addk	.S1	-128,	A6
@@ -47,11 +46,8 @@ yuyv2rgb:
 
 		; save output pointers, load constants for comparisons
 		mvk		-1,	A6
-	||	mv		A5,	B0
 		mvk		0,	A4
-	||	mv		A8,	B1
 		mvk		255,	A3
-	||	mv		A3,	B2
 
 
 		; Clip r value
@@ -94,9 +90,9 @@ yuyv2rgb:
 
 		; Store rgb values back to output. If they're not word
 		; aligned pointers, that's the callers problem.
-		stw	.D2T1	A19,		*B0
-		stw	.D2T1	A20,		*B1
-		stw	.D2T1	A21,		*B2
+		stw	.D2T1	A19,		*B6
+		stw	.D2T1	A20,		*B7
+		stw	.D2T1	A21,		*B8
 
 		bnop	.S2	B3,	5
 
