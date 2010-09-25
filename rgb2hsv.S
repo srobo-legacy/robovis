@@ -14,7 +14,7 @@ rgb2hsv:
 	||	sub		B15,	A0	,B15
 
 		mv		A8,	B7
-	||	mvk		0,	A0
+	||	mvk		0,	A26
 
 		; Calculate min/max of [r,g,b], load [h,s,v] = 0 in case we
 		; end up with v = 0 and writing out early
@@ -23,11 +23,11 @@ rgb2hsv:
 	||	mvkl		trans_table,	A25
 		max2		A6,	A17,	A17
 	||	min2		B9,	A6,	B9
-	||	mv		A0,	A3
+	||	mv		A26,	A27
 	||	mvkh		trans_table,	A25
 		mvkh		0,		A17
 	||	mvkh		0,		B9
-	||	mv		A0,	A24
+	||	mv		A26,	A24
 		cmpeq		0,	A17,	A1
 	||	ldw		*A25(A17),	A5	; trans_table load
 	||	sub		A17,	B9,	A20	; diff = max - min
@@ -86,20 +86,20 @@ rgb2hsv:
 		min2		A3,	A0,	A24
 		mvkh		0,	A24
 
-		max2		A4,	A23,	A0
-		min2		A3,	A0,	A0
-		mvkh		0,	A0
+		max2		A4,	A23,	A26
+		min2		A3,	A26,	A26
+		mvkh		0,	A26
 
 		max2		A4,	A17,	A5
-		min2		A3,	A5,	A3
-		mvkh		0,	A3
+		min2		A3,	A5,	A27
+		mvkh		0,	A27
 
 .writeout:
 
 
 		stw		A24,	*B6
-		stw		A0,	*B7
-		stw		A3,	*B8
+		stw		A26,	*B7
+		stw		A27,	*B8
 
 
 		ldw		*-A15(4),	B3
