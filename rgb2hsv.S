@@ -42,12 +42,12 @@ rgb2hsv:
 		mpy32	.M1	A5,	A20,	A0
 	||	cmpeq	.L1X	A17,	B9,	A1	; if (diff != 0)?
 		nop	.S1	3			; unavoidable
+	||	ldw		*A25(A20),	A7	; Preload for calch
 		shru	.S1	A0,	12,	A23
 		; Can't make this any shorter, branch to writeout executes
 		; up to this point
 	||	mv		A6,	B0		; Move stuff around for
 	||	mv		B4,	A5		; calch code
-	||	ldw		*A25(A20),	A7	; Preload for calch
 
 .calch:
 	[ A1]	b	.S1	.clipping
@@ -64,20 +64,20 @@ rgb2hsv:
 
 	[!A0]	mv		A3,	A8
 	||[ B1]	addk		60,	B1
+	||	mvkl		262144,	A6
 
 	[ A0]	addk		120,	B1
+	||	mvkh	.S1	262144,	A6
+	||	mpy32	.M1	A8,	A7,	A0
+	||	mvk		15,	B2
 
-		mvkl	.S1	262144,	A6
-		mvkh	.S1	262144,	A6
-		mpy32	.M1	A8,	A7,	A0
+		; This entire sequence is critical-path'd up
 		nop	.S1	3
-		mvk	.S1	15,	A3
-		mpy32	.M1	A0,	A3,	A0
+		mpy32	.M1X	A0,	B2,	A0
 		nop	.S1	3
 		add	.L1	A0,	A6,	A0
 		shr	.S1	A0,	19,	A0
 		add		A0,	B1,	A24
-
 
 
 .clipping:
