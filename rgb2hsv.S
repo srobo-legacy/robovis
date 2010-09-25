@@ -9,26 +9,27 @@ rgb2hsv:
 		mv		A8,	B7
 	||	mvk		0,	A26
 
-		; Calculate min/max of [r,g,b], load [h,s,v] = 0 in case we
-		; end up with v = 0 and writing out early
+		; Calculate min/max of [r,g,b], store [h,s,v] = 0 in case we
+		; end up with v = 0 and exiting
 		max2		A4,	B4,	A17
 	||	min2		B4,	A4,	B9
 	||	mvkl		trans_table,	A25
+	||	stw		A26,	*B6
 		max2		A6,	A17,	A17
 	||	min2		B9,	A6,	B9
-	||	mv		A26,	A24
+	||	stw		A26,	*B7
 	||	mvkh		trans_table,	A25
 		mvkh		0,		A17
 	||	mvkh		0,		B9
+	||	stw		A26,	*B8
 		cmpeq		0,	A17,	A1
 	||	ldw		*A25(A17),	A5	; trans_table load
 	||	sub		A17,	B9,	A20	; diff = max - min
 		; If v == 0, we write out all zeros
-	||[ A1]	b	.S2	.writeout
+	||[ A1]	b		B3
 		; We don't require any nops here - if the branch isn't taken
 		; no-one cares, and if it /is/ taken, it still doesn't matter
-		; so long as nothing in the following five cycles alters
-		; A24, A26, or A17 where the zeros being written out lie
+		; because we've written our return data out already
 
 .calcsat:
 
