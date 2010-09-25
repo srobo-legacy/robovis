@@ -17,14 +17,13 @@ rgb2hsv:
 		mv		B6,	A5
 		mv		B4,	A7
 
-		max2		A4,	B4,	A0
-		max2		A6,	A0,	A0
-		min2		A4,	B4,	A1
-		min2		A6,	A1,	A1
-		mvkh		0,		A0
-		mvkh		0,		A1
-		mv		A0,		A17
-		mv		A1,		A9
+		max2		A4,	B4,	A17
+	||	min2		B4,	A4,	B9
+		max2		A6,	A17,	A17
+	||	min2		B9,	A6,	B9
+		mvkh		0,		A17
+	||	mvkh		0,		B9
+		mv		B9,	A9
 
 		cmpeq	.L1	0,	A17,	A16
 		mv		A5,	B2
