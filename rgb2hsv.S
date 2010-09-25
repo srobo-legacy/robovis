@@ -67,15 +67,7 @@ rgb2hsv:
 		mv		A7,	A0
 .BB1_4:
 
-		; Looks like, despite being high up in this function, this
-		; corresponds to the end of the if (diff != 0) block
-		mvk	.S1	0,	A3
-		cmplt	.L1	A0,	A3,	A4
-		mv		A4,	A1
-	[!A1]	mv	.S1	A0,	A3
-		mv		A3,	A0
-		stw		A0,	*-A15(12)
-		b	.S1	.BB1_8
+		b	.S1	.clipping
 		nop	.S1	5
 .BB1_5:
 		; for this block, 'v' is A17
@@ -108,17 +100,17 @@ rgb2hsv:
 		shr	.S1	A0,	19,	A0
 		add		A22,	A0,	A0
 
+
+
+; clipping of h occuring?
+.clipping:
 		mvk	.S1	255,	A3
-		cmpgt	.L1	A0,	A3,	A3
-		mv		A3,	A1
-	[ A1]	b	.S1	.BB1_7
-		nop	.S1	5
+		mvk		0,	A4
 
-		b	.S1	.BB1_4
-		nop	.S1	5
-.BB1_7:
+		max2		A4,	A0,	A0
+		min2		A3,	A0,	A0
+		mvkh		0,	A0
 
-		mvk	.S1	255,	A0
 		stw		A0,	*-A15(12)
 .BB1_8:
 
