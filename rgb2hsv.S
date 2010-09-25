@@ -81,20 +81,15 @@ rgb2hsv:
 		; for this block, 'v' is A17
 		mv		A4,	A0
 		mv		A7,	A1
-		mv		A6,	A2
-		stw		A2,	*-A15(12)
+		mv		A6,	A21			; keep 'b' value
 		mvk	.S1	0,	A3
-		mv		A2,	A5
-		sub	.L1	A1,	A5,	A4
+		sub	.L1	A1,	A21,	A4
 		mv		A17,	A5
 		cmpeq	.L1	A5,	A0,	A5
-		mvkl	.S1	trans_table,	A6
 		shl	.S1	A20,	2,	A7
 		mv		A5,	A2
 	[!A2]	mv	.S1	A3,	A4
-		ldw		*-A15(12),	A2
-		nop	.S1	4
-		mv		A2,	A3
+		mv		A21,	A3
 		sub	.L1	A3,	A0,	A3
 		mv		A17,	A5
 		cmpeq	.L1	A5,	A1,	A5
@@ -102,14 +97,13 @@ rgb2hsv:
 	[!A2]	mv	.S1	A4,	A3
 		sub	.L1	A0,	A1,	A0
 		mv		A17,	A4
-		ldw		*-A15(12),	A2
-		nop	.S1	4
-		mv		A2,	A8
+		mv		A21,	A8
 		cmpeq	.L1	A4,	A8,	A4
-		mvkh	.S1	trans_table,	A6
 		shr	.S1	A7,	2,	A7
 		mv		A4,	A1
 	[!A1]	mv	.S1	A3,	A0
+		mvkl	.S1	trans_table,	A6
+		mvkh	.S1	trans_table,	A6
 		ldw		*A6(A7),	A3
 		nop	.S1	4
 		mvkl	.S1	262144,	A6
