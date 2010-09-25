@@ -117,28 +117,22 @@ rgb2hsv:
 		mvk	.S1	256,	A4
 		mv		A3,	A2
 	[!A2]	mv	.S1	A1,	A0
-		ldw		*-A15(8),	A1
-		nop	.S1	4
-		cmplt	.L1	A1,	A4,	A3
+		cmplt	.L1	A17,	A4,	A3
 		mv		A3,	A1
 	[ A1]	b	.S1	.BB1_10
 		nop	.S1	5
 
 		mvk	.S1	255,	A3
 		mv		A3,	A1
-		stw		A1,	*-A15(8)
+		mv		A3,	A17
 		b	.S1	.BB1_11
 		nop	.S1	5
 .BB1_10:
 
 		mvk	.S1	0,	A3
-		ldw		*-A15(8),	A1
-		nop	.S1	4
-		cmplt	.L1	A1,	A3,	A4
+		cmplt	.L1	A17,	A3,	A4
 		mv		A4,	A2
-	[!A2]	mv	.S1	A1,	A3
-		mv		A3,	A1
-		stw		A1,	*-A15(8)
+	[!A2]	mv	.S1	A17,	A3
 .BB1_11:
 
 		ldw		*-A15(12),	A1
@@ -146,14 +140,12 @@ rgb2hsv:
 		ldw		*-A15(24),	A2
 		nop	.S1	4
 		stw		A1,	*A2
-		ldw		*-A15(8),	A1
-		nop	.S1	4
 		ldw		*-A15(20),	A2
 		nop	.S1	4
 		stw		A0,	*A2
 		ldw		*-A15(16),	A0
 		nop	.S1	4
-		stw		A1,	*A0
+		stw		A3,	*A0
 
 
 		ldw		*-A15(4),	B3
