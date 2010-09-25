@@ -58,14 +58,12 @@ yuyv2rgb:
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
 
 		; select from 255 or calcval
-	[ A1]	mv		A5,	A5		; It's < 255, select
-	[!A1]	mv		A3,	A5		; >= 255, clip
+	[ A1]	mv		A5,	A19		; It's < 255, select
+	[!A1]	mv		A3,	A19		; >= 255, clip
 
 		; And if it was < 0, clip to 0. A16 contains previous comarison
 		mv		A16,	A0
-	[!A0]	mv		A4,	A5
-		; save
-		mv		A5,	A19
+	[!A0]	mv		A4,	A19
 .BB1_3:
 
 
@@ -75,13 +73,11 @@ yuyv2rgb:
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
 
 		; select from 255 or calcval
-	[ A1]	mv		A5,	A5		; It's < 255, select
-	[!A1]	mv		A3,	A5		; >= 255, clip
+	[ A1]	mv		A5,	A20		; It's < 255, select
+	[!A1]	mv		A3,	A20		; >= 255, clip
 
 		; And if it was < 0, clip to 0
-	[!A0]	mv		A4,	A5
-		; save
-		mv		A5,	A20
+	[!A0]	mv		A4,	A20
 
 
 		cmpgt	.L1	A18,	A6,	A0
@@ -90,13 +86,11 @@ yuyv2rgb:
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
 
 		; select from 255 or calcval
-	[ A1]	mv		A5,	A5		; It's < 255, select
-	[!A1]	mv		A3,	A5		; >= 255, clip
+	[ A1]	mv		A5,	A21		; It's < 255, select
+	[!A1]	mv		A3,	A21		; >= 255, clip
 
 		; And if it was < 0, clip to 0
-	[!A0]	mv		A4,	A5
-		; save
-		mv		A5,	A0
+	[!A0]	mv		A4,	A21
 
 ; epilog
 		ldw		*-A15(4),	B3
@@ -107,7 +101,7 @@ yuyv2rgb:
 		; aligned pointers, that's the callers problem.
 		stw	.D2T1	A19,		*B0
 		stw	.D2T1	A20,		*B1
-		stw	.D2T1	A0,		*B2
+		stw	.D2T1	A21,		*B2
 
 		bnop	.S2	B3,	5
 
