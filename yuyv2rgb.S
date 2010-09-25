@@ -42,6 +42,9 @@ yuyv2rgb:
 	||	add		A4,	A2,	A18
 		; Clip r value on A side, g on B side, b on A
 	||	shr	.S1	A9,	8,	A5	; calc final value
+	||	b	.S2	B3			; EPILOG: return
+		; Have to have precisely 5 insns following the return branch,
+		; or otherwise insert some nops
 
 		shr	.S2X	A17,	8,	B17
 	||	shr	.S1	A18,	8,	A4
@@ -50,9 +53,6 @@ yuyv2rgb:
 		max2		B4,	B17,	B9
 	||	max2		A6,	A4,	A21
 	||	min2		A19,	A3,	A19
-	||	b	.S2	B3			; EPILOG: return
-		; Have to have precisely 5 insns following the return branch,
-		; or otherwise insert some nops
 
 		min2		B9,	B2,	B9
 	||	min2		A3,	A21,	A21
@@ -60,13 +60,10 @@ yuyv2rgb:
 
 		mvkh		0,		A21
 	||	mvkh		0,		B9
-
-
-
-
+	||	stw	.D2T1	A19,		*B6
+	||	mv		B7,		A0
 		; Store rgb values back to output. If they're not word
 		; aligned pointers, that's the callers problem.
-		stw	.D2T1	A19,		*B6
-		stw	.D2T2	B9,		*B7
 		stw	.D2T1	A21,		*B8
+	||	stw	.D1T2	B9,		*A0
 
