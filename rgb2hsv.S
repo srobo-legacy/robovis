@@ -13,8 +13,7 @@ rgb2hsv:
 	||	mv		B15,	A15
 	||	sub		B15,	A0	,B15
 
-		mv		B8,	A3
-		mv		B6,	A5
+		mv		A8,	B7
 		mv		B4,	A7
 
 		max2		A4,	B4,	A17
@@ -26,9 +25,6 @@ rgb2hsv:
 		mv		B9,	A9
 
 		cmpeq	.L1	0,	A17,	A16
-		mv		A5,	B2
-		mv		A8,	B1
-		mv		A3,	B0
 		mv		A16,	A1
 
 		; If v == 0, we write out all zeros
@@ -107,9 +103,9 @@ rgb2hsv:
 .writeout:
 
 
-		stw		A24,	*B2
-		stw		A0,	*B1
-		stw		A3,	*B0
+		stw		A24,	*B6
+		stw		A0,	*B7
+		stw		A3,	*B8
 
 
 		ldw		*-A15(4),	B3
