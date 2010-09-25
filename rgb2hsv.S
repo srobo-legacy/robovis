@@ -89,8 +89,10 @@ rgb2hsv:
 	[!A2]	mvk	.S1	0,	A9
 	[!A1]	mv	.S1	A9,	A3
 	[!A0]	mv	.S1	A3,	A8
-		mv		A1,	A5
-		mv		A0,	A4
+		mvk		0,	A22
+	[ A1]	addk		60,	A22
+	[ A0]	addk		120,	A22
+
 		mvkl	.S1	trans_table,	A6
 		mvkh	.S1	trans_table,	A6
 		ldw		*A6(A20),	A3
@@ -104,14 +106,7 @@ rgb2hsv:
 		mvkh	.S1	262144,	A6
 		add	.L1	A0,	A6,	A0
 		shr	.S1	A0,	19,	A0
-		mv		A0,	A3
-		addk	.S1	60,	A3
-		mv		A5,	A1
-	[!A1]	mv	.S1	A0,	A3
-		mv		A3,	A0
-		addk	.S1	120,	A0
-		mv		A4,	A1
-	[!A1]	mv	.S1	A3,	A0
+		add		A22,	A0,	A0
 		mvk	.S1	255,	A3
 		cmpgt	.L1	A0,	A3,	A3
 		mv		A3,	A1
