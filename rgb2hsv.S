@@ -44,20 +44,19 @@ rgb2hsv:
 		nop	.S1	3			; unavoidable
 		shru	.S1	A0,	12,	A23
 	||	mv		A6,	B0		; Move stuff around for
-	||	mv		A6,	A21		; calch code
-	||	mv		B4,	A5
+	||	mv		B4,	A5		; calch code
 		; Can't make this any shorter, branch to writeout executes
 		; up to this point
 
 .calch:
 	[ A1]	b	.S1	.clipping
 	||	sub		B4,	B0,	B9
-	||	sub		A21,	A4,	A3
+	||	sub		A6,	A4,	A3
 	||	cmpeq		A17,	A4,	A2
 	||	cmpeq		B4,	A17,	B1
 
 		sub		A4,	A5,	A8
-	||	cmpeq		A17,	A21,	A0
+	||	cmpeq		A17,	A6,	A0
 	||[!A2]	mvk		0,	B9
 	||[!B1]	mv		B9,	A3
 	||	mvk		0,	B1
