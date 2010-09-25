@@ -43,25 +43,29 @@ rgb2hsv:
 	||	cmpeq	.L1X	A17,	B9,	A1	; if (diff != 0)?
 		nop	.S1	3			; unavoidable
 		shru	.S1	A0,	12,	A23
+	||	mv		A6,	B0		; Move stuff around for
+	||	mv		A6,	A21		; calch code
+	||	mv		B4,	A5
 		; Can't make this any shorter, branch to writeout executes
 		; up to this point
-	[ A1]	b	.S1	.clipping
 
 .calch:
-		; for this block, 'v' is A17
-		mv		A6,	A21			; keep 'b' value
-		sub	.L1X	B4,	A21,	A9
-		sub	.L1	A21,	A4,	A3
-		sub	.L1X	A4,	B4,	A8
-		cmpeq	.L1	A17,	A4,	A2
-		cmpeq	.L1X	A17,	B4,	A1
-		cmpeq	.L1	A17,	A21,	A0
-	[!A2]	mvk	.S1	0,	A9
-	[!A1]	mv	.S1	A9,	A3
-	[!A0]	mv	.S1	A3,	A8
-		mvk		0,	A22
-	[ A1]	addk		60,	A22
-	[ A0]	addk		120,	A22
+	[ A1]	b	.S1	.clipping
+	||	sub		B4,	B0,	B9
+	||	sub		A21,	A4,	A3
+	||	cmpeq		A17,	A4,	A2
+	||	cmpeq		B4,	A17,	B1
+
+		sub		A4,	A5,	A8
+	||	cmpeq		A17,	A21,	A0
+	||[!A2]	mvk		0,	B9
+	||[!B1]	mv		B9,	A3
+	||	mvk		0,	B1
+
+	[!A0]	mv		A3,	A8
+	||[ B1]	addk		60,	B1
+
+	[ A0]	addk		120,	B1
 
 		ldw		*A25(A20),	A3
 		nop	.S1	4
@@ -74,7 +78,7 @@ rgb2hsv:
 		nop	.S1	3
 		add	.L1	A0,	A6,	A0
 		shr	.S1	A0,	19,	A0
-		add		A22,	A0,	A24
+		add		A0,	B1,	A24
 
 
 
