@@ -98,15 +98,16 @@ rgb2hsv:
 		ldw		*A6(A20),	A3
 		nop	.S1	4
 		mvkl	.S1	262144,	A6
+		mvkh	.S1	262144,	A6
 		mpy32	.M1	A8,	A3,	A0
 		nop	.S1	3
 		mvk	.S1	15,	A3
 		mpy32	.M1	A0,	A3,	A0
 		nop	.S1	3
-		mvkh	.S1	262144,	A6
 		add	.L1	A0,	A6,	A0
 		shr	.S1	A0,	19,	A0
 		add		A22,	A0,	A0
+
 		mvk	.S1	255,	A3
 		cmpgt	.L1	A0,	A3,	A3
 		mv		A3,	A1
