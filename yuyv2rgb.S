@@ -28,7 +28,10 @@ yuyv2rgb:
 
 		mpy32	.M2	B4,	B0,	B5
 	||	mpy32	.M1X	A6,	B1,	A1
+	||	mvk	.S1	516,	A2
 	||	nop		2
+
+		mpy32	.M1X	A2,	B4,	A2
 
 		add	.L1	A4,	A0,	A4
 		add	.L1	A4,	A9,	A9
@@ -37,13 +40,9 @@ yuyv2rgb:
 
 		sub	.L1X	A4,	B5,	A17
 
-		nop	.S1	3
 		sub	.L1	A17,	A1,	A17
 
-		mvk	.S1	516,	A0
-		mpy32	.M1X	A0,	B4,	A0
-		nop	.S1	3
-		add	.L1	A4,	A0,	A18
+		add	.L1	A4,	A2,	A18
 
 		; save output pointers, load constants for comparisons
 		mvk		-1,	A6
