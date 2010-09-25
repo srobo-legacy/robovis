@@ -1,0 +1,230 @@
+	.file	"rgb2hsv.c"
+
+
+	.text
+	.globl	rgb2hsv
+	.align	5
+	.type	rgb2hsv,@function
+rgb2hsv:
+		mvk		40,	A0
+	||	mv		B15,	A1
+		stw		A15,	*B15
+	||	stw		B3,	*-A1(4)
+	||	mv		B15,	A15
+	||	sub		B15,	A0	,B15
+
+		mv		B8,	A3
+		mv		B6,	A5
+		mv		B4,	A7
+		cmpgt	.L1	A7,	A6,	A9
+		cmplt	.L1	A7,	A6,	A16
+		mv		A9,	A0
+		mv		A7,	A9
+	[!A0]	mv	.S1	A6,	A9
+		mv		A16,	A0
+		mv		A7,	A16
+	[!A0]	mv	.S1	A6,	A16
+		cmplt	.L1	A9,	A4,	A17
+		cmpgt	.L1	A16,	A4,	A18
+		mv		A17,	A0
+		mv		A4,	A17
+	[!A0]	mv	.S1	A9,	A17
+		mv		A18,	A0
+		mv		A4,	A9
+	[!A0]	mv	.S1	A16,	A9
+		cmpeq	.L1	0,	A17,	A16
+		mv		A5,	A0
+		stw		A0,	*-A15(24)
+		mv		A8,	A0
+		stw		A0,	*-A15(20)
+		mv		A3,	A0
+		stw		A0,	*-A15(16)
+		mv		A17,	A0
+		stw		A0,	*-A15(8)
+		mv		A16,	A0
+	[!A0]	b	.S1	.BB1_2
+		nop	.S1	5
+
+		mvk	.S1	0,	A7
+		mv		A7,	A0
+		stw		A0,	*-A15(12)
+		b	.S1	.BB1_11
+		nop	.S1	5
+.BB1_2:
+
+		sub	.L1	A17,	A9,	A0
+		mv		A9,	A1
+		stw		A0,	*-A15(32)
+		mvkl	.S1	trans_table,	A3
+		ldw		*-A15(8),	A2
+		nop	.S1	4
+		shl	.S1	A2,	2,	A5
+		mvkh	.S1	trans_table,	A3
+		shr	.S1	A5,	2,	A5
+		ldw		*A3(A5),	A3
+		nop	.S1	4
+		mpy32	.M1	A3,	A0,	A0
+		nop	.S1	3
+		shru	.S1	A0,	12,	A0
+		cmpeq	.L1	A2,	A1,	A3
+		stw		A0,	*-A15(28)
+		mv		A3,	A0
+	[!A0]	b	.S1	.BB1_5
+		nop	.S1	5
+
+		mvk	.S1	0,	A7
+		mv		A7,	A0
+.BB1_4:
+
+		mvk	.S1	0,	A3
+		cmplt	.L1	A0,	A3,	A4
+		mv		A4,	A1
+	[!A1]	mv	.S1	A0,	A3
+		mv		A3,	A0
+		stw		A0,	*-A15(12)
+		b	.S1	.BB1_8
+		nop	.S1	5
+.BB1_5:
+
+		mv		A4,	A0
+		mv		A7,	A1
+		mv		A6,	A2
+		stw		A2,	*-A15(12)
+		mvk	.S1	0,	A3
+		mv		A2,	A5
+		sub	.L1	A1,	A5,	A4
+		ldw		*-A15(8),	A2
+		nop	.S1	4
+		mv		A2,	A5
+		cmpeq	.L1	A5,	A0,	A5
+		mvkl	.S1	trans_table,	A6
+		ldw		*-A15(32),	A2
+		nop	.S1	4
+		shl	.S1	A2,	2,	A7
+		mv		A5,	A2
+	[!A2]	mv	.S1	A3,	A4
+		ldw		*-A15(12),	A2
+		nop	.S1	4
+		mv		A2,	A3
+		sub	.L1	A3,	A0,	A3
+		ldw		*-A15(8),	A2
+		nop	.S1	4
+		mv		A2,	A5
+		cmpeq	.L1	A5,	A1,	A5
+		mv		A5,	A2
+	[!A2]	mv	.S1	A4,	A3
+		sub	.L1	A0,	A1,	A0
+		ldw		*-A15(8),	A2
+		nop	.S1	4
+		mv		A2,	A4
+		ldw		*-A15(12),	A2
+		nop	.S1	4
+		mv		A2,	A8
+		cmpeq	.L1	A4,	A8,	A4
+		mvkh	.S1	trans_table,	A6
+		shr	.S1	A7,	2,	A7
+		mv		A4,	A1
+	[!A1]	mv	.S1	A3,	A0
+		ldw		*A6(A7),	A3
+		nop	.S1	4
+		mvkl	.S1	262144,	A6
+		mpy32	.M1	A0,	A3,	A0
+		nop	.S1	3
+		mvk	.S1	15,	A3
+		mpy32	.M1	A0,	A3,	A0
+		nop	.S1	3
+		mvkh	.S1	262144,	A6
+		add	.L1	A0,	A6,	A0
+		shr	.S1	A0,	19,	A0
+		mv		A0,	A3
+		addk	.S1	60,	A3
+		mv		A5,	A1
+	[!A1]	mv	.S1	A0,	A3
+		mv		A3,	A0
+		addk	.S1	120,	A0
+		mv		A4,	A1
+	[!A1]	mv	.S1	A3,	A0
+		mvk	.S1	255,	A3
+		cmpgt	.L1	A0,	A3,	A3
+		mv		A3,	A1
+	[ A1]	b	.S1	.BB1_7
+		nop	.S1	5
+
+		b	.S1	.BB1_4
+		nop	.S1	5
+.BB1_7:
+
+		mvk	.S1	255,	A0
+		stw		A0,	*-A15(12)
+.BB1_8:
+
+		mvk	.S1	255,	A0
+		ldw		*-A15(28),	A1
+		nop	.S1	4
+		mv		A1,	A3
+		cmpgtu	.L1	A3,	A0,	A3
+		mvk	.S1	256,	A4
+		mv		A3,	A2
+	[!A2]	mv	.S1	A1,	A0
+		ldw		*-A15(8),	A1
+		nop	.S1	4
+		cmplt	.L1	A1,	A4,	A3
+		mv		A3,	A1
+	[ A1]	b	.S1	.BB1_10
+		nop	.S1	5
+
+		mvk	.S1	255,	A3
+		mv		A3,	A1
+		stw		A1,	*-A15(8)
+		b	.S1	.BB1_11
+		nop	.S1	5
+.BB1_10:
+
+		mvk	.S1	0,	A3
+		ldw		*-A15(8),	A1
+		nop	.S1	4
+		cmplt	.L1	A1,	A3,	A4
+		mv		A4,	A2
+	[!A2]	mv	.S1	A1,	A3
+		mv		A3,	A1
+		stw		A1,	*-A15(8)
+.BB1_11:
+
+		ldw		*-A15(12),	A1
+		nop	.S1	4
+		shru	.S1	A1,	8,	A3
+		shru	.S1	A1,	16,	A4
+		shru	.S1	A1,	24,	A5
+		shru	.S1	A0,	8,	A6
+		shru	.S1	A0,	16,	A7
+		shru	.S1	A0,	24,	A8
+		ldw		*-A15(24),	A2
+		nop	.S1	4
+		stb		A1,	*A2
+		stb		A3,	*+A2(1)
+		stb		A4,	*+A2(2)
+		stb		A5,	*+A2(3)
+		ldw		*-A15(8),	A1
+		nop	.S1	4
+		shru	.S1	A1,	8,	A3
+		shru	.S1	A1,	16,	A4
+		shru	.S1	A1,	24,	A5
+		ldw		*-A15(20),	A2
+		nop	.S1	4
+		stb		A0,	*A2
+		stb		A6,	*+A2(1)
+		stb		A7,	*+A2(2)
+		stb		A8,	*+A2(3)
+		ldw		*-A15(16),	A0
+		nop	.S1	4
+		stb		A1,	*A0
+		stb		A3,	*+A0(1)
+		stb		A4,	*+A0(2)
+		stb		A5,	*+A0(3)
+		ldw		*-A15(4),	B3
+		mv		A15,	B15
+	||	ldw		*A15,	A15
+		nop		4
+
+		bnop	.S2	B3,	5
+

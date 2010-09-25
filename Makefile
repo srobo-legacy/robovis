@@ -49,8 +49,8 @@ dsp_dma.o: dsp_dma.c
 yuyv2rgb.o: yuyv2rgb.S
 	$(DSP_CC) -c $< -o $@ $(SRFLAGS)
 
-rgb2hsv.o: rgb2hsv.c
-	$(DSP_CC) -c $< -o $@ $(SRFLAGS) $(CFLAGS)
+rgb2hsv.o: rgb2hsv.S
+	$(DSP_CC) -c $< -o $@ $(SRFLAGS)
 
 visfunc.o: visfunc.c
 	$(DSP_CC) $(DSP_CFLAGS) -c visfunc.c -o visfunc.o $(SRFLAGS)
