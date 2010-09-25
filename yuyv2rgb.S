@@ -95,31 +95,24 @@ yuyv2rgb:
 		stw		A6,	*-A15(12)
 
 
-mv A18, A3	; Restore previous calculation
 		mvk	.S1	-1,	A4
-		cmpgt	.L1	A3,	A4,	A4
-		mv		A4,	A0
-	[ A0]	b	.S1	.BB1_8
-		nop	.S1	4
+		cmpgt	.L1	A18,	A4,	A4
 
-		mvk	.S1	0,	A3
-		mv		A3,	A0
-		b	.S1	.BB1_9
-		nop	.S1	4
-.BB1_8:
-
-		mv		A3,	A0
-		mvk	.S1	0,	A3
-		shr	.S1	A0,	8,	A4
+		shr	.S1	A18,	8,	A3	; calc final value
 		mvk	.S1	255,	A5
-		cmpgt	.L1	A4,	A5,	A6
-		cmplt	.L1	A0,	A3,	A0
-		mv		A6,	A1
-	[!A1]	mv	.S1	A3,	A5
-		or	.D1	A6,	A0,	A0
-	[!A0]	mv	.S1	A4,	A5
-		mv		A5,	A0
-.BB1_9:
+		cmplt	.L1	A3,	A5,	A2	; if calc'd > 255,
+		mvk	.S1	0,	A1
+
+		; select from 255 or calcval
+	[ A2]	mv		A3,	A6		; It's < 255, select
+	[!A2]	mv		A5,	A6		; >= 255, clip
+
+		; And if it was < 0, clip to 0
+		mv 		A4,	A0
+	[!A0]	mv		A1,	A6
+		; save
+		mv		A6,	A0
+
 
 		ldw		*-A15(32),	A1
 		ldw		*-A15(8),	A2
