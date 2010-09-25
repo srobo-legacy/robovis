@@ -79,7 +79,7 @@ rgb2hsv:
 		b	.S1	.BB1_8
 		nop	.S1	5
 .BB1_5:
-
+		; for this block, 'v' is A17
 		mv		A4,	A0
 		mv		A7,	A1
 		mv		A6,	A2
@@ -87,9 +87,7 @@ rgb2hsv:
 		mvk	.S1	0,	A3
 		mv		A2,	A5
 		sub	.L1	A1,	A5,	A4
-		ldw		*-A15(8),	A2
-		nop	.S1	4
-		mv		A2,	A5
+		mv		A17,	A5
 		cmpeq	.L1	A5,	A0,	A5
 		mvkl	.S1	trans_table,	A6
 		ldw		*-A15(32),	A2
@@ -101,16 +99,12 @@ rgb2hsv:
 		nop	.S1	4
 		mv		A2,	A3
 		sub	.L1	A3,	A0,	A3
-		ldw		*-A15(8),	A2
-		nop	.S1	4
-		mv		A2,	A5
+		mv		A17,	A5
 		cmpeq	.L1	A5,	A1,	A5
 		mv		A5,	A2
 	[!A2]	mv	.S1	A4,	A3
 		sub	.L1	A0,	A1,	A0
-		ldw		*-A15(8),	A2
-		nop	.S1	4
-		mv		A2,	A4
+		mv		A17,	A4
 		ldw		*-A15(12),	A2
 		nop	.S1	4
 		mv		A2,	A8
