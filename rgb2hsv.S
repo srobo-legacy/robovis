@@ -79,18 +79,16 @@ rgb2hsv:
 		nop	.S1	5
 .BB1_5:
 		; for this block, 'v' is A17
-		mv		A4,	A0
-		mv		A7,	A1
 		mv		A6,	A21			; keep 'b' value
 		mvk	.S1	0,	A3
-		sub	.L1	A1,	A21,	A4
-		cmpeq	.L1	A17,	A0,	A2
-	[!A2]	mv	.S1	A3,	A4
-		sub	.L1	A21,	A0,	A3
-		cmpeq	.L1	A17,	A1,	A2
+		sub	.L1	A7,	A21,	A0
+		cmpeq	.L1	A17,	A4,	A2
+	[!A2]	mv	.S1	A3,	A0
+		sub	.L1	A21,	A4,	A3
+		cmpeq	.L1	A17,	A7,	A2
 		mv		A2,	A5
-	[!A2]	mv	.S1	A4,	A3
-		sub	.L1	A0,	A1,	A0
+	[!A2]	mv	.S1	A0,	A3
+		sub	.L1	A4,	A7,	A0
 		cmpeq	.L1	A17,	A21,	A1
 		mv		A1,	A4
 	[!A1]	mv	.S1	A3,	A0
