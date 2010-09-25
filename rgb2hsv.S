@@ -84,25 +84,19 @@ rgb2hsv:
 		mv		A6,	A21			; keep 'b' value
 		mvk	.S1	0,	A3
 		sub	.L1	A1,	A21,	A4
-		mv		A17,	A5
-		cmpeq	.L1	A5,	A0,	A5
-		shl	.S1	A20,	2,	A7
-		mv		A5,	A2
+		cmpeq	.L1	A17,	A0,	A2
 	[!A2]	mv	.S1	A3,	A4
 		sub	.L1	A21,	A0,	A3
-		mv		A17,	A5
-		cmpeq	.L1	A5,	A1,	A5
-		mv		A5,	A2
+		cmpeq	.L1	A17,	A1,	A2
+		mv		A2,	A5
 	[!A2]	mv	.S1	A4,	A3
 		sub	.L1	A0,	A1,	A0
-		mv		A17,	A4
-		cmpeq	.L1	A4,	A21,	A4
-		shr	.S1	A7,	2,	A7
-		mv		A4,	A1
+		cmpeq	.L1	A17,	A21,	A1
+		mv		A1,	A4
 	[!A1]	mv	.S1	A3,	A0
 		mvkl	.S1	trans_table,	A6
 		mvkh	.S1	trans_table,	A6
-		ldw		*A6(A7),	A3
+		ldw		*A6(A20),	A3
 		nop	.S1	4
 		mvkl	.S1	262144,	A6
 		mpy32	.M1	A0,	A3,	A0
