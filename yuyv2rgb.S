@@ -32,17 +32,16 @@ yuyv2rgb:
 
 		mpy32	.M1X	A2,	B4,	A2
 
+		; We're now at a critical path bit that can't be further broken
+		; down. Interlace with some constant loading for next section
 		add	.L1	A4,	A0,	A4	; Depends on A4 mpy32...
 		add	.L1	A4,	A9,	A9	; Depends on prev insn
+	||	mvk		255,	A3
 		sub	.L1X	A4,	B5,	A17	; Depends on B5 mpy
+	||	mvk		-1,	A6
 		sub	.L1	A17,	A1,	A17	; Depends on prev insn
 	||	add		A4,	A2,	A18
-
-		; save output pointers, load constants for comparisons
-		mvk		-1,	A6
-		mvk		0,	A4
-		mvk		255,	A3
-
+	||	mvk		0,	A4
 
 		; Clip r value
 		shr	.S1	A9,	8,	A5	; calc final value
