@@ -119,6 +119,7 @@ get_next_buffer(uint8_t **extmem_fb, int y)
 }
 
 extern void yuyv2rgb(int y, int u, int v, int *r, int *g, int *b);
+extern void rgb2hsv(int r, int g, int b, int *h, int *s, int *v);
 
 void
 vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
@@ -193,7 +194,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 		for (x = 0; x < line_cache_sz; x++) {
 			get_yuv(x, wind_y, _y, _u, _v);
 			yuyv2rgb(_y, _u, _v, &r, &g, &b);
-			rgb_2_hsv(r, g, b, h, s, v);
+			rgb2hsv(r, g, b, &h, &s, &v);
 			cache += h;
 			back_buffer[back_buffer_idx++] = h;
 			back_buffer_idx %= line_cache_sz;
@@ -203,7 +204,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 			old_colour_value = colour_value;
 			get_yuv(x, wind_y, _y, _u, _v);
 			yuyv2rgb(_y, _u, _v, &r, &g, &b);
-			rgb_2_hsv(r, g, b, h, s, v);
+			rgb2hsv(r, g, b, &h, &s, &v);
 			cache += h;
 			cache -= back_buffer[back_buffer_idx];
 			back_buffer[back_buffer_idx++] = h;
