@@ -192,35 +192,19 @@ rgb2hsv:
 
 		ldw		*-A15(12),	A1
 		nop	.S1	4
-		shru	.S1	A1,	8,	A3
-		shru	.S1	A1,	16,	A4
-		shru	.S1	A1,	24,	A5
-		shru	.S1	A0,	8,	A6
-		shru	.S1	A0,	16,	A7
-		shru	.S1	A0,	24,	A8
 		ldw		*-A15(24),	A2
 		nop	.S1	4
-		stb		A1,	*A2
-		stb		A3,	*+A2(1)
-		stb		A4,	*+A2(2)
-		stb		A5,	*+A2(3)
+		stw		A1,	*A2
 		ldw		*-A15(8),	A1
 		nop	.S1	4
-		shru	.S1	A1,	8,	A3
-		shru	.S1	A1,	16,	A4
-		shru	.S1	A1,	24,	A5
 		ldw		*-A15(20),	A2
 		nop	.S1	4
-		stb		A0,	*A2
-		stb		A6,	*+A2(1)
-		stb		A7,	*+A2(2)
-		stb		A8,	*+A2(3)
+		stw		A0,	*A2
 		ldw		*-A15(16),	A0
 		nop	.S1	4
-		stb		A1,	*A0
-		stb		A3,	*+A0(1)
-		stb		A4,	*+A0(2)
-		stb		A5,	*+A0(3)
+		stw		A1,	*A0
+
+
 		ldw		*-A15(4),	B3
 		mv		A15,	B15
 	||	ldw		*A15,	A15
