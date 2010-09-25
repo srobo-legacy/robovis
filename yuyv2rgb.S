@@ -43,11 +43,9 @@ yuyv2rgb:
 	||	mvk		0,	A4
 	||	mvk		0,	B5
 
-		mv		A17,		B16
-
 		; Clip r value on A side, g on B side
 		shr	.S1	A9,	8,	A5	; calc final value
-	||	shr	.S2	B16,	8,	B17
+	||	shr	.S2X	A17,	8,	B17
 
 		max2		A4,	A5,	A19
 	||	max2		B5,	B17,	B9
