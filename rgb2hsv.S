@@ -36,31 +36,29 @@ rgb2hsv:
 		mv		A17,	A0
 		stw		A0,	*-A15(8)
 		mv		A16,	A0
+
+		; If v == 0, jmp - this is a valid branch to keep
 	[!A0]	b	.S1	.BB1_2
 		nop	.S1	5
 
 		mvk	.S1	0,	A7
-		mv		A7,	A0
+		mv		A7,	A0		; s and h = 0?
 		stw		A0,	*-A15(12)
 		b	.S1	.BB1_11
 		nop	.S1	5
 .BB1_2:
 
-		sub	.L1	A17,	A9,	A0
+		sub	.L1	A17,	A9,	A0	; diff = max - min
 		mv		A9,	A1
 		stw		A0,	*-A15(32)
 		mvkl	.S1	trans_table,	A3
-		ldw		*-A15(8),	A2
-		nop	.S1	4
-		shl	.S1	A2,	2,	A5
 		mvkh	.S1	trans_table,	A3
-		shr	.S1	A5,	2,	A5
-		ldw		*A3(A5),	A3
+		ldw		*A3(A17),	A3
 		nop	.S1	4
 		mpy32	.M1	A3,	A0,	A0
 		nop	.S1	3
 		shru	.S1	A0,	12,	A0
-		cmpeq	.L1	A2,	A1,	A3
+		cmpeq	.L1	A17,	A1,	A3
 		stw		A0,	*-A15(28)
 		mv		A3,	A0
 	[!A0]	b	.S1	.BB1_5
