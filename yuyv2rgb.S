@@ -22,17 +22,17 @@ yuyv2rgb:
 	||	mpy32	.M1	A4,	A9,	A4
 
 		mpy32	.M1X	A6,	B0,	A9
-	||	nop	.S1	3
+	||	addk	.S1	-128,	A7
+	||	mvk	.S2	100,	B0
+
+		mpy32	.M1X	A7,	B0,	A17
+	||	nop		2
 
 		add	.L1X	A4,	B1,	A4
 		add	.L1	A4,	A9,	A9
 		mvk	.S1	-1,	A16
-		addk	.S1	-128,	A7
 		cmpgt	.L1	A9,	A16,	A16
 
-		mvk	.S1	100,	A0
-		mpy32	.M1	A7,	A0,	A17
-		nop		3
 		sub	.L1	A4,	A17,	A17
 
 		mvk	.S1	208,	A0
