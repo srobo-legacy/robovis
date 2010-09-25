@@ -14,11 +14,12 @@ yuyv2rgb:
 	||	sub		B15,	A0	,B15
 
 		mv		A8,	B7
-		mv		B4,	A7
-		mvk	.S1	298,	A9
-		addk	.S1	-128,	A6
+	||	mv		B4,	A7
+	||	mvk	.S2	298,	B9
+	||	addk	.S1	-128,	A6
+
 		mvk	.S1	409,	A16
-		mpy32	.M1	A4,	A9,	A4
+		mpy32	.M1X	A4,	B9,	A4
 		nop	.S1	3
 		mvk	.S1	-4640,	A9
 		add	.L1	A4,	A9,	A4
