@@ -98,19 +98,11 @@ yuyv2rgb:
 		; save
 		mv		A5,	A0
 
-
-		mv		A21,		A1
-		mv		A19,		A2
-		stw		A2,	*A1
-
-
-		mv		A22,		A1
-		mv		A20,		A2
-		stw		A2,	*A1
-
-
-		mv		A23,		A1
-		stw		A0,	*A1
+		; Store rgb values back to output. If they're not word
+		; aligned pointers, that's the callers problem.
+		stw		A19,		*A21
+		stw		A20,		*A22
+		stw		A0,		*A23
 
 
 ; epilog
