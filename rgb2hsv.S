@@ -31,10 +31,12 @@ rgb2hsv:
 		cmpeq		0,	A17,	A1
 	||	ldw		*A25(A17),	A5	; trans_table load
 	||	sub		A17,	B9,	A20	; diff = max - min
-
 		; If v == 0, we write out all zeros
-	[ A1]	b	.S1	.writeout
-		nop	.S1	5
+	||[ A1]	b	.S2	.writeout
+		; We don't require any nops here - if the branch isn't taken
+		; no-one cares, and if it /is/ taken, it still doesn't matter
+		; so long as nothing in the following five cycles alters
+		; A24, A26, or A27 where the zeros being written out lie
 
 .calcsat:
 
