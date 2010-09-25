@@ -14,32 +14,35 @@ yuyv2rgb:
 
 		mv		A8,	B7
 	||	add		A6,	B2,	A6
+	||	add		B4,	B2,	B4
 	||	mvk		409,	A0
-	||	mvk	.S2	208,	B1
+	||	mvk	.S2	100,	B0
 	||	mpy32	.M1	A4,	A9,	A4
 
 		mpy32	.M1	A6,	A0,	A9
-	||	add		B4,	B2,	B4
+	||	mpy32	.M2	B4,	B0,	B5
 	||	mvk	.S1	-4640,	A0
-	||	mvk	.S2	100,	B0
+	||	mvk	.S2	208,	B1
 
-		mpy32	.M2	B4,	B0,	B5
-	||	mpy32	.M1X	A6,	B1,	A1
+		mpy32	.M1X	A6,	B1,	A1
 	||	mvk	.S1	516,	A2
 
 		mpy32	.M1X	A2,	B4,	A2
 
 		; We're now at a critical path bit that can't be further broken
 		; down. Interlace with some constant loading for next section
-		add	.L1	A4,	A0,	A4	; Depends on A4 mpy32...
-		add	.L1	A4,	A9,	A9	; Depends on prev insn
+		add		A4,	A0,	A4	; Depends on A4 mpy32...
+
+		add		A4,	A9,	A9	; Depends on prev insn
+	||	sub		A4,	B5,	A17	; Depends on B5 mpy
 	||	mvk		255,	A3
 	||	mvk		255,	B2
-		sub	.L1X	A4,	B5,	A17	; Depends on B5 mpy
+
+		sub		A17,	A1,	A17
 	||	mvk		0,	A6
 	||	mvk		0,	B4
-		sub	.L1	A17,	A1,	A17	; Depends on prev insn
-	||	add		A4,	A2,	A18
+
+		add		A4,	A2,	A18
 		; Clip r value on A side, g on B side, b on A
 	||	shr	.S1	A9,	8,	A5	; calc final value
 	||	b	.S2	B3			; EPILOG: return
