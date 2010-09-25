@@ -45,12 +45,9 @@ yuyv2rgb:
 		nop	.S1	3
 		add	.L1	A4,	A0,	A18
 
-		mv		A5,	A0
-		stw		A0,	*-A15(32)
-		mv		A8,	A0
-		stw		A0,	*-A15(28)
-		mv		A3,	A0
-		stw		A0,	*-A15(24)
+		mv		A5,	A21
+		mv		A8,	A22
+		mv		A3,	A23
 		mv		A7,	A0
 		stw		A0,	*-A15(16)
 		mv		A6,	A0
@@ -72,7 +69,7 @@ yuyv2rgb:
 		; And if it was < 0, clip to 0
 	[!A0]	mv		A1,	A5
 		; save
-		stw		A5,	*-A15(8)
+		mv		A5,	A19
 .BB1_3:
 
 
@@ -92,7 +89,7 @@ yuyv2rgb:
 		mv 		A4,	A0
 	[!A0]	mv		A1,	A6
 		; save
-		stw		A6,	*-A15(12)
+		mv		A6,	A20
 
 
 		mvk	.S1	-1,	A4
@@ -114,20 +111,17 @@ yuyv2rgb:
 		mv		A6,	A0
 
 
-		ldw		*-A15(32),	A1
-		ldw		*-A15(8),	A2
-		nop		4
+		mv		A21,		A1
+		mv		A19,		A2
 		stw		A2,	*A1
 
 
-		ldw		*-A15(28),	A1
-		ldw		*-A15(12),	A2
-		nop	.S1	4
+		mv		A22,		A1
+		mv		A20,		A2
 		stw		A2,	*A1
 
 
-		ldw		*-A15(24),	A1
-		nop	.S1	4
+		mv		A23,		A1
 		stw		A0,	*A1
 
 
