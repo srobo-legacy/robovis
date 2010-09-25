@@ -80,17 +80,17 @@ rgb2hsv:
 .BB1_5:
 		; for this block, 'v' is A17
 		mv		A6,	A21			; keep 'b' value
-		sub	.L1	A7,	A21,	A0
+		sub	.L1	A7,	A21,	A9
 		sub	.L1	A21,	A4,	A3
 		sub	.L1	A4,	A7,	A8
 		cmpeq	.L1	A17,	A4,	A2
-	[!A2]	mvk	.S1	0,	A0
-		cmpeq	.L1	A17,	A7,	A2
-		mv		A2,	A5
-	[!A2]	mv	.S1	A0,	A3
-		cmpeq	.L1	A17,	A21,	A1
-		mv		A1,	A4
-	[!A1]	mv	.S1	A3,	A8
+		cmpeq	.L1	A17,	A7,	A1
+		cmpeq	.L1	A17,	A21,	A0
+	[!A2]	mvk	.S1	0,	A9
+	[!A1]	mv	.S1	A9,	A3
+	[!A0]	mv	.S1	A3,	A8
+		mv		A1,	A5
+		mv		A0,	A4
 		mvkl	.S1	trans_table,	A6
 		mvkh	.S1	trans_table,	A6
 		ldw		*A6(A20),	A3
