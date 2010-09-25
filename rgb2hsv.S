@@ -41,13 +41,11 @@ rgb2hsv:
 .calcsat:
 
 		mpy32	.M1	A5,	A20,	A0
-		nop	.S1	3
+	||	cmpeq	.L1X	A17,	B9,	A1	; if (diff != 0)?
+		nop	.S1	3			; unavoidable
 		shru	.S1	A0,	12,	A23
-		cmpeq	.L1X	A17,	B9,	A3	; if (diff != 0)?
-		mv		A3,	A1
-	[ A1]	mvk		0,	A0
+	||	mvk		0,	A24
 	[ A1]	b	.S1	.clipping
-		nop	.S1	5
 
 .calch:
 		; for this block, 'v' is A17
@@ -76,7 +74,7 @@ rgb2hsv:
 		nop	.S1	3
 		add	.L1	A0,	A6,	A0
 		shr	.S1	A0,	19,	A0
-		add		A22,	A0,	A0
+		add		A22,	A0,	A24
 
 
 
@@ -84,8 +82,8 @@ rgb2hsv:
 		mvk	.S1	255,	A3
 		mvk		0,	A4
 
-		max2		A4,	A0,	A0
-		min2		A3,	A0,	A24
+		max2		A4,	A24,	A24
+		min2		A3,	A24,	A24
 		mvkh		0,	A24
 
 		max2		A4,	A23,	A26
