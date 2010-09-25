@@ -48,12 +48,6 @@ yuyv2rgb:
 		mv		A5,	A21
 		mv		A8,	A22
 		mv		A3,	A23
-		mv		A7,	A0
-		stw		A0,	*-A15(16)
-		mv		A6,	A0
-		stw		A0,	*-A15(12)
-		mv		A4,	A0
-		stw		A0,	*-A15(20)
 
 		; A16 -> is this > 0?
 		mv		A16,	A0
