@@ -43,10 +43,11 @@ rgb2hsv:
 	||	cmpeq	.L1X	A17,	B9,	A1	; if (diff != 0)?
 		nop	.S1	3			; unavoidable
 		shru	.S1	A0,	12,	A23
-	||	mv		A6,	B0		; Move stuff around for
-	||	mv		B4,	A5		; calch code
 		; Can't make this any shorter, branch to writeout executes
 		; up to this point
+	||	mv		A6,	B0		; Move stuff around for
+	||	mv		B4,	A5		; calch code
+	||	ldw		*A25(A20),	A7	; Preload for calch
 
 .calch:
 	[ A1]	b	.S1	.clipping
@@ -66,11 +67,9 @@ rgb2hsv:
 
 	[ A0]	addk		120,	B1
 
-		ldw		*A25(A20),	A3
-		nop	.S1	4
 		mvkl	.S1	262144,	A6
 		mvkh	.S1	262144,	A6
-		mpy32	.M1	A8,	A3,	A0
+		mpy32	.M1	A8,	A7,	A0
 		nop	.S1	3
 		mvk	.S1	15,	A3
 		mpy32	.M1	A0,	A3,	A0
