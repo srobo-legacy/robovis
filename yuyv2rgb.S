@@ -18,13 +18,13 @@ yuyv2rgb:
 		mv		A8,	B7
 	||	mv		B4,	A7
 	||	addk	.S1	-128,	A6
+	||	mvk	.S2	-4640,	B1
 	||	mpy32	.M1	A4,	A9,	A4
 
-		nop	.S1	3
-		mvk	.S1	-4640,	A9
-		add	.L1	A4,	A9,	A4
 		mpy32	.M1X	A6,	B0,	A9
-		nop	.S1	3
+	||	nop	.S1	3
+
+		add	.L1X	A4,	B1,	A4
 		add	.L1	A4,	A9,	A9
 		mvk	.S1	-1,	A16
 		addk	.S1	-128,	A7
