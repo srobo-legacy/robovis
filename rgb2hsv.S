@@ -59,16 +59,11 @@ rgb2hsv:
 		shru	.S1	A0,	12,	A0
 		cmpeq	.L1	A17,	A1,	A3	; if (diff != 0)?
 		stw		A0,	*-A15(28)
-		mv		A3,	A0
-	[!A0]	b	.S1	.BB1_5			; if nz, do some calcs
+		mv		A3,	A1
+	[ A1]	mvk		0,	A0
+	[ A1]	b	.S1	.clipping
 		nop	.S1	5
 
-		mvk	.S1	0,	A7
-		mv		A7,	A0
-.BB1_4:
-
-		b	.S1	.clipping
-		nop	.S1	5
 .BB1_5:
 		; for this block, 'v' is A17
 		mv		A6,	A21			; keep 'b' value
