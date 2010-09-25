@@ -81,20 +81,23 @@ rgb2hsv:
 
 
 .clipping:
-		mvk	.S1	255,	A3
+		mvk		255,	A3
+	||	mvk		255,	B3
 		mvk		0,	A4
+	||	mvk		0,	B4
 
 		max2		A4,	A24,	A24
+	||	max2		B4,	A23,	B5
 		min2		A3,	A24,	A24
+	||	min2		B3,	B5,	B5
 		mvkh		0,	A24
+	||	mvkh		0,	B5
+	||	max2		A4,	A17,	A17
 
-		max2		A4,	A23,	A26
-		min2		A3,	A26,	A26
-		mvkh		0,	A26
-
-		max2		A4,	A17,	A17
 		min2		A3,	A17,	A17
+
 		mvkh		0,	A17
+	||	mv		B5,	A26
 
 .writeout:
 
