@@ -58,16 +58,18 @@ rgb2hsv:
 		mpy32	.M1	A3,	A0,	A0
 		nop	.S1	3
 		shru	.S1	A0,	12,	A0
-		cmpeq	.L1	A17,	A1,	A3
+		cmpeq	.L1	A17,	A1,	A3	; if (diff != 0)?
 		stw		A0,	*-A15(28)
 		mv		A3,	A0
-	[!A0]	b	.S1	.BB1_5
+	[!A0]	b	.S1	.BB1_5			; if nz, do some calcs
 		nop	.S1	5
 
 		mvk	.S1	0,	A7
 		mv		A7,	A0
 .BB1_4:
 
+		; Looks like, despite being high up in this function, this
+		; corresponds to the end of the if (diff != 0) block
 		mvk	.S1	0,	A3
 		cmplt	.L1	A0,	A3,	A4
 		mv		A4,	A1
