@@ -44,7 +44,7 @@ yuyv2rgb:
 
 		; Clip r value on A side, g on B side
 		shr	.S1	A9,	8,	A5	; calc final value
-		shr	.S2	B16,	8,	B17
+	||	shr	.S2	B16,	8,	B17
 	||	cmpgt	.L1	A9,	A6,	A0	; are we > -1?
 	||	cmpgt	.L2	B16,	B1,	B0
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
