@@ -32,13 +32,14 @@ rgb2hsv:
 		mv		A3,	B0
 		mv		A16,	A1
 
+		; If v == 0, we write out all zeros
 		mvk		0,	A0
 	[ A1]	mv		A0,	A3
 	[ A1]	stw		A0,	*-A15(12)
-	[ A1]	b	.S1	.BB1_11
+	[ A1]	b	.S1	.writeout
 		nop	.S1	5
 
-.BB1_2:
+.calcsat:
 
 		sub	.L1	A17,	A9,	A20	; diff = max - min
 		mv		A9,	A1
@@ -55,7 +56,7 @@ rgb2hsv:
 	[ A1]	b	.S1	.clipping
 		nop	.S1	5
 
-.BB1_5:
+.calch:
 		; for this block, 'v' is A17
 		mv		A6,	A21			; keep 'b' value
 		sub	.L1	A7,	A21,	A9
@@ -88,7 +89,6 @@ rgb2hsv:
 
 
 
-; clipping of h occuring?
 .clipping:
 		mvk	.S1	255,	A3
 		mvk		0,	A4
@@ -98,7 +98,6 @@ rgb2hsv:
 		mvkh		0,	A0
 
 		stw		A0,	*-A15(12)
-.BB1_8:
 
 		max2		A4,	A23,	A0
 		min2		A3,	A0,	A0
@@ -108,7 +107,7 @@ rgb2hsv:
 		min2		A3,	A5,	A3
 		mvkh		0,	A3
 
-.BB1_11:
+.writeout:
 
 
 		ldw		*-A15(12),	A1
