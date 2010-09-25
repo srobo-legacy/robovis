@@ -37,34 +37,33 @@ yuyv2rgb:
 		add	.L1	A4,	A0,	A4	; Depends on A4 mpy32...
 		add	.L1	A4,	A9,	A9	; Depends on prev insn
 	||	mvk		255,	A3
+	||	mvk		255,	B3
 		sub	.L1X	A4,	B5,	A17	; Depends on B5 mpy
 	||	mvk		-1,	A6
+	||	mvk		-1,	B4
 		sub	.L1	A17,	A1,	A17	; Depends on prev insn
 	||	add		A4,	A2,	A18
 	||	mvk		0,	A4
+	||	mvk		0,	B5
 
-		; Clip r value
+		mv		A17,		B16
+
+		; Clip r value on A side, g on B side
 		shr	.S1	A9,	8,	A5	; calc final value
+		shr	.S2	B16,	8,	B17
 	||	cmpgt	.L1	A9,	A6,	A0	; are we > -1?
+	||	cmpgt	.L2	B16,	B1,	B0
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
+	||	cmplt	.L2	B17,	B3,	B1
 
 		; select from 255 or calcval
 	[ A1]	mv		A5,	A19		; It's < 255, select
 	||[!A1]	mv		A3,	A19		; >= 255, clip
+	||[ B1]	mv		B17,	B9
+	||[!B1]	mv		B3,	B9
 
 	[!A0]	mv		A4,	A19		; If it was < 0, clip
-
-
-		; Clip g value
-		shr	.S1	A17,	8,	A5	; calc final value
-	||	cmpgt	.L1	A17,	A6,	A0	; are we > -1?
-		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
-
-	[ A1]	mv		A5,	A20		; It's < 255, select
-	||[!A1]	mv		A3,	A20		; >= 255, clip
-
-	[!A0]	mv		A4,	A20		; If it was < 0, clip
-
+	||[!B0]	mv		B5,	B9
 
 		; Clip b value
 		shr	.S1	A18,	8,	A5	; calc final value
@@ -84,7 +83,7 @@ yuyv2rgb:
 		; Store rgb values back to output. If they're not word
 		; aligned pointers, that's the callers problem.
 		stw	.D2T1	A19,		*B6
-		stw	.D2T1	A20,		*B7
+		stw	.D2T2	B9,		*B7
 		stw	.D2T1	A21,		*B8
 
 		bnop	.S2	B3,	5
