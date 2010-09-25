@@ -13,22 +13,25 @@ yuyv2rgb:
 	||	mv		B15,	A15
 	||	sub		B15,	A0	,B15
 	||	mvk	.S1	298,	A9
-	||	mvk	.S2	409,	B0
+	||	mvk	.S2	-128,	B2
+
+		; This to be hacked in elsewhere
+		mv		B4,	A7
 
 		mv		A8,	B7
-	||	mv		B4,	A7
-	||	addk	.S1	-128,	A6
-	||	mvk	.S2	-4640,	B1
+	||	add		A6,	B2,	A6
+	||	mvk		409,	A0
 	||	mpy32	.M1	A4,	A9,	A4
 
-		mpy32	.M1X	A6,	B0,	A9
-	||	addk	.S1	-128,	A7
+		mpy32	.M1	A6,	A0,	A9
+	||	add		A7,	B2,	A7
+	||	mvk	.S1	-4640,	A0
 	||	mvk	.S2	100,	B0
 
 		mpy32	.M1X	A7,	B0,	A17
 	||	nop		2
 
-		add	.L1X	A4,	B1,	A4
+		add	.L1	A4,	A0,	A4
 		add	.L1	A4,	A9,	A9
 		mvk	.S1	-1,	A16
 		cmpgt	.L1	A9,	A16,	A16
