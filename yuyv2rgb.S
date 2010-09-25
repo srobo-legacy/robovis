@@ -48,24 +48,19 @@ yuyv2rgb:
 		; Clip r value on A side, g on B side
 		shr	.S1	A9,	8,	A5	; calc final value
 	||	shr	.S2	B16,	8,	B17
-	||	cmpgt	.L1	A9,	A6,	A0	; are we > -1?
-	||	cmpgt	.L2	B16,	B1,	B0
-		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
-	||	cmplt	.L2	B17,	B2,	B1
 
-		; select from 255 or calcval
-	[ A1]	mv		A5,	A19		; It's < 255, select
-	||[!A1]	mv		A3,	A19		; >= 255, clip
-	||[ B1]	mv		B17,	B9
-	||[!B1]	mv		B2,	B9
+		max2		A4,	A5,	A19
+	||	max2		B5,	B17,	B9
 
-	[!A0]	mv		A4,	A19		; If it was < 0, clip
-	||[!B0]	mv		B5,	B9
+		min2		A19,	A3,	A19
+	||	min2		B9,	B2,	B9
 
 		; Clip b value
 		shr	.S1	A18,	8,	A5	; calc final value
 	||	cmpgt	.L1	A18,	A6,	A0	; are we > -1?
+	||	mvkh		0,		B9
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
+	||	mvkh		0,		A19
 	||	b	.S2	B3			; EPILOG: return
 		; Have to have precisely 5 insns following the return branch,
 		; or otherwise insert some nops
