@@ -45,14 +45,14 @@ yuyv2rgb:
 		nop	.S1	3
 		add	.L1	A4,	A0,	A18
 
-		mv		A5,	A21
-		mv		A8,	A22
-		mv		A3,	A23
-
-		; Some constants to be using...
-		mvk		255,	A3
-		mvk		0,	A4
+		; save output pointers, load constants for comparisons
 		mvk		-1,	A6
+	||	mv		A5,	B0
+		mvk		0,	A4
+	||	mv		A8,	B1
+		mvk		255,	A3
+	||	mv		A3,	B2
+
 
 		shr	.S1	A9,	8,	A5	; calc final value
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
@@ -105,9 +105,9 @@ yuyv2rgb:
 
 		; Store rgb values back to output. If they're not word
 		; aligned pointers, that's the callers problem.
-		stw		A19,		*A21
-		stw		A20,		*A22
-		stw		A0,		*A23
+		stw	.D2T1	A19,		*B0
+		stw	.D2T1	A20,		*B1
+		stw	.D2T1	A0,		*B2
 
 		bnop	.S2	B3,	5
 
