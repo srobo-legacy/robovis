@@ -49,60 +49,54 @@ yuyv2rgb:
 		mv		A8,	A22
 		mv		A3,	A23
 
-		; A16 -> is this > 0?
-		mv		A16,	A0
-		shr	.S1	A9,	8,	A4	; calc final value
-		mvk	.S1	255,	A5
-		cmplt	.L1	A4,	A5,	A2	; if calc'd > 255,
-		mvk	.S1	0,	A1
+		; Some constants to be using...
+		mvk		255,	A3
+		mvk		0,	A4
+		mvk		-1,	A6
+
+		shr	.S1	A9,	8,	A5	; calc final value
+		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
 
 		; select from 255 or calcval
-	[ A2]	mv		A4,	A5		; It's < 255, select
-	[!A2]	mv		A5,	A5		; >= 255, clip
+	[ A1]	mv		A5,	A5		; It's < 255, select
+	[!A1]	mv		A3,	A5		; >= 255, clip
 
-		; And if it was < 0, clip to 0
-	[!A0]	mv		A1,	A5
+		; And if it was < 0, clip to 0. A16 contains previous comarison
+		mv		A16,	A0
+	[!A0]	mv		A4,	A5
 		; save
 		mv		A5,	A19
 .BB1_3:
 
 
-		mvk	.S1	-1,	A4
-		cmpgt	.L1	A17,	A4,	A4
+		cmpgt	.L1	A17,	A6,	A0
 
-		shr	.S1	A17,	8,	A3	; calc final value
-		mvk	.S1	255,	A5
-		cmplt	.L1	A3,	A5,	A2	; if calc'd > 255,
-		mvk	.S1	0,	A1
+		shr	.S1	A17,	8,	A5	; calc final value
+		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
 
 		; select from 255 or calcval
-	[ A2]	mv		A3,	A6		; It's < 255, select
-	[!A2]	mv		A5,	A6		; >= 255, clip
+	[ A1]	mv		A5,	A5		; It's < 255, select
+	[!A1]	mv		A3,	A5		; >= 255, clip
 
 		; And if it was < 0, clip to 0
-		mv 		A4,	A0
-	[!A0]	mv		A1,	A6
+	[!A0]	mv		A4,	A5
 		; save
-		mv		A6,	A20
+		mv		A5,	A20
 
 
-		mvk	.S1	-1,	A4
-		cmpgt	.L1	A18,	A4,	A4
+		cmpgt	.L1	A18,	A6,	A0
 
-		shr	.S1	A18,	8,	A3	; calc final value
-		mvk	.S1	255,	A5
-		cmplt	.L1	A3,	A5,	A2	; if calc'd > 255,
-		mvk	.S1	0,	A1
+		shr	.S1	A18,	8,	A5	; calc final value
+		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
 
 		; select from 255 or calcval
-	[ A2]	mv		A3,	A6		; It's < 255, select
-	[!A2]	mv		A5,	A6		; >= 255, clip
+	[ A1]	mv		A5,	A5		; It's < 255, select
+	[!A1]	mv		A3,	A5		; >= 255, clip
 
 		; And if it was < 0, clip to 0
-		mv 		A4,	A0
-	[!A0]	mv		A1,	A6
+	[!A0]	mv		A4,	A5
 		; save
-		mv		A6,	A0
+		mv		A5,	A0
 
 
 		mv		A21,		A1
