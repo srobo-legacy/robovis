@@ -6,13 +6,7 @@
 	.align	5
 	.type	yuyv2rgb,@function
 yuyv2rgb:
-		mvk		40,	A0
-	||	mv		B15,	A1
-		stw		A15,	*B15
-	||	stw		B3,	*-A1(4)
-	||	mv		B15,	A15
-	||	sub		B15,	A0	,B15
-	||	mvk	.S1	298,	A9
+		mvk	.S1	298,	A9
 	||	mvk	.S2	-128,	B2
 
 		mv		A8,	B7
@@ -47,7 +41,6 @@ yuyv2rgb:
 	||	mvk		0,	B5
 
 		mv		A17,		B16
-	||	ldw		*-A15(4),	B3	; EPILOG: load retptr
 
 		; Clip r value on A side, g on B side
 		shr	.S1	A9,	8,	A5	; calc final value
@@ -70,8 +63,6 @@ yuyv2rgb:
 		shr	.S1	A18,	8,	A5	; calc final value
 	||	cmpgt	.L1	A18,	A6,	A0	; are we > -1?
 		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
-	||	mv		A15,	B15		; EPILOG: destroy frame
-	||	ldw		*A15,	A15		; ^^^
 	||	b	.S2	B3			; EPILOG: return
 		; Have to have precisely 5 insns following the return branch,
 		; or otherwise insert some nops
