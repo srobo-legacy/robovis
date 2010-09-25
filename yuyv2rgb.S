@@ -57,18 +57,15 @@ yuyv2rgb:
 
 		; Clip b value
 		shr	.S1	A18,	8,	A5	; calc final value
-	||	cmpgt	.L1	A18,	A6,	A0	; are we > -1?
 	||	mvkh		0,		B9
-		cmplt	.L1	A5,	A3,	A1	; if calc'd > 255,
-	||	mvkh		0,		A19
-	||	b	.S2	B3			; EPILOG: return
+
+		max2		A4,	A5,	A21
+		min2		A3,	A21,	A21
+
+		b	.S2	B3			; EPILOG: return
+	||	mvkh		0,		A21
 		; Have to have precisely 5 insns following the return branch,
 		; or otherwise insert some nops
-
-	[ A1]	mv		A5,	A21		; It's < 255, select
-	||[!A1]	mv		A3,	A21		; >= 255, clip
-
-	[!A0]	mv		A4,	A21		; If it was < 0, clip
 
 
 		; Store rgb values back to output. If they're not word
@@ -77,4 +74,4 @@ yuyv2rgb:
 		stw	.D2T2	B9,		*B7
 		stw	.D2T1	A21,		*B8
 
-
+		nop	5
