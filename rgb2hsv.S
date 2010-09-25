@@ -16,18 +16,16 @@ rgb2hsv:
 		mv		B8,	A3
 		mv		B6,	A5
 		mv		B4,	A7
-		cmpgt	.L1	A7,	A6,	A0
-		cmplt	.L1	A7,	A6,	A1
-		mv		A7,	A9
-	[!A0]	mv	.S1	A6,	A9
-		mv		A7,	A16
-	[!A1]	mv	.S1	A6,	A16
-		cmplt	.L1	A9,	A4,	A0
-		cmpgt	.L1	A16,	A4,	A1
-		mv		A4,	A17
-	[!A0]	mv	.S1	A9,	A17
-		mv		A4,	A9
-	[!A1]	mv	.S1	A16,	A9
+
+		max2		A4,	B4,	A0
+		max2		A6,	A0,	A0
+		min2		A4,	B4,	A1
+		min2		A6,	A1,	A1
+		mvkh		0,		A0
+		mvkh		0,		A1
+		mv		A0,		A17
+		mv		A1,		A9
+
 		cmpeq	.L1	0,	A17,	A16
 		mv		A5,	A0
 		stw		A0,	*-A15(24)
