@@ -133,10 +133,6 @@ struct blob_position *spans, *ospans;
 int val_hyst_count, sat_hyst_count;
 int span, ospan;
 
-void
-vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
-				struct blob_position *blobs_out)
-{
 #define red_min 0
 #define red_max 10 * line_cache_sz
 #define green_min 60 * line_cache_sz
@@ -147,12 +143,102 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 #define red2_max 185 * line_cache_sz
 /* FIXME - adjust for 0-180 scale */
 
-	void *tmp;
-	uint8_t *extmem;
-	int x, i, j;
-	unsigned int y, wind_y;
+void
+vis_scanline_calcs(uint8_t *yuyv, int width, int x, int y)
+{
 	int32_t _y, _u, _v, r, g, b, h, s, v;
 	uint8_t drb, drg, dgb;
+
+	old_colour_value = colour_value;
+	get_yuv(x, y, _y, _u, _v);
+	yuyv2rgb(_y, _u, _v, &r, &g, &b);
+	rgb2hsv(r, g, b, &h, &s, &v);
+	hue_cache += h;
+	hue_cache -= back_buffer[back_buffer_idx];
+	back_buffer[back_buffer_idx++] = h;
+	back_buffer_idx %= line_cache_sz;
+
+	drb = abs(r - b);
+	drg = abs(r - g);
+	dgb = abs(g - b);
+
+	if (hue_cache >= blue_min &&
+		drb < colour_strength_minimum_blue &&
+		drg < colour_strength_minimum_blue &&
+		dgb < colour_strength_minimum_blue) {
+		sat_hyst_count = 0;
+		val_hyst_count = 0;
+		colour_value = NOTHING;
+	} else if (hue_cache < blue_min &&
+		drb < colour_strength_minimum &&
+		drg < colour_strength_minimum &&
+		dgb < colour_strength_minimum) {
+		sat_hyst_count = 0;
+		val_hyst_count = 0;
+		colour_value = NOTHING;
+	} else if (s < span_min_sat) {
+		sat_hyst_count++;
+		if (sat_hyst_count > 1)
+			colour_value = NOTHING;
+	} else if (v < span_min_val) {
+		val_hyst_count++;
+		if (val_hyst_count > 1)
+			colour_value = NOTHING;
+	} else {
+		sat_hyst_count = 0;
+		val_hyst_count = 0;
+		if (hue_cache <= red_max && hue_cache >=red_min)
+			colour_value = RED;
+		else if (hue_cache <= blue_max &&
+			hue_cache >= blue_min)
+			colour_value = BLUE;
+		else if (hue_cache <= green_max &&
+			hue_cache >= green_min)
+			colour_value = GREEN;
+		else if (hue_cache <= red2_max &&
+			hue_cache >= red2_min)
+			colour_value = RED;
+		else
+			colour_value = NOTHING;
+	}
+
+	if (old_colour_value != colour_value) {
+		/* First, end the current span. Insert here
+		 * some logic to make sure the first span slot
+		 * isn't discarded each time */
+		if (spans[span].y1 != y ||
+		    spans[span].colour == NOTHING)
+			goto trumpets;
+
+		/* Reject anything not long enough */
+		if (x - spans[span].x1 <= span_min_len)
+			goto trumpets;
+
+		spans[span].x2 = x;
+		spans[span].y2 = y;
+		spans[span].maxx = x;
+		spans[span].maxy = y;
+		spans[span].minx = spans[span].x1;
+		spans[span].miny = spans[span].y1;
+		span++;
+		trumpets:
+		spans[span].x1 = x;
+		spans[span].y1 = y;
+		spans[span].colour = colour_value;
+	}
+
+	return;
+}
+
+void
+vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
+				struct blob_position *blobs_out)
+{
+	void *tmp;
+	uint8_t *extmem;
+	int32_t _y, _u, _v, r, g, b, h, s, v;
+	int x, i, j;
+	unsigned int y, wind_y;
 
 	extmem = yuyv;
 	reset_dma_state(&extmem);
@@ -205,84 +291,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 		}
 
 		for (x = line_cache_sz; x < width; x++) {
-			old_colour_value = colour_value;
-			get_yuv(x, wind_y, _y, _u, _v);
-			yuyv2rgb(_y, _u, _v, &r, &g, &b);
-			rgb2hsv(r, g, b, &h, &s, &v);
-			hue_cache += h;
-			hue_cache -= back_buffer[back_buffer_idx];
-			back_buffer[back_buffer_idx++] = h;
-			back_buffer_idx %= line_cache_sz;
-
-			drb = abs(r - b);
-			drg = abs(r - g);
-			dgb = abs(g - b);
-
-			if (hue_cache >= blue_min &&
-				drb < colour_strength_minimum_blue &&
-				drg < colour_strength_minimum_blue &&
-				dgb < colour_strength_minimum_blue) {
-				sat_hyst_count = 0;
-				val_hyst_count = 0;
-				colour_value = NOTHING;
-			} else if (hue_cache < blue_min &&
-				drb < colour_strength_minimum &&
-				drg < colour_strength_minimum &&
-				dgb < colour_strength_minimum) {
-				sat_hyst_count = 0;
-				val_hyst_count = 0;
-				colour_value = NOTHING;
-			} else if (s < span_min_sat) {
-				sat_hyst_count++;
-				if (sat_hyst_count > 1)
-					colour_value = NOTHING;
-			} else if (v < span_min_val) {
-				val_hyst_count++;
-				if (val_hyst_count > 1)
-					colour_value = NOTHING;
-			} else {
-				sat_hyst_count = 0;
-				val_hyst_count = 0;
-				if (hue_cache <= red_max && hue_cache >=red_min)
-					colour_value = RED;
-				else if (hue_cache <= blue_max &&
-					hue_cache >= blue_min)
-					colour_value = BLUE;
-				else if (hue_cache <= green_max &&
-					hue_cache >= green_min)
-					colour_value = GREEN;
-				else if (hue_cache <= red2_max &&
-					hue_cache >= red2_min)
-					colour_value = RED;
-				else
-					colour_value = NOTHING;
-			}
-
-			if (old_colour_value != colour_value) {
-				/* First, end the current span. Insert here
-				 * some logic to make sure the first span slot
-				 * isn't discarded each time */
-				if (spans[span].y1 != y ||
-				    spans[span].colour == NOTHING)
-					goto trumpets;
-
-				/* Reject anything not long enough */
-				if (x - spans[span].x1 <= span_min_len)
-					goto trumpets;
-
-				spans[span].x2 = x;
-				spans[span].y2 = y;
-				spans[span].maxx = x;
-				spans[span].maxy = y;
-				spans[span].minx = spans[span].x1;
-				spans[span].miny = spans[span].y1;
-				span++;
-				trumpets:
-				spans[span].x1 = x;
-				spans[span].y1 = y;
-				spans[span].colour = colour_value;
-			}
-
+			vis_scanline_calcs(yuyv, width, x, wind_y);
 #ifndef USE_DSP
 			if (span >= SPANS) {
 				fprintf(stderr, "Out of spans storage\n");
