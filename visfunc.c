@@ -121,11 +121,15 @@ get_next_buffer(uint8_t **extmem_fb, int y)
 extern void yuyv2rgb(int y, int u, int v, int *r, int *g, int *b);
 extern void rgb2hsv(int r, int g, int b, int *h, int *s, int *v);
 
+#define line_cache_sz 3
+uint8_t back_buffer[line_cache_sz];
+uint8_t back_buffer_idx, colour_value, old_colour_value;
+int hue_cache;
+
 void
 vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 				struct blob_position *blobs_out)
 {
-#define line_cache_sz 3
 #define red_min 0
 #define red_max 10 * line_cache_sz
 #define green_min 60 * line_cache_sz
@@ -139,15 +143,13 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 	#define SPANS 32
 	struct blob_position spans_a[SPANS+1];
 	struct blob_position spans_b[SPANS+1];
-	uint8_t back_buffer[line_cache_sz];
 	struct blob_position *spans, *ospans;
 	int span, ospan;
 	void *tmp;
 	uint8_t *extmem;
-	int x, i, j, cache, val_hyst_count, sat_hyst_count;
+	int x, i, j, val_hyst_count, sat_hyst_count;
 	unsigned int y, wind_y;
 	int32_t _y, _u, _v, r, g, b, h, s, v;
-	uint8_t back_buffer_idx, colour_value, old_colour_value;
 	uint8_t drb, drg, dgb;
 
 	extmem = yuyv;
@@ -179,7 +181,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 		/* Swap sizes too */
 		ospan = span;
 
-		cache = 0;
+		hue_cache = 0;
 		span = 0;
 
 		if (y == height)
@@ -195,7 +197,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 			get_yuv(x, wind_y, _y, _u, _v);
 			yuyv2rgb(_y, _u, _v, &r, &g, &b);
 			rgb2hsv(r, g, b, &h, &s, &v);
-			cache += h;
+			hue_cache += h;
 			back_buffer[back_buffer_idx++] = h;
 			back_buffer_idx %= line_cache_sz;
 		}
@@ -205,8 +207,8 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 			get_yuv(x, wind_y, _y, _u, _v);
 			yuyv2rgb(_y, _u, _v, &r, &g, &b);
 			rgb2hsv(r, g, b, &h, &s, &v);
-			cache += h;
-			cache -= back_buffer[back_buffer_idx];
+			hue_cache += h;
+			hue_cache -= back_buffer[back_buffer_idx];
 			back_buffer[back_buffer_idx++] = h;
 			back_buffer_idx %= line_cache_sz;
 
@@ -214,14 +216,14 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 			drg = abs(r - g);
 			dgb = abs(g - b);
 
-			if (cache >= blue_min &&
+			if (hue_cache >= blue_min &&
 				drb < colour_strength_minimum_blue &&
 				drg < colour_strength_minimum_blue &&
 				dgb < colour_strength_minimum_blue) {
 				sat_hyst_count = 0;
 				val_hyst_count = 0;
 				colour_value = NOTHING;
-			} else if (cache < blue_min &&
+			} else if (hue_cache < blue_min &&
 				drb < colour_strength_minimum &&
 				drg < colour_strength_minimum &&
 				dgb < colour_strength_minimum) {
@@ -239,14 +241,16 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height,
 			} else {
 				sat_hyst_count = 0;
 				val_hyst_count = 0;
-				if (cache <= red_max && cache >= red_min)
+				if (hue_cache <= red_max && hue_cache >=red_min)
 					colour_value = RED;
-				else if (cache <= blue_max && cache >= blue_min)
+				else if (hue_cache <= blue_max &&
+					hue_cache >= blue_min)
 					colour_value = BLUE;
-				else if (cache <= green_max &&
-					cache >= green_min)
+				else if (hue_cache <= green_max &&
+					hue_cache >= green_min)
 					colour_value = GREEN;
-				else if (cache <= red2_max && cache >= red2_min)
+				else if (hue_cache <= red2_max &&
+					hue_cache >= red2_min)
 					colour_value = RED;
 				else
 					colour_value = NOTHING;
