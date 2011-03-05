@@ -5,9 +5,6 @@ LDBFLAGS = `pkg-config --libs blobslib`
 OPENCV_CFLAGS += `pkg-config --cflags opencv` -Wall
 OPENCV_LDFLAGS += `pkg-config --libs opencv`
 
-CC = $(CROSS_COMPILE)gcc
-CXX = $(CROSS_COMPILE)g++
-
 # Python 2.4 doesn't support pkg-config; bodge this to your own include path
 PY_CFLAGS += -I/usr/include/python2.4
 
