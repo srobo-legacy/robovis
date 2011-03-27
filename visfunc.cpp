@@ -193,6 +193,8 @@ squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue,
 	return;
 }
 
+#endif
+
 void
 make_rgb_image(uint8_t *yuyv, int width, int height, int stride, uint8_t *orig_prgb)
 {
@@ -214,8 +216,6 @@ make_rgb_image(uint8_t *yuyv, int width, int height, int stride, uint8_t *orig_p
 
 	return;
 }
-
-#endif
 
 struct bmp_header {
         uint16_t magic;
