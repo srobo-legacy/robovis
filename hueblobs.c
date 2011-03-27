@@ -308,8 +308,6 @@ main(int argc, char **argv)
 		fputs("BLOBS\n", stdout);
 		fflush(stdout);
 
-		store_rgb_image(OUT_FILENAME, raw_data, CAMWIDTH, CAMHEIGHT);
-
 #ifdef OPENCV
 		if (DEBUGDISPLAY)
 			cvWaitKey(100);
