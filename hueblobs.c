@@ -324,6 +324,16 @@ main(int argc, char **argv)
 			cvWaitKey(100);
 #endif
 
+		// So, interact with the GUI. Is there already a frame sitting
+		// in the buffer?
+		if (*gui_data != 0)
+			continue;
+
+		make_rgb_image(raw_data, CAMWIDTH, CAMHEIGHT, CAMWIDTH*3, shm_ptr);
+
+		// Set flag
+		*gui_data = 1;
+
 	}	//end while loop
 
 	close_webcam();
