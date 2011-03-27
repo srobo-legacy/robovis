@@ -344,8 +344,18 @@ main(int argc, char **argv)
 		// Set flag
 		*gui_data = 1;
 
-		// Also pump blob data at FIFO. Currently unimplemented
-		fwrite("\n", 1, 1, fifo_out);
+		// Also pump blob data at FIFO.
+		for (i = 0; ; i++) {
+			if (blobs[i].x1 == 0 && blobs[i].x2 == 0)
+				break;
+
+			w = blobs[i].x2 - blobs[i].x1;
+			h = blobs[i].y2 - blobs[i].y1;
+			fprintf(fifo_out, "%d,%d,%d,%d,%d,%d\n", blobs[i].x1,
+				blobs[i].y1, w, h, w*h, blobs[i].colour);
+		}
+
+		fprintf(fifo_out, "BLOBS\n");
 		fflush(fifo_out);
 
 	}	//end while loop
