@@ -219,9 +219,7 @@ main(int argc, char **argv)
 		cvNamedWindow("hue", CV_WINDOW_AUTOSIZE);
 		cvSetMouseCallback("hue", Foo, hue);
 	}
-#endif
 
-#ifdef OPENCV
 	framesize = cvSize(320, 240);
 
 	if (DEBUGDISPLAY) {
