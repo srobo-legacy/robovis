@@ -350,6 +350,7 @@ main(int argc, char **argv)
 
 		// Also pump blob data at FIFO. Currently unimplemented
 		fwrite("\n", 1, 1, fifo_out);
+		fflush(fifo_out);
 
 	}	//end while loop
 
