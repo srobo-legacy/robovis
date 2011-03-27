@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -203,9 +204,21 @@ main(int argc, char **argv)
 
 	struct blob_position *blobs;
 	char *req_tag = NULL;
-	int i, w, h;
+	int i, w, h, shm_fd, fifo_fd;
 
 	open_webcam(CAMWIDTH, CAMHEIGHT);
+
+	shm_fd = shm_open("/robovis_frame", O_RDWR | O_CREAT | O_TRUNC, 0664);
+	if (shm_fd < 0) {
+		perror("Couldn't open robovis frame SHM object");
+		exit(1);
+	}
+
+	fifo_fd = mkfifo("/tmp/robovis_frame_fifo", 0664);
+	if (fifo_fd < 0) {
+		perror("Couldn't create robovis fifo");
+		exit(1);
+	}
 
 #ifdef OPENCV
 	if(DEBUGDISPLAY) {

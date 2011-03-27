@@ -9,7 +9,7 @@ OPENCV_LDFLAGS += `pkg-config --libs opencv`
 PY_CFLAGS += -I/usr/include/python2.4
 
 hueblobs: hueblobs.c visfunc.o v4l.o
-	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o v4l.o
+	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o v4l.o -lrt
 
 showyuyv: showyuyv.c visfunc.o
 	$(CXX) -o $@ $(OPENCV_CFLAGS) $< $(OPENCV_LDFLAGS) $(CFLAGS) visfunc.o
