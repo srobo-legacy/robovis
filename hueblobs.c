@@ -195,8 +195,7 @@ main(int argc, char **argv)
 #ifdef OPENCV
 	CvSize framesize;
 #endif
-	uint8_t *raw_data;
-
+	uint8_t *raw_data, *shm_ptr, *gui_data;
 	struct blob_position *blobs;
 	char *req_tag = NULL;
 	int i, w, h, shm_fd, fifo_fd;
@@ -208,6 +207,18 @@ main(int argc, char **argv)
 		perror("Couldn't open robovis frame SHM object");
 		exit(1);
 	}
+
+	ftruncate(shm_fd, (CAMWIDTH * CAMHEIGHT * 3) + 1);
+
+	shm_ptr = (uint8_t *)mmap(NULL, (CAMWIDTH * CAMHEIGHT * 3) + 1,
+			PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+	if (shm_ptr == NULL) {
+		perror("Couldn't map robovis shm");
+		exit(1);
+	}
+
+	gui_data = shm_ptr + (CAMWIDTH * CAMHEIGHT * 3);
+	*gui_data = 0;
 
 	fifo_fd = mkfifo("/tmp/robovis_frame_fifo", 0664);
 	if (fifo_fd < 0) {
