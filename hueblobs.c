@@ -72,6 +72,7 @@ char
 	req_tag = (char*)malloc(129);
 
 	if (DEBUGDISPLAY && DEBUGSLOW) {
+#ifdef OPENCV
 		do {
 			fd.fd = STDIN_FILENO;
 			fd.events = POLLIN;
@@ -87,6 +88,7 @@ char
 
 			cvWaitKey(100);
 		} while (1);
+#endif
 	} else {
 		req_tag = fgets(req_tag, 128, stdin);
 		if (req_tag == NULL)	/*EOF*/
