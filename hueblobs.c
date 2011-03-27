@@ -66,13 +66,14 @@ get_command_line_opts(int argc, char **argv)
 char
 *wait_trigger(void)
 {
-	struct pollfd fd;
 	char *req_tag;
 
 	req_tag = (char*)malloc(129);
 
 	if (DEBUGDISPLAY && DEBUGSLOW) {
 #ifdef OPENCV
+		struct pollfd fd;
+
 		do {
 			fd.fd = STDIN_FILENO;
 			fd.events = POLLIN;
@@ -96,6 +97,8 @@ char
 
 		return req_tag;
 	}
+
+	return 0;
 }
 
 void
