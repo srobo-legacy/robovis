@@ -253,7 +253,8 @@ main(int argc, char **argv)
 #ifdef OPENCV
 		if (DEBUGDISPLAY) {
 			oldframe = frame;
-			frame = make_rgb_image(raw_data, 320, 240);
+			frame = cvCreateImage(framesize, IPL_DEPTH_8U, 3);
+			make_rgb_image(raw_data, 320, 240, frame->widthStep, (uint8_t *)frame->imageData);
 			squish_raw_data_into_hsv(raw_data, 320, 240,
 							hue, sat, val);
 

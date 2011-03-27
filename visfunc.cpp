@@ -193,19 +193,14 @@ squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue,
 	return;
 }
 
-IplImage *
-make_rgb_image(uint8_t *yuyv, int width, int height)
+void
+make_rgb_image(uint8_t *yuyv, int width, int height, int stride, uint8_t *orig_prgb)
 {
-	IplImage *out;
-	CvSize frsize;
 	uint8_t *prgb;
 	int i, j, y, u, v, r, g, b;
 
-	frsize = cvSize(width, height);
-	out = cvCreateImage(frsize, IPL_DEPTH_8U, 3);
-	prgb = (uint8_t *)out->imageData;
-
 	for (j = 0; j < height; j++) {
+		prgb = orig_prgb;
 		for (i = 0; i < width; i++) {
 			get_yuv(i, j, y, u, v);
 			yuv_2_rgb(y, u, v, r, g, b);
@@ -213,9 +208,11 @@ make_rgb_image(uint8_t *yuyv, int width, int height)
 			*prgb++ = g;
 			*prgb++ = r;
 		}
+
+		orig_prgb += stride;
 	}
 
-	return out;
+	return;
 }
 
 #endif

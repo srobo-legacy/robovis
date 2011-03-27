@@ -23,8 +23,9 @@ struct blob_position {
 #define GREEN 3
 };
 
+void make_rgb_image(uint8_t *yuyv, int width, int height, int stride, uint8_t *prgb);
+
 #ifdef OPENCV
-IplImage *make_rgb_image(uint8_t *raw_data, int width, int height);
 void squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue, IplImage *sat, IplImage *val);
 #endif
 
