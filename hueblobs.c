@@ -195,6 +195,7 @@ main(int argc, char **argv)
 #ifdef OPENCV
 	CvSize framesize;
 #endif
+	FILE *fifo_out;
 	uint8_t *raw_data, *shm_ptr, *gui_data;
 	struct blob_position *blobs;
 	char *req_tag = NULL;
@@ -226,6 +227,7 @@ main(int argc, char **argv)
 		perror("Couldn't create robovis fifo");
 		exit(1);
 	}
+	fifo_out = fdopen(fifo_fd, "w");
 
 #ifdef OPENCV
 	if(DEBUGDISPLAY) {
@@ -334,6 +336,9 @@ main(int argc, char **argv)
 
 		// Set flag
 		*gui_data = 1;
+
+		// Also pump blob data at FIFO. Currently unimplemented
+		fwrite("\n", 1, 1, fifo_out);
 
 	}	//end while loop
 
