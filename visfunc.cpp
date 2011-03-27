@@ -196,7 +196,7 @@ squish_raw_data_into_hsv(uint8_t *yuyv, int width, int height, IplImage *hue,
 #endif
 
 void
-make_rgb_image(uint8_t *yuyv, int width, int height, int stride, uint8_t *orig_prgb)
+make_rgb_image(uint8_t *yuyv, int width, int height, int stride, bool reverse_order, uint8_t *orig_prgb)
 {
 	uint8_t *prgb;
 	int i, j, y, u, v, r, g, b;
@@ -206,9 +206,18 @@ make_rgb_image(uint8_t *yuyv, int width, int height, int stride, uint8_t *orig_p
 		for (i = 0; i < width; i++) {
 			get_yuv(i, j, y, u, v);
 			yuv_2_rgb(y, u, v, r, g, b);
-			*prgb++ = b;
+
+			if (reverse_order)
+				*prgb++ = r;
+			else
+				*prgb++ = b;
+
 			*prgb++ = g;
-			*prgb++ = r;
+
+			if (reverse_order)
+				*prgb++ = b;
+			else
+				*prgb++ = r;
 		}
 
 		orig_prgb += stride;

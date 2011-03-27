@@ -281,7 +281,7 @@ main(int argc, char **argv)
 		if (DEBUGDISPLAY) {
 			oldframe = frame;
 			frame = cvCreateImage(framesize, IPL_DEPTH_8U, 3);
-			make_rgb_image(raw_data, 320, 240, frame->widthStep, (uint8_t *)frame->imageData);
+			make_rgb_image(raw_data, 320, 240, frame->widthStep, false, (uint8_t *)frame->imageData);
 			squish_raw_data_into_hsv(raw_data, 320, 240,
 							hue, sat, val);
 
@@ -339,7 +339,7 @@ main(int argc, char **argv)
 		if (*gui_data != 0)
 			continue;
 
-		make_rgb_image(raw_data, CAMWIDTH, CAMHEIGHT, CAMWIDTH*3, shm_ptr);
+		make_rgb_image(raw_data, CAMWIDTH, CAMHEIGHT, CAMWIDTH*3, true, shm_ptr);
 
 		// Set flag
 		*gui_data = 1;
