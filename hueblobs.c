@@ -36,7 +36,6 @@ const unsigned int MAXMASS = 2000;
 IplImage *frame = NULL, *oldframe = NULL, *hsv, *hue, *sat, *val;
 #endif
 
-int USEFILE = 0;
 int DEBUGOUTPUT = 0;
 int DEBUGDISPLAY = 0;
 int DEBUGSLOW = 0;
@@ -221,12 +220,6 @@ main(int argc, char **argv)
 		cvSetMouseCallback("hue", Foo, hue);
 	}
 #endif
-
-	//Get a frame to find the image size
-	if (USEFILE) {
-		fprintf(stderr, "USEFILE is now no longer valid, seeing how "
-			"the existing code will only work on a yuyv array");
-	}
 
 #ifdef OPENCV
 	framesize = cvSize(320, 240);
