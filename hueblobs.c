@@ -226,11 +226,7 @@ main(int argc, char **argv)
 	gui_data = shm_ptr + (CAMWIDTH * CAMHEIGHT * 3);
 	*gui_data = 0;
 
-	unlink("/tmp/robovis_frame_fifo");
-	if (mkfifo("/tmp/robovis_frame_fifo", 0664) != 0) {
-		perror("Couldn't create robovis fifo");
-		exit(1);
-	}
+	mkfifo("/tmp/robovis_frame_fifo", 0664); // Don't care about the return.
 
 	fifo_fd = open("/tmp/robovis_frame_fifo", O_RDWR, 0);
 	if (fifo_fd < 0) {
