@@ -192,11 +192,6 @@ int
 main(int argc, char **argv)
 {
 	get_command_line_opts(argc, argv);
-
-#ifdef spam
-	char buffer[256];
-	int rawr = 0;
-#endif
 #ifdef OPENCV
 	CvSize framesize;
 #endif
@@ -312,13 +307,6 @@ main(int argc, char **argv)
 
 		fputs("BLOBS\n", stdout);
 		fflush(stdout);
-
-		srlog(DEBUG, "Saving frame to out.jpg");
-#ifdef spam
-		sprintf(buffer, "out%4d.jpg", rawr);
-		rawr++;
-		cvSaveImage(buffer, frame);
-#endif
 
 		store_rgb_image(OUT_FILENAME, raw_data, CAMWIDTH, CAMHEIGHT);
 
