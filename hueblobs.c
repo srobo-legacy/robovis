@@ -227,11 +227,17 @@ main(int argc, char **argv)
 	*gui_data = 0;
 
 	unlink("/tmp/robovis_frame_fifo");
-	fifo_fd = mkfifo("/tmp/robovis_frame_fifo", 0664);
-	if (fifo_fd < 0) {
+	if (mkfifo("/tmp/robovis_frame_fifo", 0664) != 0) {
 		perror("Couldn't create robovis fifo");
 		exit(1);
 	}
+
+	fifo_fd = open("/tmp/robovis_frame_fifo", O_RDWR, 0);
+	if (fifo_fd < 0) {
+		perror("Couldn't open robovis fifo");
+		exit(1);
+	}
+
 	fifo_out = fdopen(fifo_fd, "w");
 
 #ifdef OPENCV
