@@ -36,7 +36,7 @@
 #define BLOB_MIN_MASS 5
 
 #define span_min_sat 60
-#define span_min_val 60
+#define span_min_val 40
 #define span_min_len 3
 #define span_match_fuzz 8
 #define colour_strength_minimum 20
