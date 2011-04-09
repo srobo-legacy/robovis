@@ -307,7 +307,7 @@ vis_find_blobs_through_scanlines(uint8_t *yuyv, int width, int height)
 #define red_max 10 * line_cache_sz
 #define green_min 60 * line_cache_sz
 #define green_max 90 * line_cache_sz
-#define blue_min 100 * line_cache_sz
+#define blue_min 90 * line_cache_sz
 #define blue_max 115 * line_cache_sz
 #define red2_min 150 * line_cache_sz
 #define red2_max 185 * line_cache_sz
