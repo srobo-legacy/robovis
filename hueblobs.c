@@ -249,7 +249,7 @@ main(int argc, char **argv)
 		cvSetMouseCallback("hue", Foo, hue);
 	}
 
-	framesize = cvSize(320, 240);
+	framesize = cvSize(CAMWIDTH, CAMHEIGHT);
 
 	if (DEBUGDISPLAY) {
 		srlog(DEBUG, "Allocating scratchpads");
@@ -281,8 +281,8 @@ main(int argc, char **argv)
 		if (DEBUGDISPLAY) {
 			oldframe = frame;
 			frame = cvCreateImage(framesize, IPL_DEPTH_8U, 3);
-			make_rgb_image(raw_data, 320, 240, frame->widthStep, false, (uint8_t *)frame->imageData);
-			squish_raw_data_into_hsv(raw_data, 320, 240,
+			make_rgb_image(raw_data, CAMWIDTH, CAMHEIGHT, frame->widthStep, false, (uint8_t *)frame->imageData);
+			squish_raw_data_into_hsv(raw_data, CAMWIDTH, CAMHEIGHT,
 							hue, sat, val);
 
 			cvShowImage("sat", sat);
@@ -291,7 +291,7 @@ main(int argc, char **argv)
 		}
 #endif
 
-		blobs = vis_find_blobs_through_scanlines(raw_data, 320, 240);
+		blobs = vis_find_blobs_through_scanlines(raw_data, CAMWIDTH, CAMHEIGHT);
 
 		for (i = 0; ; i++) {
 			if (blobs[i].x1 == 0 && blobs[i].x2 == 0)
